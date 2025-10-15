@@ -83,6 +83,9 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 WHITENOISE_MANIFEST_STRICT = False  # eksik referanslarda hata atma
 
+WHITENOISE_SKIP_COMPRESS_EXTENSIONS = ['.map']
+
+
 MEDIA_URL = "/media/"
 MEDIA_ROOT = '/data/media'
 
