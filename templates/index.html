@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<style>
+  /* Hareketi sevmeyenler için erişilebilirlik */
+  @media (prefers-reduced-motion: reduce) {
+    .page-fade { transition: none !important; }
+  }
+
+  :root { --fade-duration: 320ms; }
+
+  .page-fade {
+    opacity: 0;
+    transition: opacity var(--fade-duration) ease;
+  }
+  .page-fade.is-visible { opacity: 1; }
+  .page-fade.is-hidden  { opacity: 0; }
+</style>
+
+
+<!-- **************** MAIN CONTENT START **************** -->
+<main id="page-fader" class="page-fade" data-fader>
+
+	<!-- =======================
+	Main banner START -->
+	<section class="position-relative py-xl-9" style="background-image:url({% static 'assets/images/bg/10.jpg' %}); background-position: center left; background-size: cover;">
+		<div class="container z-index-9">
+			<div class="row">
+				<div class="col-lg-10 m-auto text-center position-relative z-index-9">
+          <form class="form-control-inline my-5" action="{% url 'tour_grid' %}" method="get">
+            <div class="d-flex flex-wrap justify-content-center align-items-center">
+
+              <!-- x civarında -->
+              <span class="d-inline-block">
+                <select class="form-select js-choice" data-search-enabled="true" name="country">
+                  <option value="">Seçiniz</option>
+                  {% for c in countries %}
+                    <option value="{{ c.id }}">{{ c.name }}</option>
+                  {% endfor %}
+                </select>
+              </span>
+              <label class="form-control-inline-text">civarında</label>
+
+              <!-- x–y tarihleri arasında -->
+              <span class="d-inline-block">
+                <input type="text" class="form-control flatpickr" name="dates" placeholder="Başlangıç - Bitiş">
+              </span>
+              <label class="form-control-inline-text">tarihleri arasında</label>
+
+              <!-- kapanış -->
+              <label class="form-control-inline-text">size özel bir seyahat deneyimi yaşayın.</label>
+            </div>
+
+            <!-- Button -->
+            <button class="icon-xxl bg-primary btn-dark-hover rounded-circle btn fs-6 text-white p-0 mt-4" type="submit">
+              Rotamı Bul
+            </button>
+          </form>
+
+				</div>
+			</div> <!-- Row END -->
+		</div>
+	</section>
+	<!-- =======================
+	Main banner END -->
+
+</main>
+<!-- **************** MAIN CONTENT END **************** -->
+
+
+<script>
+(function(){
+  const FADE_MS = 320;
+
+  function showFader() {
+    const fader = document.querySelector('[data-fader]');
+    if (!fader) return;
+    // önce gizli sınıfını temizle, sonra görünür yap
+    fader.classList.remove('is-hidden');
+    // raf ile transition tetikle
+    requestAnimationFrame(() => fader.classList.add('is-visible'));
+  }
+
+  function wireFormFadeOut() {
+    const fader = document.querySelector('[data-fader]');
+    const form  = document.querySelector('form.form-control-inline');
+    if (!fader || !form) return;
+
+    if (form.dataset.fadeBound === '1') return; // iki kez bağlama
+    form.dataset.fadeBound = '1';
+
+    form.addEventListener('submit', function(e){
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduce) return;
+
+      e.preventDefault();
+      fader.classList.remove('is-visible');
+      fader.classList.add('is-hidden');
+      setTimeout(() => form.submit(), FADE_MS + 50);
+    });
+  }
+
+  // İlk yükleme
+  document.addEventListener('DOMContentLoaded', () => {
+    showFader();
+    wireFormFadeOut();
+  });
+
+  // Geri/ileri gezinmede (BFCache) de tetikle
+  window.addEventListener('pageshow', (ev) => {
+    // BFCache’den gelinmiş olsun olmasın görünürlüğü düzelt
+    showFader();
+    wireFormFadeOut();
+  });
+})();
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  if (!window.flatpickr) return;
+
+  const RANGE_SEP_CANON = ' to ';
+  if (flatpickr.l10ns && flatpickr.l10ns.tr) flatpickr.localize(flatpickr.l10ns.tr);
+
+  document.querySelectorAll('input.flatpickr[name="dates"]').forEach(function(el){
+    if (el._flatpickr) el._flatpickr.destroy();
+    flatpickr(el, {
+      locale: Object.assign({}, flatpickr.l10ns?.tr || {}, { rangeSeparator: RANGE_SEP_CANON }),
+      mode: 'range',
+      dateFormat: 'Y-m-d',   // URL'e giden ham değer
+      altInput: true,
+      altFormat: 'd F Y',    // Görünüm: "7 Ekim 2025"
+      allowInput: true
+    });
+  });
+});
+</script>
+
+
+{% endblock %}

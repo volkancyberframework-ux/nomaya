@@ -1,0 +1,650 @@
+{% extends "base.html" %}
+{% block content %}
+{% load static currency %}
+
+
+<style>
+  /* Varsayılan: açık zeminde koyu rozet */
+  .badge-contrast{
+    background:#111 !important;
+    color:#fff !important;
+    border:0 !important;
+    border-radius:50rem;
+    font-weight:600;
+    line-height:1;
+  }
+  .badge-contrast i{ opacity:.9; }
+
+  /* Koyu zeminleri otomatik yakala ve rozetleri ters çevir */
+  .bg-dark .badge-contrast,
+  .text-bg-dark .badge-contrast,
+  .bg-primary .badge-contrast,
+  .bg-secondary .badge-contrast,
+  .bg-black .badge-contrast {
+    background:#fff !important;
+    color:#111 !important;
+    border:1px solid rgba(0,0,0,.15) !important;
+  }
+
+  /* Başlık satırı spacing ve tipografi */
+  .filter-bar h5{ margin-bottom:.25rem; }
+  .filter-bar .sub{ font-size:.925rem; opacity:.75; }
+</style>
+
+
+<!-- ==== Nomaya Açılış Popup (Modal) START ==== -->
+<div class="modal fade" id="nomayaIntro" tabindex="-1" aria-labelledby="nomayaIntroLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 rounded-4">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold" id="nomayaIntroLabel">Nomaya’ya Hoş Geldin 🌿</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+      </div>
+      <div class="modal-body pt-2">
+        <!-- Yeşil kutu -->
+        <div class="alert alert-success d-flex align-items-start rounded-3 mb-0">
+          <span class="h4 mb-0 me-2">
+            <i class="bi bi-whatsapp"></i>
+          </span>
+          <div class="ms-1">
+            <h6 class="mb-1">WhatsApp Asistan 7/24 Yanında</h6>
+            <p class="mb-2">
+              Seyahatin boyunca <strong>gittiğin her yerde</strong> Nomaya WhatsApp Asistanı yanında.
+              Gezdiğin noktaların <strong>Türkçe hikâyelerini dinleyerek</strong> keşfedecek,
+              yol üstü önerileri <strong>anlık bildirimlerle</strong> alacaksın.
+            </p>
+            <ul class="mb-2 ps-3">
+              <li><strong>Anlık rehberlik:</strong> Çıkış saatleri, check-in, görülmesi gereken yerler, restoran önerileri.</li>
+              <li><strong>Kişisel tempo:</strong> Plan değil, <em>planın seni</em> takip eder — tarih ve hızına uyum.</li>
+              <li><strong>Pratik paylaşımlar:</strong> Harita pinleri, kısa mesajlar, çevrimdışı dostu içerik.</li>
+              <li><strong>Tek panel konforu:</strong> Uçuş, otel ve transferlerini güvenle tek yerden yönet.</li>
+            </ul>
+            <p class="mb-0"><strong>Nomaya farkı:</strong> Her yolculuk benzersizdir; biz de öyle tasarlarız. 💚</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-success" data-bs-dismiss="modal">
+          Tamam, keşfetmeye başla
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Yalnızca ilk ziyaret için göstermek istersen alttaki iki satırın yorumlarını kaldır:
+     if (localStorage.getItem("nomayaIntroShown") === "1") return;
+    var modal = new bootstrap.Modal(document.getElementById("nomayaIntro"));
+    modal.show();
+    modal._element.addEventListener("hidden.bs.modal", () => localStorage.setItem("nomayaIntroShown", "1"));
+  });
+</script>
+<!-- ==== Nomaya Açılış Popup (Modal) END ==== -->
+
+<!-- **************** MAIN CONTENT START **************** -->
+<main>
+
+<!-- =======================
+Main Banner START -->
+<section class="pt-0">
+	<div class="container">
+		<!-- Background image -->
+		<div class="p-3 p-sm-5 rounded-3" style="background-image: url({% static 'assets/images/bg/04.jpg' %}); background-position: center center; background-repeat: no-repeat; background-size: cover;">
+		  <!-- Banner title -->
+		  <div class="row">
+		    <div class="col-md-8 mx-auto my-5">
+					<h1 class="text-center text-dark">
+					  {{ country_name|default:"Asya"|title }}
+					</h1>
+		      <ul class="nav nav-divider h6 text-dark mb-0 justify-content-center">
+						<li class="nav-item">🌍 1000+ Eşsiz Deneyim Noktası</li>
+						<li class="nav-item">🧳 200+ Özenle Hazırlanmış Paket</li>
+		      </ul>
+		    </div>
+		  </div>
+		</div>
+
+		<!-- Search START -->
+		<div class="row mt-n4 mt-sm-n7">
+		  <div class="col-11 mx-auto">
+
+		    <!-- Booking form START -->
+		    <div class="bg-mode shadow p-4 rounded-3">
+
+					{# ==== Main search START (models-driven) ==== #}
+					<form class="form-control-bg-transparent bg-mode rounded-3"
+					      action="{% url 'tour_grid' %}" method="get">
+					  <div class="row g-4 align-items-center">
+
+					    <div class="col-xl-10">
+					      <div class="row g-4">
+
+					        {# Country (DB’den) #}
+					        <div class="col-md-6 col-lg-4">
+					          <label class="h6 fw-normal mb-0">
+					            <i class="bi bi-geo-alt text-primary me-1"></i>Lokasyon
+					          </label>
+					          <div class="form-border-bottom form-control-transparent form-fs-lg mt-2">
+					            <select class="form-select js-choice" data-search-enabled="true" name="country">
+					              <option value="">{% if country %}Tüm Lokasyonlar{% else %}Lokasyon seçin{% endif %}</option>
+					              {% for c in countries %}
+					                <option value="{{ c.id }}"
+					                        {% if country|stringformat:"s" == c.id|stringformat:"s" %}selected{% endif %}>
+					                  {{ c.name }}
+					                </option>
+					              {% endfor %}
+					            </select>
+					          </div>
+					        </div>
+
+					        {# Dates (mevcut) #}
+					        <div class="col-md-6 col-lg-4">
+					          <label class="h6 fw-normal mb-0">
+					            <i class="bi bi-calendar text-primary me-1"></i>Tarih
+					          </label>
+					          <div class="form-border-bottom form-control-transparent form-fs-lg mt-2">
+											{% with qd=request.GET.dates|default_if_none:'' %}
+											  <input type="text"
+											         class="form-control flatpickr"
+											         name="dates"
+											         value="{% if qd %}{{ qd }}{% elif dates %}{{ dates }}{% endif %}"
+											         placeholder="Başlangıç - Bitiş">
+											{% endwith %}
+					          </div>
+					        </div>
+
+					        {# Tour Type (tekli) — modellerden #}
+					        <div class="col-md-6 col-lg-4">
+					          <label class="h6 fw-normal mb-0">
+					            <i class="fa-solid fa-person-skating text-primary me-1"></i>Profilin Nedir?
+					          </label>
+					          <div class="form-border-bottom form-control-transparent form-fs-lg mt-2">
+					            <select class="form-select js-choice" data-search-enabled="true" name="tour_type">
+					              <option value="">{% if tour_type %}Tüm Tipler{% else %}Gezgin profili seçin{% endif %}</option>
+					              {% for t in tourtype_opts %}
+					                <option value="{{ t.id }}"
+					                        {% if tour_type|stringformat:"s" == t.id|stringformat:"s" %}selected{% endif %}>
+					                  {{ t.name }}
+					                </option>
+					              {% endfor %}
+					            </select>
+					          </div>
+					        </div>
+
+					      </div>
+					    </div>
+
+					    {# Submit butonu #}
+					    <div class="col-xl-2">
+					      <div class="d-grid">
+					        <button type="submit" class="btn btn-lg btn-dark mb-0">Keşfet</button>
+					      </div>
+					    </div>
+
+					  </div>
+					</form>
+					{# ==== Main search END ==== #}
+
+
+		    </div>
+		    <!-- Booking form END -->
+		  </div>
+		</div>
+		<!-- Search END -->
+
+		<!-- Alert box START -->
+		<div class="alert alert-danger d-flex align-items-center mt-4 rounded-3 mb-0" role="alert">
+		  <span class="h4 mb-0 alert-heading">
+		    <i class="bi bi-heart-fill me-2"></i>
+		  </span>
+		  <div class="ms-3">
+		    <h6 class="mb-0 alert-heading">Nomaya: Her yolculuk, sadece sana özel ❤️</h6>
+		    <p class="mb-0">Her seyahat, bir diğerinden tamamen <strong>benzersiz</strong>.
+		    Çünkü bizce, her gezginin hikayesi kendine özgüdür.</p>
+		  </div>
+		</div>
+		<!-- Alert box END -->
+
+		<!-- (İsteğe bağlı) Fiyat uyarısı sarı kutu burada kalabilir -->
+		<div class="alert alert-warning d-flex align-items-center mt-3 rounded-3 mb-0" role="alert">
+		  <span class="h4 mb-0 alert-heading">
+		    <i class="bi bi-graph-up-arrow me-2"></i>
+		  </span>
+		  <div class="ms-3">
+		    <h6 class="mb-0 alert-heading">Acele edin! Fiyatlar her hafta %5–7 oranında artıyor</h6>
+		    <p class="mb-0">Fırsatlar hızla tükeniyor — size özel tasarlanmış seyahat deneyimini kaçırmayın.</p>
+		  </div>
+		</div>
+		<!-- Alert box END -->
+
+	</div>
+</section>
+<!-- =======================
+Main Banner END -->
+
+<!-- =======================
+Tour grid START -->
+<section class="pt-0">
+	<div class="container">
+
+    <!-- Filter and content START -->
+    <div class="row align-items-center g-3 g-md-4 mb-4 filter-bar">
+      <!-- Left: Başlık -->
+      <div class="col-12 col-md">
+        <h5 class="mb-1">
+          {% if country %}
+            <span class="text-body-secondary">Keşfet:</span>
+            <strong>{{ country_name }}</strong> bölgesindeki seyahat fırsatları
+          {% else %}
+            <span class="text-body-secondary">Keşfet:</span>
+            <strong>Tüm turlar</strong>
+          {% endif %}
+        </h5>
+        <div class="sub">Binlerce nokta arasından sana en uygun rotayı bulalım.</div>
+      </div>
+
+      <!-- Right: Rozetler -->
+      <div class="col-12 col-md-auto">
+        <div class="d-flex flex-wrap gap-2 justify-content-start justify-content-md-end">
+          {% if requested_days %}
+            <span class="badge badge-contrast px-3 py-2">
+              <i class="bi bi-clock-history me-1"></i>{{ requested_days }} güne göre öneriler
+            </span>
+          {% endif %}
+          {% if country_name %}
+            <span class="badge badge-contrast px-3 py-2">
+              <i class="bi bi-geo-alt me-1"></i>{{ country_name }}
+            </span>
+          {% endif %}
+          {% if tour_types_selected %}
+            <span class="badge badge-contrast px-3 py-2">
+              <i class="bi bi-funnel me-1"></i>Filtreler aktif
+            </span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <!-- Filter and content END -->
+
+		<div class="row g-4">
+		  <div class="row g-4">
+		    {% for tour in tours %}
+        <!-- Card item START -->
+        <div class="col-md-6 col-xl-4">
+          <div class="card card-hover-shadow pb-0 h-100">
+            <div class="position-relative">
+              {% with img=tour.photos.first %}
+                {% if img %}
+                  <img src="{{ img.image.url }}" class="card-img-top" alt="{{ img.alt_text|default:tour.title }}">
+                {% else %}
+                  <img src="{% static 'assets/images/category/tour/4by3/placeholder.jpg' %}" class="card-img-top" alt="{{ tour.title }}">
+                {% endif %}
+              {% endwith %}
+
+              {% if tour.badge_text %}
+                <span class="position-absolute top-0 start-0 m-3 badge rounded-pill text-bg-danger shadow-sm">
+                  {{ tour.badge_text }}
+                </span>
+              {% endif %}
+
+              {% if tour.duration_label %}
+                <span class="position-absolute bottom-0 start-0 m-3 badge text-bg-white fs-6 shadow-sm">
+                  {{ tour.duration_label }}
+                </span>
+              {% endif %}
+
+              {# === TOUR TYPE ROZETLERİ (sağ üst) === #}
+              {% if tour.tour_types.all %}
+                <div class="position-absolute top-0 end-0 m-3 d-flex flex-wrap gap-2 justify-content-end">
+                  {% for tt in tour.tour_types.all %}
+                    {% cycle 'primary' 'success' 'info' 'warning' 'danger' 'secondary' as ttcolor silent %}
+                    <span class="badge text-bg-{{ ttcolor }} shadow-sm">{{ tt.name }}</span>
+                  {% endfor %}
+                </div>
+              {% endif %}
+              {# === /TOUR TYPE ROZETLERİ === #}
+            </div>
+
+            <div class="card-body px-3">
+              <h5 class="card-title mb-0">
+                <a href="{% url 'tour_detail' slug=tour.slug %}?{{ request.GET.urlencode }}" class="stretched-link">
+                  {{ tour.title }}
+                </a>
+              </h5>
+
+              {% if tour.start_date and tour.end_date %}
+                <span class="small" title="{{ tour.start_date|date:'l' }} – {{ tour.end_date|date:'l' }}">
+                  <i class="far fa-calendar-alt me-2"></i>
+                  {% load i18n %}
+                  {% language 'tr' %}
+                    {{ tour.start_date|date:"d F Y" }} – {{ tour.end_date|date:"d F Y" }}
+                  {% endlanguage %}
+                </span>
+              {% elif tour.start_date %}
+                <span class="small">
+                  <i class="far fa-calendar-alt me-2"></i>
+                  {% load i18n %}
+                  {% language 'tr' %}
+                    {{ tour.start_date|date:"d F Y" }}
+                  {% endlanguage %}
+                </span>
+              {% endif %}
+
+              <ul class="nav nav-divider mt-3 mb-0">
+                <li class="nav-item h6 fw-normal mb-0">
+                  <i class="fa-solid fa-plane text-orange me-2"></i>{{ tour.flights_count }} Uçuş
+                </li>
+                <li class="nav-item h6 fw-normal mb-0">
+                  <i class="fa-solid fa-hotel text-info me-2"></i>{{ tour.hotels_count }} Otel
+                </li>
+                <li class="nav-item h6 fw-normal mb-0">
+                  <i class="fa-solid fa-person-skating text-danger me-2"></i>{{ tour.activities_count }} Aktivite
+                </li>
+              </ul>
+            </div>
+
+            <div class="card-footer pt-0">
+              <div class="d-sm-flex justify-content-sm-between align-items-center flex-wrap">
+                <div class="hstack gap-2 align-items-baseline">
+                  {% if tour.price and tour.price|floatformat:0 != "0" %}
+                    <h5 class="fw-normal text-success mb-0">
+                      {{ tour.price_currency|currency_symbol }}{{ tour.price|floatformat:0 }}
+                    </h5>
+                    <small class="text-muted">/kişi</small>
+
+                    {% widthratio tour.price 10 13 as compare_raw %}
+                    <span class="text-decoration-line-through ms-1">
+                      {{ tour.price_currency|currency_symbol }}{{ compare_raw|floatformat:0 }}
+                    </span>
+                  {% else %}
+                    <span class="badge text-bg-secondary">Fiyat için iletişime geçin</span>
+                  {% endif %}
+                </div>
+
+                <div class="mt-2 mt-sm-0">
+                  <a href="{% url 'tour_detail' slug=tour.slug %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}"
+                     class="btn btn-sm btn-primary mb-0 js-require-dates">
+                    Detayları Gör
+                  </a>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <!-- Card item END -->
+
+		    {% empty %}
+		      <div class="col-12"><div class="alert alert-warning">Uygun tur bulunamadı.</div></div>
+		    {% endfor %}
+		  </div>
+		</div>
+
+		{# ---- Pagination ---- #}
+		<div class="row">
+		  <div class="col-12">
+		    {% if paginator.num_pages > 1 %}
+		    <nav class="mt-4 d-flex justify-content-center" aria-label="navigation">
+		      <ul class="pagination pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
+
+		        {# Prev #}
+		        <li class="page-item mb-0 {% if not page_obj.has_previous %}disabled{% endif %}">
+		          <a class="page-link"
+		             href="{% if page_obj.has_previous %}?{% if qs %}{{ qs }}&{% endif %}page={{ page_obj.previous_page_number }}{% else %}#{% endif %}">
+		            <i class="fa-solid fa-angle-left"></i>
+		          </a>
+		        </li>
+
+		        {# İlk sayfa + baş ellipsis #}
+		        {% if page_obj.number > 3 %}
+		          <li class="page-item mb-0">
+		            <a class="page-link" href="?{% if qs %}{{ qs }}&{% endif %}page=1">1</a>
+		          </li>
+		          {% if page_obj.number > 4 %}
+		            <li class="page-item mb-0 disabled"><span class="page-link">…</span></li>
+		          {% endif %}
+		        {% endif %}
+
+		        {# Orta aralık (±2) #}
+		        {% for num in paginator.page_range %}
+		          {% if num >= page_obj.number|add:-2 and num <= page_obj.number|add:2 %}
+		            {% if num == page_obj.number %}
+		              <li class="page-item mb-0 active"><a class="page-link" href="#">{{ num }}</a></li>
+		            {% else %}
+		              <li class="page-item mb-0">
+		                <a class="page-link" href="?{% if qs %}{{ qs }}&{% endif %}page={{ num }}">{{ num }}</a>
+		              </li>
+		            {% endif %}
+		          {% endif %}
+		        {% endfor %}
+
+		        {# Son ellipsis + son sayfa #}
+		        {% if page_obj.number < paginator.num_pages|add:-2 %}
+		          {% if page_obj.number < paginator.num_pages|add:-3 %}
+		            <li class="page-item mb-0 disabled"><span class="page-link">…</span></li>
+		          {% endif %}
+		          <li class="page-item mb-0">
+		            <a class="page-link" href="?{% if qs %}{{ qs }}&{% endif %}page={{ paginator.num_pages }}">{{ paginator.num_pages }}</a>
+		          </li>
+		        {% endif %}
+
+		        {# Next #}
+		        <li class="page-item mb-0 {% if not page_obj.has_next %}disabled{% endif %}">
+		          <a class="page-link"
+		             href="{% if page_obj.has_next %}?{% if qs %}{{ qs }}&{% endif %}page={{ page_obj.next_page_number }}{% else %}#{% endif %}">
+		            <i class="fa-solid fa-angle-right"></i>
+		          </a>
+		        </li>
+
+		      </ul>
+		    </nav>
+		    {% endif %}
+		  </div>
+		</div>
+
+
+
+	</div>
+</section>
+<!-- =======================
+Tour grid END -->
+
+<!-- Tarih gerekli modalı -->
+<div class="modal fade" id="datesRequiredModal" tabindex="-1" aria-labelledby="datesRequiredLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-semibold" id="datesRequiredLabel">Tarih gerekli</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+      </div>
+      <div class="modal-body pt-2">
+        <div class="d-flex align-items-start">
+          <div class="me-3 fs-3" aria-hidden="true">📅</div>
+          <div>
+            <p class="mb-1">
+              <strong>Size en uygun seyahati tasarlayabilmemiz için</strong> lütfen bir
+              <strong>başlangıç ve bitiş tarihi</strong> seçin.
+            </p>
+            <p class="text-muted small mb-0">Tarih aralığı seçmeden detaylara ilerleyemezsiniz.</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+        <button type="button" class="btn btn-primary" id="goPickDatesBtn" data-bs-dismiss="modal">
+          Tarih seç
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+</main>
+<!-- **************** MAIN CONTENT END **************** -->
+
+<script>
+(function(){
+  const RANGE_SEP_CANON = ' - ';
+
+  // AYIRICIYA BAKMADAN iki ISO tarihi çek
+  function normalizeRange(raw){
+    if (!raw) return '';
+    const dates = Array.from(raw.matchAll(/\d{4}-\d{2}-\d{2}/g)).map(m => m[0]);
+    if (dates.length >= 2) return `${dates[0]}${RANGE_SEP_CANON}${dates[1]}`;
+    if (dates.length === 1) return dates[0];
+    return '';
+  }
+
+  function initRange(){
+    if (!window.flatpickr) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const datesParam = normalizeRange(params.get('dates') || '');
+
+    const el = document.querySelector('input.flatpickr[name="dates"]');
+    if (!el) return;
+
+    if (flatpickr.l10ns && flatpickr.l10ns.tr) flatpickr.localize(flatpickr.l10ns.tr);
+    if (el._flatpickr) el._flatpickr.destroy();
+
+    const fp = flatpickr(el, {
+      locale: Object.assign({}, flatpickr.l10ns?.tr || {}, { rangeSeparator: RANGE_SEP_CANON }),
+      mode: 'range',
+      dateFormat: 'Y-m-d',
+      altInput: true,
+      altFormat: 'd F Y',
+      allowInput: true
+    });
+
+    if (datesParam){
+      el.value = datesParam; // ham değer
+      const parts = datesParam.split(RANGE_SEP_CANON);
+      if (parts.length === 2) fp.setDate(parts, true, 'Y-m-d');
+    }
+  }
+
+  window.addEventListener('load', initRange);
+  window.addEventListener('pageshow', initRange);
+})();
+</script>
+
+<script>
+(function(){
+  function hasTwoISO(s){
+    if(!s) return false;
+    const m = String(s).match(/\d{4}-\d{2}-\d{2}/g);
+    return !!(m && m.length === 2);
+  }
+  function urlHasValidDates(href){
+    try{
+      const u = new URL(href, window.location.origin);
+      return hasTwoISO(u.searchParams.get('dates'));
+    }catch(e){ return false; }
+  }
+
+  function focusDatesInput(){
+    const input = document.querySelector('input.flatpickr[name="dates"]');
+    if (!input) return;
+    input.focus();
+    if (input._flatpickr) input._flatpickr.open();
+  }
+
+  // ⬇️ Yeni: önce en üste kaydır, sonra tarih alanına odaklan
+  function scrollTopThenFocusDates(){
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const start = Date.now();
+    const poll = setInterval(()=>{
+      const atTop = (window.scrollY || document.documentElement.scrollTop) === 0;
+      const timeout = Date.now() - start > 1200; // güvenlik süresi
+      if (atTop || timeout){
+        clearInterval(poll);
+        // küçük bir nefes payı verip odakla
+        setTimeout(focusDatesInput, 120);
+      }
+    }, 50);
+  }
+
+  function showDatesModal(){
+    const el = document.getElementById('datesRequiredModal');
+    if (!el) return scrollTopThenFocusDates();
+    const m = new bootstrap.Modal(el);
+    m.show();
+
+    const btn = el.querySelector('#goPickDatesBtn');
+    if (btn && !btn._bound){
+      btn._bound = true;
+      btn.addEventListener('click', function(){
+        m.hide();
+        // modal kapanınca: en üste kaydır + tarih seçtir
+        setTimeout(scrollTopThenFocusDates, 150);
+      });
+    }
+  }
+
+  document.addEventListener('click', function(e){
+    const a = e.target.closest('a');
+    if(!a) return;
+
+    const isDetailLink =
+      a.classList.contains('js-require-dates') ||
+      (/\/tours\/[^\/?#]+\/?$/.test(a.pathname) || /\/tours\/[^\/?#]+\/\?/.test(a.href));
+
+    if(!isDetailLink) return;
+
+    if (!urlHasValidDates(a.href)) {
+      e.preventDefault();
+      showDatesModal();
+    }
+  });
+})();
+</script>
+
+<script>
+(function(){
+  function focusDatesInput(){
+    const input = document.querySelector('input.flatpickr[name="dates"]');
+    if (!input) return;
+    input.focus();
+    if (input._flatpickr) input._flatpickr.open();
+  }
+  function scrollTopThenFocusDates(){
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const t0 = Date.now();
+    const id = setInterval(()=>{
+      const atTop = (window.scrollY || document.documentElement.scrollTop) === 0;
+      if (atTop || Date.now()-t0 > 1200){
+        clearInterval(id);
+        setTimeout(focusDatesInput, 120);
+      }
+    }, 50);
+  }
+
+  function showDatesModal(){
+    const el = document.getElementById('datesRequiredModal');
+    if (!el) return scrollTopThenFocusDates();
+
+    const modal = bootstrap.Modal.getOrCreateInstance(el);
+    modal.show();
+
+    const btn = el.querySelector('#goPickDatesBtn');
+    if (btn && !btn._bound){
+      btn._bound = true;
+      btn.addEventListener('click', function(){
+        // data-bs-dismiss zaten kapatır; yine de emin olmak için:
+        modal.hide();
+        // modal kapanınca kaydır + focus yap
+        setTimeout(scrollTopThenFocusDates, 120);
+      });
+    }
+  }
+
+  // … (senin mevcut tarih kontrol/engelleyen click handler’ın burada) …
+  // boş dates ise: e.preventDefault(); showDatesModal();
+})();
+</script>
+
+
+{% endblock %}

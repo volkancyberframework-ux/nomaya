@@ -1,0 +1,348 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<style>
+
+	/* Testimonial kartı tek yüzey gibi dursun */
+	.testimonial-card{
+	  background: #111318;           /* koyu yüzey */
+	  border-radius: 16px;
+	  box-shadow: 0 6px 24px rgba(0,0,0,.25);
+	  overflow: hidden;
+	}
+
+	/* Görsel alanı: kenar boşluğu yok, kapa */
+	.testimonial-photo{
+	  position: relative;
+	  width: 100%;
+	  aspect-ratio: 16 / 9;          /* sabit oran, responsive */
+	  overflow: hidden;
+	}
+	.testimonial-photo img{
+	  width: 100%;
+	  height: 100%;
+	  object-fit: cover;             /* soldaki boşluklar biter */
+	  display: block;
+	}
+
+	/* Küçük ekranlarda yastıklar */
+	@media (max-width: 767.98px){
+	  .testimonial-card .p-lg-5{ padding: 1.25rem !important; }
+	}
+
+	/* Slider oklarını biraz aşağıda ve içeride göster */
+	.tns-controls [data-controls]{
+	  transform: translateY(6px);
+	}
+
+
+</style>
+
+<!-- **************** MAIN CONTENT START **************** -->
+<main>
+
+<!-- =======================
+Main Banner START -->
+<section class="pt-4 pt-md-5">
+	<div class="container">
+		<div class="row g-4 align-items-center">
+			<div class="col-lg-7">
+				<!-- Title -->
+				<h1 class="mb-4 display-5">Nomaya ile kendi ritminde, güvenle ve bütçene uygun keşfet</h1>
+				<!-- Info -->
+				<p class="mb-4">Hazır turları değil, <b>sana özel rotaları</b> tasarlıyoruz. Uçuş, konaklama ve günlük öneriler dahil — WhatsApp’tan <b>Türkçe asistanın</b> yolun her anında yanında.</p>
+				<!-- Button -->
+				<a href="https://www.youtube.com/@volkangulernguyen" class="btn btn-primary-soft mb-4">Hemen Başla <i class="fa-solid fa-arrow-right-long fa-fw"></i></a>
+				<!-- List -->
+				<h6 class="fw-normal mb-1">Neden Nomaya?</h6>
+				<ul class="list-group list-group-borderless mb-0 small">
+					<li class="list-group-item d-flex mb-0">
+						<i class="fa-solid fa-check-circle text-success me-2 mt-1"></i>Kişiye özel plan: tarih ve tempo sana göre
+					</li>
+					<li class="list-group-item d-flex mb-0">
+						<i class="fa-solid fa-check-circle text-success me-2 mt-1"></i>Yerel ve gerçek deneyimler: klişe rotaların ötesi
+					</li>
+					<li class="list-group-item d-flex mb-0">
+						<i class="fa-solid fa-check-circle text-success me-2 mt-1"></i>WhatsApp’ta Türkçe asistan: her gün yanında
+					</li>
+				</ul>
+			</div>
+			<!-- Image -->
+			<div class="col-lg-5 text-center">
+				<img src="{% static 'assets/images/element/join-us.svg' %}" alt="Nomaya">
+			</div>
+		</div>
+	</div>
+</section>
+<!-- =======================
+Main Banner END -->
+
+<!-- =======================
+Counter START -->
+<section class="pt-0">
+	<div class="container">
+		<div class="row g-4 align-items-center">
+			<!-- Title -->
+			<div class="col-sm-6 col-md-3">
+				<h4 class="mb-0">Güven Veren Rakamlar</h4>
+			</div>
+
+			<!-- Counter item: 800+ deneyim -->
+			<div class="col-sm-6 col-md-3">
+				<div class="card card-body text-center bg-light">
+					<div class="d-flex justify-content-center">
+						<h3 class="purecounter text-orange mb-0" data-purecounter-start="0" data-purecounter-end="800" data-purecounter-delay="50">0</h3>
+						<span class="h3 text-orange mb-0">+</span>
+					</div>
+					<h6 class="fw-normal mb-0">Planlanan deneyim</h6>
+				</div>
+			</div>
+
+			<!-- Counter item: %60 daha uygun -->
+			<div class="col-sm-6 col-md-3">
+				<div class="card card-body text-center bg-light">
+					<div class="d-flex justify-content-center">
+						<h3 class="purecounter text-info mb-0" data-purecounter-start="0" data-purecounter-end="60" data-purecounter-delay="50">0</h3>
+						<span class="h3 text-info mb-0">%</span>
+					</div>
+					<h6 class="fw-normal mb-0">Ortalama tura göre daha uygun</h6>
+				</div>
+			</div>
+
+			<!-- Counter item: 400K+ izlenme -->
+			<div class="col-sm-6 col-md-3">
+				<div class="card card-body text-center bg-light">
+					<div class="d-flex justify-content-center">
+						<h3 class="purecounter text-primary mb-0" data-purecounter-start="0" data-purecounter-end="400" data-purecounter-delay="50">0</h3>
+						<span class="h3 text-primary mb-0">K+</span>
+					</div>
+					<h6 class="fw-normal mb-0">Toplam izlenme</h6>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+<!-- =======================
+Counter END -->
+
+<!-- PureCounter -->
+<script src="https://cdn.jsdelivr.net/npm/purecounterjs@1.5.0/dist/purecounter_vanilla.js" defer></script>
+<script>
+  // Sayfa yüklendiğinde sayaçları başlat
+  document.addEventListener('DOMContentLoaded', () => {
+    new PureCounter();
+  });
+</script>
+
+
+<!-- =======================
+Benefits START -->
+<section class="pt-0 pt-md-5">
+	<div class="container">
+		<div class="row">
+			<div class="col-12">
+				<div class="bg-light p-4 p-sm-5 rounded-3">
+					<!-- Title -->
+					<h2 class="fs-3 text-center mb-4 mb-sm-5">Neden Nomaya?</h2>
+
+					<div class="row g-4">
+						<!-- Card START -->
+						<div class="col-md-6">
+							<div class="card card-body p-4">
+								<div><img src="{% static 'assets/images/element/18.svg' %}" class="h-70px mb-3" alt=""></div>
+								<h5>Kişiye Özel Planlama</h5>
+								<p class="mb-0">Tüm plan; tarihinden ritmine, bütçenden zevklerine kadar sana göre şekillenir. Hazır tur değil, sana ait bir yolculuk.</p>
+							</div>
+						</div>
+						<!-- Card END -->
+
+						<!-- Card START -->
+						<div class="col-md-6">
+							<div class="card card-body p-4">
+								<div><img src="{% static 'assets/images/element/21.svg' %}" class="h-70px mb-3" alt=""></div>
+								<h5>Şeffaf ve Güvenli</h5>
+								<p class="mb-0">Sürpriz maliyet yok. Otel ve uçuşlar kalite–fiyat dengesiyle seçilir, tüm detaylar açıkça paylaşılır.</p>
+							</div>
+						</div>
+						<!-- Card END -->
+
+						<!-- Card START -->
+						<div class="col-md-6">
+							<div class="card card-body p-4">
+								<div><img src="{% static 'assets/images/element/19.svg' %}" class="h-70px mb-3" alt=""></div>
+								<h5>Günlük Türkçe Asistan</h5>
+								<p class="mb-0">WhatsApp’tan her gün rota önerileri, seyahatiniz boyunca bölge ile ilgili hikayeler, anlık revizyonlarla yanındayız.</p>
+							</div>
+						</div>
+						<!-- Card END -->
+
+						<!-- Card START -->
+						<div class="col-md-6">
+							<div class="card card-body p-4">
+								<div><img src="{% static 'assets/images/element/20.svg' %}" class="h-70px mb-3" alt=""></div>
+								<h5>Yerel ve Gerçek Deneyimler</h5>
+								<p class="mb-0">Klişe durakların ötesinde, şehrin ruhunu hissettiren özgün öneriler ve güvenli ulaşım çözümleri.</p>
+							</div>
+						</div>
+						<!-- Card END -->
+
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+<!-- =======================
+Benefits END -->
+
+<!-- =======================
+Testimonials START -->
+<section>
+  <div class="container">
+    <div class="row justify-content-between align-items-end mb-5">
+      <div class="col-lg-6">
+        <h2 class="mb-0">Kullanıcılarımız Ne Diyor?</h2>
+      </div>
+    </div>
+
+    <div class="row">
+      <!-- Testimonials START -->
+      <div class="col-12">
+        <div class="tiny-slider arrow-round arrow-blur arrow-hover">
+          <div class="tiny-slider-inner"
+               data-autoplay="true"
+               data-arrow="true"
+               data-dots="false"
+               data-items="1"
+               data-gutter="16">
+            <!-- Slider item: Solo Nomad -->
+            <div class="testimonial-card">
+              <div class="row g-0 align-items-stretch">
+                <div class="col-md-5">
+                  <div class="testimonial-photo">
+                    <img src="{% static 'assets/images/team/solo-nomad.png' %}" alt="Dijital göçebe">
+                  </div>
+                </div>
+                <div class="col-md-7">
+                  <div class="p-4 p-lg-5 h-100 d-flex">
+                    <div class="d-flex">
+                      <span class="display-6 opacity-25 me-3 lh-1"><i class="bi bi-quote"></i></span>
+                      <div>
+                        <h5 class="mb-3 text-primary">“Tur değil, bana ait bir rota.”</h5>
+                        <p class="mb-3">Nomaya sayesinde Vietnam’da hem uygun uçuş hem de temiz–iyi konumlu oteller buldum. Her gün WhatsApp’tan öneriler geldi, planım esnedikçe rota anında güncellendi. Tek başıma çok güvende hissettim.</p>
+                        <h6 class="mb-0">Ece K.</h6>
+                        <small class="text-body-secondary">Dijital Göçebe, Solo Gezgin</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Slider item: Emekli Çift -->
+            <div class="testimonial-card">
+              <div class="row g-0 align-items-stretch">
+                <div class="col-md-5">
+                  <div class="testimonial-photo">
+                    <img src="{% static 'assets/images/team/retired-couple.png' %}" alt="Emekli çift">
+                  </div>
+                </div>
+                <div class="col-md-7">
+                  <div class="p-4 p-lg-5 h-100 d-flex">
+                    <div class="d-flex">
+                      <span class="display-6 opacity-25 me-3 lh-1"><i class="bi bi-quote"></i></span>
+                      <div>
+                        <h5 class="mb-3 text-primary">“Her detay düşünülmüştü, içimiz çok rahattı.”</h5>
+                        <p class="mb-3">Uçuş bağlantıları, otel konforu ve şehir içi ulaşımımız baştan sona planlandı. Türkçe asistanımıza her an ulaşabildik. Klasik turlardan daha sakindi ve bütçemize de uydu.</p>
+                        <h6 class="mb-0">Nermin & İhsan A.</h6>
+                        <small class="text-body-secondary">Emekli Çift</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- /item -->
+          </div>
+        </div>
+      </div>
+      <!-- Testimonials END -->
+    </div>
+  </div>
+</section>
+
+<!-- =======================
+Testimonials END -->
+
+<!-- =======================
+Action box START -->
+<section>
+	<div class="container">
+		<div class="row g-4">
+			<div class="col-12">
+				<!-- Action box START -->
+				<div class="card card-body shadow p-4">
+					<div class="row g-4 justify-content-between align-items-center">
+						<!-- Image -->
+						<div class="col-sm-3 col-lg-2">
+							<img src="{% static 'assets/images/element/22.svg' %}" alt="">
+						</div>
+
+						<!-- Title and content -->
+						<div class="col-sm-9 col-lg-6 col-xl-7">
+							<h4>Güvenli ve kişisel bir yolculuğa hazır mısın?</h4>
+							<p class="mb-0">Nomaya, bütçene ve ritmine uyan gerçek deneyimler tasarlar. Hemen ücretsiz ön planını iste.</p>
+						</div>
+
+						<!-- Button -->
+						<div class="col-lg-3 col-xxl-2 d-grid">
+							<a href="{% url 'faqs' %}"  class="btn btn-primary mb-0">Sıkça Sorulan Sorular</a>
+						</div>
+					</div>
+				</div>
+				<!-- Action box END -->
+			</div>
+		</div>
+	</div>
+</section>
+<!-- =======================
+Action box END -->
+
+{# --- Signup Success Modal --- #}
+{% if messages %}
+  {% for message in messages %}
+    {% if 'signup' in message.tags %}
+      <div class="modal fade" id="signupSuccessModal" tabindex="-1" aria-labelledby="signupSuccessLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header border-0">
+              <h5 class="modal-title" id="signupSuccessLabel">Hoş geldiniz 🎉</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <div class="modal-body">
+              {{ message }}
+            </div>
+            <div class="modal-footer border-0">
+              <a href="{% url 'home' %}" class="btn btn-primary">Tamam</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          var el = document.getElementById('signupSuccessModal');
+          if (el && window.bootstrap) {
+            var m = new bootstrap.Modal(el);
+            m.show();
+          }
+        });
+      </script>
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+</main>
+{% endblock %}

@@ -1,0 +1,988 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+
+{% block content %}
+<main>
+
+  <!-- ======================= Title + Gallery ======================= -->
+  <section class="pt-4 pt-lg-5">
+    <div class="container position-relative">
+
+      <!-- Title row -->
+      <div class="row">
+        <div class="col-12">
+          <div class="d-md-flex justify-content-md-between">
+            <div>
+              <h1 class="fs-2">{{ tour.title }}</h1>
+
+              {% if pax or country or dates %}
+                <ul class="nav nav-divider h6 text-body mb-0">
+                  {% if pax %}<li class="nav-item">{{ pax }} kişi</li>{% endif %}
+                  {% if country %}<li class="nav-item">{{ country }}</li>{% endif %}
+
+                  {# ——— TR tarih aralığı ——— #}
+                  {% if dates_start and computed_end_date %}
+                    <li class="nav-item">
+                      {{ dates_start|date:"d F Y" }} – {{ computed_end_date|date:"d F Y" }}
+                    </li>
+                  {% elif dates_start and dates_end %}
+                    <li class="nav-item">
+                      {{ dates_start|date:"d F Y" }} – {{ dates_end|date:"d F Y" }}
+                    </li>
+                  {% elif dates %}
+                    <li class="nav-item">{{ dates }}</li>
+                  {% endif %}
+                </ul>
+              {% else %}
+                <ul class="nav nav-divider h6 text-body mb-0">
+                  <li class="nav-item">{{ tour.duration_label }}</li>
+                  <li class="nav-item">
+                    {% with cnt=tour.places_covered.count %}
+                      {% if cnt %}{{ cnt }} Şehir{% endif %}
+                    {% endwith %}
+                  </li>
+                </ul>
+              {% endif %}
+            </div>
+
+
+            <ul class="list-inline text-end">
+              <li class="list-inline-item">
+                <a href="#" class="btn btn-sm btn-light px-2"><i class="fa-solid fa-fw fa-heart"></i></a>
+              </li>
+
+              <li class="list-inline-item dropdown">
+                <a href="#" class="btn btn-sm btn-light px-2" role="button" id="dropdownShare" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="fa-solid fa-fw fa-share-alt"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end min-w-auto shadow rounded" aria-labelledby="dropdownShare">
+                  <!-- YouTube kanal / video -->
+                  <li>
+                    <a class="dropdown-item" href="https://www.youtube.com/@volkangulernguyen" target="_blank" rel="noopener">
+                      <i class="fab fa-youtube me-2"></i>YouTube
+                    </a>
+                  </li>
+                  <!-- E-posta -->
+                  <li>
+                    <a class="dropdown-item" id="shareEmail" href="#">
+                      <i class="fa-solid fa-envelope me-2"></i>E-posta ile gönder
+                    </a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Image gallery -->
+      <div class="row mt-md-5">
+        <div class="col-12">
+          <!-- Main -->
+          <div class="splide splide-main mb-3" data-splide='{"type":"fade","autoplay":false,"heightRatio":0.5,"pagination":true,"arrows":true,"cover":true,"lazyLoad":"sequential","drag":true,"keyboard":"global","rewind":true,"speed":500}'>
+            <div class="splide__track">
+              <ul class="splide__list">
+                {% if tour.photos.all %}
+                  {% for p in tour.photos.all|slice:":10" %}
+                    <li class="splide__slide rounded">
+                      <img src="{{ p.image.url }}" alt="{{ p.alt_text|default:tour.title }}">
+                      <a href="{{ p.image.url }}" class="stretched-link" data-glightbox data-gallery="banner"></a>
+                    </li>
+                  {% endfor %}
+                {% else %}
+                  <li class="splide__slide rounded">
+                    <img src="{% static 'assets/images/gallery/placeholder.jpg' %}" alt="{{ tour.title }}">
+                  </li>
+                {% endif %}
+              </ul>
+            </div>
+          </div>
+
+          <!-- Thumbs -->
+          <div class="splide splide-thumb" data-splide='{"rewind":true,"fixedWidth":200,"fixedHeight":120,"isNavigation":true,"gap":20,"focus":"center","pagination":false,"cover":true,"lazyLoad":"sequential","breakpoints":{"600":{"fixedWidth":150,"fixedHeight":80}}}'>
+            <div class="splide__track">
+              <ul class="splide__list">
+                {% for p in tour.photos.all|slice:":10" %}
+                  <li class="splide__slide"><img src="{{ p.image.url }}" alt="{{ p.alt_text|default:tour.title }}"></li>
+                {% endfor %}
+              </ul>
+            </div>
+            <div class="splide__arrows">
+              <button class="splide__arrow splide__arrow--prev p-splide__arrow--prev bg-primary"><span class="spi-angle-left text-white"><i class="fa-solid fa-fw fa-angle-left"></i></span></button>
+              <button class="splide__arrow splide__arrow--next p-splide__arrow--next bg-primary"><span class="spi-angle-right text-white"><i class="fa-solid fa-fw fa-angle-right"></i></span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ======================= Tabs ======================= -->
+  <section class="py-0">
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <ul class="nav nav-pills nav-justified nav-responsive bg-primary bg-opacity-10 rounded p-2" id="tour-pills-tab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active mb-0" id="tour-pills-tab-1" data-bs-toggle="pill" data-bs-target="#tour-pills-tab1" type="button" role="tab" aria-controls="tour-pills-tab1" aria-selected="true">Genel Bakış</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link mb-0" id="tour-pills-tab-2" data-bs-toggle="pill" data-bs-target="#tour-pills-tab2" type="button" role="tab" aria-controls="tour-pills-tab2" aria-selected="false">Program / Güzergâh</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link mb-0" id="tour-pills-tab-3" data-bs-toggle="pill" data-bs-target="#tour-pills-tab3" type="button" role="tab" aria-controls="tour-pills-tab3" aria-selected="false">Dahiller & Hariçler</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link mb-0" id="tour-pills-tab-4" data-bs-toggle="pill" data-bs-target="#tour-pills-tab4" type="button" role="tab" aria-controls="tour-pills-tab4" aria-selected="false">Politikamız</button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= Tabs content ======================= -->
+  <section class="pt-4 pt-md-5">
+    <div class="container">
+      <div class="row g-4 g-md-5">
+
+        <!-- Left: tabs content -->
+        <div class="col-xl-8">
+          <div class="tab-content mb-0" id="tour-pills-tabContent">
+
+            <!-- Overview -->
+            <div class="tab-pane fade show active" id="tour-pills-tab1" role="tabpanel" aria-labelledby="tour-pills-tab-1">
+              <div class="card bg-transparent p-0">
+                <div class="card-header bg-transparent border-bottom p-0 pb-3">
+                  <h3 class="mb-0">Genel Bakış</h3>
+                </div>
+
+                <div class="card-body p-0 pt-3">
+                  {% if tour.overview %}
+                    <p class="mb-4">{{ tour.overview|linebreaks }}</p>
+                  {% endif %}
+
+                  {% if tour.info %}
+                    <h5 class="mt-3">Tur Bilgisi</h5>
+                    <p class="mb-4">{{ tour.info|linebreaks }}</p>
+                  {% endif %}
+
+                  <h5>Öne Çıkan Bilgiler</h5>
+                  <ul class="list-group list-group-borderless mb-4">
+                    <li class="list-group-item">
+                      <span class="h6 mb-0 me-1">Kapsanan Noktalar:</span>
+                      <span class="h6 fw-light mb-0">
+                        {% for c in tour.places_covered.all %}
+                          {{ c.name }}{% if not forloop.last %} - {% endif %}
+                        {% empty %}—{% endfor %}
+                      </span>
+                    </li>
+                    <li class="list-group-item">
+                      <span class="h6 mb-0 me-1">Süre:</span>
+                      <span class="h6 fw-light mb-0">{{ tour.duration_label|default:"—" }}</span>
+                    </li>
+                    <li class="list-group-item">
+                      <span class="h6 mb-0 me-1">Başlangıç Noktası:</span>
+                      <span class="h6 fw-light mb-0">{{ tour.start_point|default:"—" }}</span>
+                    </li>
+                    <li class="list-group-item">
+                      <span class="h6 mb-0 me-1">Bitiş Noktası:</span>
+                      <span class="h6 fw-light mb-0">{{ tour.end_point|default:"—" }}</span>
+                    </li>
+                  </ul>
+
+                  {% if tour.tour_bullets.all %}
+                    <h5>Turun Öne Çıkanları</h5>
+                    <ul class="list-group list-group-borderless mb-4">
+                      {% for tb in tour.tour_bullets.all %}
+                        {% if tb.section == "highlights" %}
+                          <li class="list-group-item h6 fw-light d-flex mb-0">
+                            <i class="bi bi-arrow-right me-2"></i>{{ tb.bullet.text }}
+                          </li>
+                        {% endif %}
+                      {% endfor %}
+                    </ul>
+
+                    <h5>Bu Tur Hakkında Daha Fazlası</h5>
+                    <ul class="list-group list-group-borderless mb-0">
+                      {% for tb in tour.tour_bullets.all %}
+                        {% if tb.section == "more_about" %}
+                          <li class="list-group-item h6 fw-light d-flex mb-0">
+                            <i class="fa-solid fa-check-circle text-success me-2"></i>{{ tb.bullet.text }}
+                          </li>
+                        {% endif %}
+                      {% endfor %}
+                    </ul>
+                  {% endif %}
+
+                </div>
+              </div>
+            </div>
+
+            <!-- Itinerary -->
+            <div class="tab-pane fade" id="tour-pills-tab2" role="tabpanel" aria-labelledby="tour-pills-tab-2">
+              <div class="card bg-transparent p-0">
+                <div class="card-header bg-transparent border-bottom p-0 pb-3 d-flex align-items-center justify-content-between">
+                  <h3 class="mb-0">Program</h3>
+                  <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-danger" data-toggle-remove="flights">
+                      <i class="fa-solid fa-plane me-1"></i><span class="btn-text">Uçuşları Çıkar</span>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-danger" data-toggle-remove="transfers">
+                      <i class="fa-solid fa-car-side me-1"></i><span class="btn-text">Transferleri Çıkar</span>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-danger" data-toggle-remove="hotels">
+                      <i class="fa-solid fa-hotel me-1"></i><span class="btn-text">Otelleri Çıkar</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="card-body p-0 pt-3">
+                  <div class="accordion accordion-icon accordion-bg-light" id="itineraryAcc">
+                    {% for td in tour_days %}
+                      {% with d=td.day %}
+                      <div class="accordion-item mb-3">
+                        <div class="accordion-item">
+                          <h6 class="accordion-header font-base" id="heading-{{ forloop.counter }}">
+                            <button class="accordion-button rounded d-inline-block {% if not forloop.first %}collapsed{% endif %}"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#collapse-{{ forloop.counter }}"
+                                    aria-expanded="{{ forloop.first|yesno:'true,false' }}"
+                                    aria-controls="collapse-{{ forloop.counter }}">
+                                    {% with disp_day=start_day_number|add:forloop.counter0 %}
+                                      <span class="lead me-1 fw-normal">
+                                        Gün {{ disp_day }}:
+                                      </span>
+                                    {% endwith %}
+                                    {{ d.title|default:d.city.name }}
+
+                                    {% if day_dates and day_dates|length >= forloop.counter %}
+                                      <small class="text-muted ms-2">{{ day_dates|index:forloop.counter0 }}</small>
+                                    {% endif %}
+
+                            </button>
+                          </h6>
+
+                          <div id="collapse-{{ forloop.counter }}"
+                               class="accordion-collapse collapse {% if forloop.first %}show{% endif %}"
+                               aria-labelledby="heading-{{ forloop.counter }}"
+                               data-bs-parent="#itinerary">
+                            <div class="accordion-body">
+                              {# ... gün içeriğin ... #}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div id="collapse-{{ forloop.counter }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}"
+                             aria-labelledby="heading-{{ forloop.counter }}" data-bs-parent="#itineraryAcc">
+                          <div class="accordion-body mt-3">
+                            <div class="vstack gap-4">
+
+                              {% if not hide_flights and d.dayflight_set.all %}
+                              <div data-section="flights">
+                                {% for df in d.dayflight_set.all %}
+                                  {% with f=df.flight %}
+                                  <div class="card bg-transparent p-0">
+                                    <div class="card-header bg-transparent p-0">
+                                      <span class="text-body"><i class="fa-solid fa-check-circle me-2"></i>Uçuş Detayları</span>
+                                      <div class="p-3 bg-light rounded-2 d-sm-flex justify-content-sm-between align-items-center mb-4 mt-2">
+                                        <h6 class="mb-0">{{ f.origin.iata }} - {{ f.destination.iata }}</h6>
+                                        <h6 class="fw-normal mb-0">
+                                          <span class="text-body">Kalkış:</span> {{ f.departure_time|time:"H:i" }}
+                                          &nbsp;•&nbsp; <span class="text-body">Varış:</span> {{ f.arrival_time|time:"H:i" }}
+
+                                        </h6>
+                                      </div>
+                                    </div>
+                                    <div class="card-body p-0">
+                                      <div class="row g-4 align-items-center">
+                                        <div class="col-md-3">
+                                          {% if f.airline.logo %}
+                                            <img src="{{ f.airline.logo.url }}" class="w-80px mb-2" alt="{{ f.airline.name }}">
+                                          {% endif %}
+                                          <h6 class="fw-normal small mb-0">{{ f.airline.name }}</h6>
+                                          <small class="text-muted">{{ f.flight_number }}</small>
+                                        </div>
+                                        <div class="col-4 col-md-3">
+                                          <h5>{{ f.origin.iata }}</h5>
+                                          <h6 class="mb-0">{{ f.departure_time|date:"H:i" }}</h6>
+                                        </div>
+                                        <div class="col-4 col-md-3 text-center">
+                                          <h6>{{ f.duration_minutes }} min</h6>
+                                          <div class="position-relative my-4">
+                                            <hr class="bg-primary opacity-5 position-relative">
+                                            <div class="icon-md bg-primary text-white rounded-circle position-absolute top-50 start-50 translate-middle">
+                                              <i class="fa-solid fa-fw fa-plane"></i>
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div class="col-4 col-md-3 text-end">
+                                          <h5>{{ f.destination.iata }}</h5>
+                                          <h6 class="mb-0">{{ f.arrival_time|date:"H:i" }}</h6>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  {% endwith %}
+                                {% endfor %}
+                                <hr class="mt-3 mb-0">
+                              </div>
+                              {% endif %}
+
+                              {% if not hide_transfers and d.daytransfer_set.all %}
+                              <div data-section="transfers">
+                                {% for dt in d.daytransfer_set.all %}
+                                  {% with t=dt.transfer %}
+                                  <div class="card bg-transparent p-0">
+                                    <div class="card-header bg-transparent p-0">
+                                      <span class="text-body"><i class="fa-solid fa-check-circle me-2"></i>
+                                        {% if t.direction == 'A2H' %}Havalimanından Otele Transfer{% else %}Otelden Havalimanına Transfer{% endif %}
+                                      </span>
+                                    </div>
+                                    <div class="card-body p-0 mt-2">
+                                      <div class="row g-2 g-sm-4 align-items-center">
+                                        <div class="col-sm-4 col-xl-3">
+                                          <div class="bg-light rounded-3 px-4 py-5 text-center">
+                                            <i class="fa-solid fa-car-side fs-2"></i>
+                                          </div>
+                                        </div>
+                                        <div class="col-sm-8 col-xl-9">
+                                          <h5 class="card-title mb-2">{{ t.city.name }} • {{ t.vehicle_type }}</h5>
+                                          <h6 class="mb-2">{{ t.airport.iata }} ↔ {{ t.hotel.name }}</h6>
+                                          <ul class="nav nav-divider mb-2">
+                                            <li class="nav-item">{{ t.get_direction_display }}</li>
+                                          </ul>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  {% endwith %}
+                                {% endfor %}
+                                <hr class="mt-3 mb-0">
+
+                              </div>
+                              {% endif %}
+
+                              {% if not hide_hotels and d.dayhotel_set.all %}
+                              <div data-section="hotels">
+                                {% for dh in d.dayhotel_set.all %}
+                                  {% with h=dh.hotel %}
+                                  <div class="card bg-transparent p-0">
+                                    <div class="card-header bg-transparent p-0">
+                                      <span class="text-body"><i class="fa-solid fa-check-circle me-2"></i>Konaklanacak Otel</span>
+                                    </div>
+                                    <div class="card-body p-0 mt-2">
+                                      <div class="row g-2 g-sm-4">
+                                        <div class="col-sm-4">
+                                          {% if h.image %}<img src="{{ h.image.url }}" class="card-img" alt="{{ h.name }}">{% endif %}
+                                        </div>
+                                        <div class="col-sm-8">
+                                          <div class="d-flex justify-content-between mb-2">
+                                            <div class="badge bg-dark">Otel</div>
+                                          </div>
+                                          <h5 class="card-title mb-1">{{ h.name }}</h5>
+                                          <span>{{ h.city.name }}</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  {% endwith %}
+                                {% endfor %}
+                                <hr class="mt-3 mb-0">
+                              </div>
+                              {% endif %}
+
+                              {% if d.dayactivity_set.all %}
+                                {% for da in d.dayactivity_set.all %}
+                                  {% with a=da.activity %}
+                                  <div class="card bg-transparent p-0">
+                                    <div class="card-header bg-transparent p-0">
+                                      <span class="text-body"><i class="fa-solid fa-check-circle me-2"></i>Bugünün Aktivitesi</span>
+                                    </div>
+                                    <div class="card-body p-0 mt-2">
+                                      <div class="row g-2 g-sm-4 align-items-center">
+                                        <div class="col-sm-4">
+                                          {% if a.cover_image %}<img src="{{ a.cover_image.url }}" class="card-img" alt="{{ a.title }}">{% endif %}
+                                        </div>
+                                        <div class="col-sm-8">
+                                          <h5 class="card-title mb-0">{{ a.title }}</h5>
+                                          {% if a.location_text %}<small class="mb-2"><i class="bi bi-geo-alt me-2"></i>{{ a.location_text }}</small>{% endif %}
+                                          {% if a.points %}
+                                            <ul class="list-group list-group-borderless mb-0 mt-2">
+                                              {% for pt in a.points|slice:":5" %}
+                                                <li class="list-group-item d-flex p-0"><i class="bi bi-arrow-right text-primary me-2"></i>{{ pt }}</li>
+                                              {% endfor %}
+                                            </ul>
+                                          {% endif %}
+                                          <div class="hstack gap-3 flex-wrap mt-2">
+                                            {% if a.duration_hours %}<p class="mb-0">Duration:<span class="h6 fw-light mb-0 ms-1">{{ a.duration_hours }} hrs</span></p>{% endif %}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  {% endwith %}
+                                {% endfor %}
+                              {% endif %}
+
+                              {% if d.description %}<p class="mb-1">{{ d.description|linebreaksbr }}</p>{% endif %}
+                              {% if d.bullets %}
+                                <ul class="list-unstyled mb-0 mt-1">
+                                  {% for b in d.bullets %}
+                                    <li class="d-flex align-items-start mb-1">
+                                      <i class="fa-solid fa-circle-small text-primary mt-1 me-2" style="font-size: 8px;"></i>
+                                      <span>{{ b }}</span>
+                                    </li>
+                                  {% endfor %}
+                                </ul>
+                              {% endif %}
+                              {% if d.images.all %}
+                                <div class="row g-3 mt-1">
+                                  {% for im in d.images.all %}
+                                    <div class="col-6 col-md-4">
+                                      <img src="{{ im.image.url }}" class="rounded-3 w-100" alt="{{ im.alt_text }}">
+                                    </div>
+                                  {% endfor %}
+                                </div>
+                              {% endif %}
+
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      {% endwith %}
+                    {% empty %}
+                      <p class="text-muted">Bu tura ait gün atanmamış. Lütfen TourDay üzerinden gün ekleyin.</p>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+						<!-- Inclusions -->
+						<div class="tab-pane fade" id="tour-pills-tab3" role="tabpanel" aria-labelledby="tour-pills-tab-3">
+						  <div class="card bg-transparent p-0">
+						    <div class="card-header bg-transparent border-bottom p-0 pb-3">
+						      <h3 class="mb-0">Dahiller & Hariçler</h3>
+						    </div>
+
+                <div class="card-body p-0 pt-3">
+                  <div class="row g-4">
+                    <div class="col-md-6">
+                      <h5 class="mb-2">Dahiller</h5>
+                      <ul class="list-group list-group-borderless mb-0">
+
+                        <li class="list-group-item h6 fw-light d-flex mb-0">
+                          <i class="fa-solid fa-check text-success me-2"></i> Uçuşlar
+                        </li>
+                        <li class="list-group-item h6 fw-light d-flex mb-0">
+                          <i class="fa-solid fa-check text-success me-2"></i> Havalimanı–otel transferleri
+                        </li>
+                        <li class="list-group-item h6 fw-light d-flex mb-0">
+                          <i class="fa-solid fa-check text-success me-2"></i> Otel konaklaması
+                        </li>
+                        <li class="list-group-item h6 fw-light d-flex mb-0">
+                          <i class="fa-solid fa-check text-success me-2"></i> Günlük kahvaltı
+                        </li>
+
+                        <li class="list-group-item h6 fw-light d-flex mb-0">
+                          <i class="fa-solid fa-check text-success me-2"></i> Şehir içi ulaşımlar (program)
+                        </li>
+                        <li class="list-group-item h6 fw-light d-flex mb-0">
+                          <i class="fa-solid fa-check text-success me-2"></i> Giriş biletleri (program)
+                        </li>
+                        <li class="list-group-item h6 fw-light d-flex mb-0">
+                          <i class="fa-solid fa-check text-success me-2"></i> Otele alma & bırakma (aktiviteler)
+                        </li>
+
+                        <li class="list-group-item h6 fw-light d-flex mb-0">
+                          <i class="fa-solid fa-check text-success me-2"></i> 7/24 WhatsApp Asistan
+                        </li>
+                        <li class="list-group-item h6 fw-light d-flex mb-0">
+                          <i class="fa-solid fa-check text-success me-2"></i> Canlı rehber (belirli günler)
+                        </li>
+
+                        <li class="list-group-item h6 fw-light d-flex mb-0">
+                          <i class="fa-solid fa-check text-success me-2"></i> Kişisel rota & harita pinleri
+                        </li>
+                        <li class="list-group-item h6 fw-light d-flex mb-0">
+                          <i class="fa-solid fa-check text-success me-2"></i> Restoran & deneyim önerileri
+                        </li>
+                        <li class="list-group-item h6 fw-light d-flex mb-0">
+                          <i class="fa-solid fa-check text-success me-2"></i> Acil durum destek hattı
+                        </li>
+
+                      </ul>
+                    </div>
+                    <div class="col-md-6">
+                      <h5 class="mb-2">Hariçler</h5>
+                      <ul class="list-group list-group-borderless mb-0">
+                        <li class="list-group-item h6 fw-light d-flex mb-0">
+                          <i class="fa-solid fa-xmark text-danger me-2"></i> Vize ücretleri ve vize işlem bedelleri
+                        </li>
+                        <li class="list-group-item h6 fw-light d-flex mb-0">
+                          <i class="fa-solid fa-xmark text-danger me-2"></i> Öğle ve akşam yemekleri (aksi belirtilmedikçe)
+                        </li>
+                        <li class="list-group-item h6 fw-light d-flex mb-0">
+                          <i class="fa-solid fa-xmark text-danger me-2"></i> Kişisel harcamalar (alışveriş, içecekler vb.)
+                        </li>
+                        <li class="list-group-item h6 fw-light d-flex mb-0">
+                          <i class="fa-solid fa-xmark text-danger me-2"></i> Otelde minibar ve ekstra hizmetler
+                        </li>
+                        <li class="list-group-item h6 fw-light d-flex mb-0">
+                          <i class="fa-solid fa-xmark text-danger me-2"></i> Opsiyonel aktiviteler ve ekstra turlar
+                        </li>
+                        <li class="list-group-item h6 fw-light d-flex mb-0">
+                          <i class="fa-solid fa-xmark text-danger me-2"></i> Bahşişler ve taşıyıcı ücretleri
+                        </li>
+                        <li class="list-group-item h6 fw-light d-flex mb-0">
+                          <i class="fa-solid fa-xmark text-danger me-2"></i> Yurt dışı çıkış harcı ve benzeri resmi ödemeler
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+						  </div>
+						</div>
+
+            <!-- Policy -->
+            <div class="tab-pane fade" id="tour-pills-tab4" role="tabpanel" aria-labelledby="tour-pills-tab-4">
+              <div class="card bg-transparent p-0">
+                <div class="card-header bg-transparent border-bottom p-0 pb-3">
+                  <h3 class="mb-0">Politikamız</h3>
+                </div>
+                <div class="card-body p-0 pt-3">
+                  <ul class="list-group list-group-borderless mb-0">
+                    <li class="list-group-item h6 fw-light d-flex mb-0">
+                      <i class="bi bi-info-circle me-2"></i>
+                      <span><strong>Aracılık ve Sorumluluk:</strong> Nomaya, hava yolu ile yolcu arasında aracı konumundadır ve 28.09.1955 tarihli Lahey Protokolü’ne tabidir. Uçuş saatleri değişebilir; tüm saatlerin hareket tarihlerinden 48 saat önce teyit edilmesi gerekir. Uçağın ineceği şehre göre parkurlarda değişiklikler olabilir. Uçuş saatleri hakkında ofislerimizden veya satış temsilcinizden bilgi alabilirsiniz. Hava yolu şirketleri tarafından yapılabilecek saat değişiklikleri ve rötarlardan Nomaya sorumlu tutulamaz.</span>
+                    </li>
+                    <li class="list-group-item h6 fw-light d-flex mb-0">
+                      <i class="bi bi-info-circle me-2"></i>
+                      <span><strong>Uçuş İşlemleri:</strong> Uçaklı turlara katılan kişilerin check-in ve boarding işlemleri kişisel sorumluluktadır; havalimanındaki hava yolu kontuarlarında veya online yapılmalıdır. Son dakika rötarları ve kapı değişiklikleri havaalanlarında sesli anons edilir ve panolarda gösterilir; bu bilgilerin takibi gerekmektedir.</span>
+                    </li>
+                    <li class="list-group-item h6 fw-light d-flex mb-0">
+                      <i class="bi bi-info-circle me-2"></i>
+                      <span><strong>Tura Katılım:</strong> Nomaya tarafından bildirilen saatlerde belirtilen havaalanında hazır bulunmayan, check-in ve boarding işlemlerini zamanında yapmayan ya da uçağa binmeyen kişilerin uçuşu gerçekleştirememelerinden Nomaya sorumlu değildir. Uçağını kaçıran kişilerin tura dahil olabilmesi için gerekli yeni gidiş-dönüş biletleri ve bölgedeki transfer masrafları kendilerine aittir.</span>
+                    </li>
+                    <li class="list-group-item h6 fw-light d-flex mb-0">
+                      <i class="bi bi-info-circle me-2"></i>
+                      <span><strong>Turun Yapılmaması:</strong> Panoramik turlar ve diğer program turları, yerel otoritelerin izin vermemesi veya kapalı yollar nedeniyle gerçekleşmeyebilir. Hava şartları nedeniyle turun yapılması imkânsız hale geldiğinde, bu turların yapılamamasından Nomaya sorumlu değildir. Kapalı yollar veya araç girişine izin verilmeyen noktalarda program toplu taşıma veya yaya olarak sürdürülebilir.</span>
+                    </li>
+                    <li class="list-group-item h6 fw-light d-flex mb-0">
+                      <i class="bi bi-info-circle me-2"></i>
+                      <span><strong>Kişisel Eşyalar:</strong> Katılımcıların şahsi eşyaları, çantaları ve valizleri kendilerinin sorumluluğundadır. Unutulan, kaybolan veya çalınan eşyaların bulunması halinde, ülkeye veya kişiye ulaştırılması sırasında oluşan tüm masraflar eşya sahibine aittir.</span>
+                    </li>
+                    <li class="list-group-item h6 fw-light d-flex mb-0">
+                      <i class="bi bi-info-circle me-2"></i>
+                      <span><strong>Otel ve Konaklama:</strong> Nomaya, otel isimlerini değiştirme hakkını saklı tutar. 3 kişilik odalarda ilave yatak uygulaması olabilir; bu yataklar açma-kapama veya coach bed türünde olabilir. Bu nedenle 3. kişi ve/veya çocuk rezervasyonlarında odalarda yaşanabilecek sıkışıklık ve yatak tipi kabul edilmiş sayılır. Fiyat listesinde belirtilen çocuk fiyatları, çocuğun iki yetişkin yanında konaklaması durumunda geçerlidir. Otellerde sunulan kontinental kahvaltı; tereyağı, reçel veya bal, ekmek, çay veya kahve ile meyve suyundan oluşur. Grup kahvaltıları ayrı bir salonda servis edilebilir.</span>
+                    </li>
+                    <li class="list-group-item h6 fw-light d-flex mb-0">
+                      <i class="bi bi-info-circle me-2"></i>
+                      <span><strong>Sigorta ve Sağlık:</strong> Katılımcıların seyahatleri boyunca seyahat sigortalarını yanlarında bulundurmaları gerekir. Tura katılım sırasında sağlık durumları, hamilelik ve sürekli kullanılan ilaçlara ilişkin raporların yanınızda bulundurulması zorunludur.</span>
+                    </li>
+                    <li class="list-group-item h6 fw-light d-flex mb-0">
+                      <i class="bi bi-info-circle me-2"></i>
+                      <span><strong>Diğer Notlar:</strong> 18 yaş altı çocukların anne veya babalarından biri ya da ikisiyle birlikte tura katılmadığı durumlarda, muvafakatnamelerin seyahat sırasında yanlarında bulundurulması gerekmektedir.</span>
+                    </li>
+                    <li class="list-group-item h6 fw-light d-flex mb-0">
+                      <i class="bi bi-info-circle me-2"></i>
+                      <span><strong>Pasaport Geçerlilik Tarihi:</strong> Yurt dışına seyahat edecek yolcuların pasaportlarının ilk alış tarihi 10 yıldan eski olmamalı ve seyahat bitimi itibarıyla en az 6 ay geçerliliği bulunmalıdır. Pasaportunu yenileyecek misafirlerimiz, satın alma sırasında geçerli pasaport bilgisi vermediyse, güncel pasaport bilgisini satın aldığı kanal aracılığıyla paylaşmakla yükümlüdür.</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Right side -->
+        <aside class="col-xl-4">
+          <div class="row g-4">
+            <div class="col-md-6 col-xl-12">
+              <!-- NET toplamlar ve commission -->
+              <div class="card card-body border bg-transparent" id="priceBox"
+                   data-commission="{{ tour.commission|default_if_none:'1' }}"
+                   data-flight-total="{{ flights_total|default_if_none:'0' }}"
+                   data-transfer-total="{{ transfers_total|default_if_none:'0' }}"
+                   data-hotel-total="{{ hotels_total|default_if_none:'0' }}"
+                   data-activities-total="{{ activities_total|default_if_none:'0' }}"
+                   data-currency="{{ tour.price_currency }}">
+
+                <!-- Header price: base = tour.price (komisyon DAHİL) -->
+                <div class="hstack gap-2 mb-1">
+                  <h3 class="card-title mb-0">
+                    {{ tour.price_currency }}
+                    <span id="displayPrice"
+                          data-base-price="{{ tour.price|floatformat:2 }}"> {{ tour.price|floatformat:0 }}
+                    </span>
+                  </h3>
+                  <span class="fs-5">/ kişi</span>
+                </div>
+                <div class="d-grid gap-2">
+                  <a href="#" class="btn btn-primary" id="bookNowBtn">Şimdi Al!</a>
+
+                  {% with wa_text="Merhaba Nomaya! "|add:tour.title|add:" turu hakkında destek rica ediyorum." %}
+                    <a class="btn btn-outline-success mb-0"
+                       href="https://wa.me/32476073171?text={{ wa_text|urlencode }}"
+                       target="_blank" rel="noopener">
+                      <i class="bi bi-whatsapp fa-fw me-2"></i>WhatsApp’tan Destek Al
+                    </a>
+                  {% endwith %}
+                </div>
+              </div>
+
+              </div>
+            </div>
+            <br>
+            <div class="card card-body bg-light p-4">
+              <h4 class="card-title">Bize ulaşın</h4>
+
+              <style>
+                /* Tek tip satır stili */
+                .contact-list .contact-row{
+                  display:flex; align-items:center; gap:.5rem;
+                  color:var(--bs-body-color); text-decoration:none;
+                  padding:.5rem 0;
+                }
+                .contact-list .contact-row i{ font-size:1.25rem; color:var(--bs-body-color); line-height:1; }
+                .contact-list .label{ font-weight:500; opacity:.9; }
+                .contact-list .value{ font-weight:600; }
+                .contact-list a.contact-row:hover{ opacity:.85; }
+                .contact-list hr{ opacity:.15; margin: .25rem 0; }
+              </style>
+
+              <style>
+                /* ek renk (WhatsApp) */
+                :root{ --c-wa:#25D366; }
+                .icon-wa{ color:var(--c-wa); }
+                .pill-fast{
+                  background:rgba(37,211,102,.12);
+                  color:#25D366;
+                  border:1px solid rgba(37,211,102,.25);
+                  display:inline-block; padding:.1rem .45rem; border-radius:999px;
+                  font-size:.8rem; font-weight:700; line-height:1;
+                }
+              </style>
+
+              <ul class="list-group list-group-borderless contact-list">
+                <!-- WhatsApp (yerine geçen satır) -->
+                <li class="list-group-item py-3">
+                  <a
+                    href="https://wa.me/32476073171?text={{ 'Merhaba Nomaya! Bilgi almak istiyorum.'|urlencode }}"
+                    target="_blank" rel="noopener"
+                    class="contact-row"
+                  >
+                    <i class="bi bi-whatsapp fs-5 me-2 icon-wa"></i>
+                    <span class="label">WhatsApp’tan yazın</span>
+                    <span class="value ms-auto text-nowrap">
+                      +90 534 960 41 09 <br><span class="pill-fast ms-2">Hızlı cevap</span>
+                    </span>
+                  </a>
+                </li>
+
+
+                <li class="list-group-item p-0"><hr class="my-0"></li>
+
+                <!-- Çalışma saatleri -->
+                <li class="list-group-item py-3">
+                  <div class="contact-row">
+                    <i class="bi fa-fw bi-alarm me-2"></i>
+                    <span class="label">Çalışma saatleri:</span>
+                    <span class="value ms-auto text-nowrap">7/24 (WhatsApp)</span>
+                  </div>
+                </li>
+
+                <li class="list-group-item p-0"><hr class="my-0"></li>
+
+                <!-- E-posta -->
+                <li class="list-group-item py-3">
+                  <a href="mailto:destek@nomaya.co" class="contact-row">
+                    <i class="bi fa-fw bi-envelope-open me-2"></i>
+                    <span class="label">E-posta atın.</span>
+                  </a>
+                </li>
+
+                <li class="list-group-item p-0"><hr class="my-0"></li>
+
+                <!-- YouTube -->
+                <li class="list-group-item pt-3 pb-0">
+                  <a href="https://www.youtube.com/@volkangulernguyen" target="_blank" rel="noopener" class="contact-row">
+                    <i class="bi fa-fw bi-youtube me-2"></i>
+                    <span class="label">YouTube’da Bakın. 🎥</span>
+                  </a>
+                </li>
+              </ul>
+
+            </div>
+
+            <!-- Help item END -->
+
+          </div>
+        </aside>
+
+      </div>
+    </div>
+
+    <script>
+    (function () {
+      // Helpers
+      const num = (v) => {
+        const x = parseFloat(v);
+        return Number.isFinite(x) ? x : 0;
+      };
+
+      // Elements
+      const box          = document.getElementById('priceBox');
+      const displayPrice = document.getElementById('displayPrice');
+      const bookBtn      = document.getElementById('bookNowBtn');
+      if (!box || !displayPrice || !bookBtn) return;
+
+      // Data (from server)
+      const BASE       = num(displayPrice.dataset.basePrice || '0');   // tour.price (1 kişi, tüm kalemler dahil)
+      const commission = num(box.dataset.commission) || 1;
+      const totals = {
+        flights:    num(box.dataset.flightTotal),
+        transfers:  num(box.dataset.transferTotal),
+        hotels:     num(box.dataset.hotelTotal),
+        activities: num(box.dataset.activitiesTotal)
+      };
+      const RAW_SUM = totals.flights + totals.transfers + totals.hotels + totals.activities;
+      const SCALE   = RAW_SUM > 0 ? (BASE / (commission * RAW_SUM)) : 1; // normalize: raw*commission*SCALE === BASE
+
+      // Global toggle state (preserve if exists)
+      window.tourToggles = window.tourToggles || { flights:false, transfers:false, hotels:false };
+      const toggles = window.tourToggles;
+
+      // --- UI helpers
+      function setSectionVisibility(key) {
+        document.querySelectorAll(`[data-section="${key}"]`).forEach(el => {
+          el.style.display = toggles[key] ? 'none' : '';
+        });
+      }
+      function setButtonLabel(btn, key) {
+        const span = btn.querySelector('.btn-text') || btn;
+        const on = toggles[key];
+        if (key === 'flights')   span.textContent = on ? 'Uçuşları Ekle'     : 'Uçuşları Çıkar';
+        if (key === 'transfers') span.textContent = on ? 'Transferleri Ekle' : 'Transferleri Çıkar';
+        if (key === 'hotels')    span.textContent = on ? 'Otelleri Ekle'     : 'Otelleri Çıkar';
+      }
+
+      // --- Header price (1 kişi varsayımı, toggle’larla güncellenir)
+      function calcHeaderPerPerson() {
+        // Dahil olan kalemler (toggle kapalıysa dahil, açıksa 0)
+        const incFlights   = (toggles.flights   ? 0 : totals.flights)   * SCALE;
+        const incTransfers = (toggles.transfers ? 0 : totals.transfers) * SCALE;
+        const incHotels    = (toggles.hotels    ? 0 : totals.hotels)    * SCALE;
+        const incActivities= totals.activities * SCALE; // aktiviteler her zaman görünür, toggle yok
+
+        const net = incFlights + incTransfers + incHotels + incActivities;
+        const perPerson = Math.max(net * commission, 0);
+        return Math.round(perPerson);
+      }
+      function renderHeader() {
+        displayPrice.textContent = String(calcHeaderPerPerson());
+      }
+
+      // Initial sync
+      ['flights','transfers','hotels'].forEach(key => {
+        setSectionVisibility(key);
+        document.querySelectorAll(`[data-toggle-remove="${key}"]`).forEach(btn => setButtonLabel(btn, key));
+      });
+      renderHeader();
+
+      // Toggle handler (event delegation)
+      document.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-toggle-remove]');
+        if (!btn) return;
+        const key = btn.dataset.toggleRemove;
+        if (!['flights','transfers','hotels'].includes(key)) return;
+
+        toggles[key] = !toggles[key];
+        setSectionVisibility(key);
+        setButtonLabel(btn, key);
+
+        // Update header price based on current toggles
+        renderHeader();
+      });
+
+      // --- Book Now → Modal
+      bookBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        openBookingModal();
+      });
+
+      function openBookingModal() {
+        const hotelIncluded = totals.hotels > 0;
+
+        const html = `
+        <div class="modal fade" id="bookingModal" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4 shadow-lg">
+              <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="bookingModalLabel">Seyahat Bilgileri</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+              </div>
+              <form id="bookingForm" method="post" action="{% url 'tour_booking' %}" class="needs-validation" novalidate>
+                {% csrf_token %}
+                <div class="modal-body vstack gap-3">
+                  <div>
+                    <label class="form-label fw-semibold">Kaç kişi seyahat edeceksiniz? (Max 2)</label>
+                    <input type="number" id="paxInput" name="pax" class="form-control" min="1" max="2" value="1" required>
+                    <div class="invalid-feedback">Lütfen 1 veya 2 seçin.</div>
+                  </div>
+                  <div>
+                    <label class="form-label fw-semibold" for="emailInput">E-posta adresiniz</label>
+                    <input type="email" id="emailInput" name="email" class="form-control" placeholder="örnek@eposta.com"
+                           inputmode="email" autocomplete="email" autocapitalize="none" required>
+                    <div class="invalid-feedback">Geçerli bir e-posta girin.</div>
+                  </div>
+                  <div id="roomChoiceWrap" style="display:none;">
+                    <label class="form-label fw-semibold">Oda Seçimi (sadece otel dâhil ve 2 kişi için)</label>
+                    <select id="roomSelect" class="form-select">
+                      <option value="same">Aynı odada kalacağız</option>
+                      <option value="separate">Ayrı odalarda kalacağız</option>
+                    </select>
+                  </div>
+
+                  <!-- Gizli alanlar -->
+                  <!-- Gizli alanlar -->
+                  <input type="hidden" name="start_date" value="{{ dates_start|date:'Y-m-d' }}">
+                  <input type="hidden" name="end_date"   value="{{ computed_end_date|date:'Y-m-d' }}">
+                  <input type="hidden" name="hide_flights"   id="fHide">
+                  <input type="hidden" name="hide_transfers" id="tHide">
+                  <input type="hidden" name="hide_hotels"    id="hHide">
+                  <input type="hidden" name="same_room"      id="sameRoom">
+                  <input type="hidden" name="price"          id="pricePP">
+                  <input type="hidden" name="total"          id="priceTotal">
+                  <input type="hidden" name="currency"       value="{{ tour.price_currency }}">
+                  <input type="hidden" name="tour_id"        value="{{ tour.id }}">
+
+                </div>
+
+                <div class="modal-footer d-flex flex-wrap justify-content-between align-items-center gap-2">
+                  <div class="small text-muted">
+                    Kişi başı: <strong id="modalPrice">${calcHeaderPerPerson()}</strong>
+                  </div>
+                  <div class="small">
+                    <span class="text-muted me-1">Toplam (seçime göre):</span>
+                    <strong id="modalTotal">${calcHeaderPerPerson()}</strong>
+                  </div>
+                  <button type="submit" class="btn btn-primary" id="modalConfirmBtn">Devam Et</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>`;
+
+        document.body.insertAdjacentHTML('beforeend', html);
+
+        const modalEl        = document.getElementById('bookingModal');
+        const modal          = new bootstrap.Modal(modalEl);
+        const bookingForm    = document.getElementById('bookingForm');
+        const paxInput       = document.getElementById('paxInput');
+        const roomWrap       = document.getElementById('roomChoiceWrap');
+        const roomSelect     = document.getElementById('roomSelect');
+        const modalPrice     = document.getElementById('modalPrice');
+        const modalTotal     = document.getElementById('modalTotal');
+        const fHide          = document.getElementById('fHide');
+        const tHide          = document.getElementById('tHide');
+        const hHide          = document.getElementById('hHide');
+        const sameRoomHidden = document.getElementById('sameRoom');
+        const pricePP        = document.getElementById('pricePP');
+        const priceTotal     = document.getElementById('priceTotal');
+
+        modal.show();
+
+        function toggleRoomSelect() {
+          const pax = Math.min(Math.max(Number(paxInput.value || 1), 1), 2);
+          roomWrap.style.display = (hotelIncluded && pax === 2) ? '' : 'none';
+        }
+
+        // 1 kişi → header per person; 2 kişi → senin kuralların
+        function calcTotal() {
+          const pax = Math.min(Math.max(Number(paxInput.value || 1), 1), 2);
+
+          // 1 kişi: modal kişi başı = header kişi başı
+          if (pax === 1 || RAW_SUM <= 0) {
+            const onePax = calcHeaderPerPerson();
+            modalPrice.textContent = String(onePax);
+            modalTotal.textContent = String(onePax);
+            return { grand: onePax, perPerson: onePax, pax, sameRoom: true };
+          }
+
+          const sameRoom = (roomSelect ? roomSelect.value === 'same' : true);
+
+          // Dahil parçalar (toggle’larla)
+          const inc = {
+            flights:    (toggles.flights   ? 0 : totals.flights)   * SCALE,
+            transfers:  (toggles.transfers ? 0 : totals.transfers) * SCALE,
+            hotels:     (toggles.hotels    ? 0 : totals.hotels)    * SCALE,
+            activities:   totals.activities * SCALE
+          };
+
+          // 2 kişi & aynı oda: flights×2, activities×2, hotels×1, transfers×1
+          // 2 kişi & ayrı oda: flights×2, activities×2, hotels×2, transfers×1
+          const mFlights    = 2;
+          const mActivities = 2;
+          const mHotels     = hotelIncluded ? (sameRoom ? 1 : 2) : 0;
+          const mTransfers  = 1;
+
+          const netBeforeCommission =
+            inc.flights    * mFlights +
+            inc.activities * mActivities +
+            inc.hotels     * mHotels +
+            inc.transfers  * mTransfers;
+
+          const grand     = Math.max(netBeforeCommission * commission, 0);
+          const perPerson = Math.round(grand / 2);
+
+          modalPrice.textContent = String(perPerson);
+          modalTotal.textContent = String(Math.round(grand));
+
+          return { grand: Math.round(grand), perPerson, pax, sameRoom };
+        }
+
+        // Initial
+        toggleRoomSelect();
+        calcTotal();
+
+        paxInput.addEventListener('input', () => { toggleRoomSelect(); calcTotal(); });
+        if (roomSelect) roomSelect.addEventListener('change', calcTotal);
+
+        bookingForm.addEventListener('submit', (ev) => {
+          if (!bookingForm.checkValidity()) {
+            ev.preventDefault(); ev.stopPropagation();
+            bookingForm.classList.add('was-validated');
+            return;
+          }
+          const { grand, perPerson, pax, sameRoom } = calcTotal();
+
+          // Toggles → POST
+          fHide.value = toggles.flights   ? '1' : '0';
+          tHide.value = toggles.transfers ? '1' : '0';
+          hHide.value = toggles.hotels    ? '1' : '0';
+
+          // Oda seçimi (yalnızca 2 kişi + otel dahil)
+          sameRoomHidden.value = (hotelIncluded && pax === 2) ? (sameRoom ? '1' : '0') : '';
+
+          // Prices
+          pricePP.value    = String(perPerson);
+          priceTotal.value = String(grand);
+        });
+
+        modalEl.addEventListener('hidden.bs.modal', () => modalEl.remove());
+      }
+    })();
+    </script>
+
+
+  </section>
+
+</main>
+{% endblock %}

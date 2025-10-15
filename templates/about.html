@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- **************** MAIN CONTENT START **************** -->
+<main>
+
+<!-- =======================
+Main banner START -->
+<section>
+	<div class="container">
+		<div class="row mb-5">
+			<div class="col-xl-10 mx-auto text-center">
+				<!-- Title -->
+				<h1>Nomaya — Ülke ülke gezerken başlayan bir aşkın ürünü; şimdi sizin yol arkadaşınız.</h1>
+				<p class="lead">Dünyayı kendi hızınızda, bütçenize uygun ve güvenle keşfedin. Biz yolun her anında yanınızdayız: planlamadan ilk uçuşunuza, her günkü önerilerden dönüşünüze kadar.</p>
+
+				<!-- Meta -->
+				<div class="hstack gap-3 flex-wrap justify-content-center">
+					<!-- Item -->
+					<h6 class="bg-mode shadow rounded-2 fw-normal d-inline-block py-2 px-4">
+						<img src="{% static 'assets/images/element/06.svg' %}" class="h-20px me-2" alt="">
+						103+ ülke deneyimi
+					</h6>
+
+					<!-- Item -->
+					<h6 class="bg-mode shadow rounded-2 fw-normal d-inline-block py-2 px-4">
+						<img src="{% static 'assets/images/element/07.svg' %}" class="h-20px me-2" alt="">
+						400.000+ izlenme
+					</h6>
+
+					<!-- Item -->
+					<h6 class="bg-mode shadow rounded-2 fw-normal d-inline-block py-2 px-4">
+						<img src="{% static 'assets/images/element/08.svg' %}" class="h-20px me-2" alt="">
+						800+ planlanan seyahat
+					</h6>
+				</div>
+			</div>
+		</div> <!-- Row END -->
+
+		<!-- Image START -->
+		<div class="row g-4 align-items-center">
+		  <!-- Image -->
+		  <div class="col-md-6">
+		    <img src="{% static 'assets/images/about/13.JPG' %}"
+		         class="rounded-3 w-100"
+		         style="aspect-ratio:16/9; object-fit:cover;"
+		         alt="Nomaya about">
+		  </div>
+
+		  <div class="col-md-6">
+		    <div class="row g-4">
+		      <!-- Image -->
+		      <div class="col-md-8">
+		        <img src="{% static 'assets/images/about/12.JPG' %}"
+		             class="rounded-3 w-100"
+		             style="aspect-ratio:16/9; object-fit:cover;"
+		             alt="Nomaya journey">
+		      </div>
+
+		      <!-- Image -->
+		      <div class="col-12">
+		        <img src="{% static 'assets/images/about/14.JPG' %}"
+		             class="rounded-3 w-100"
+		             style="aspect-ratio:16/9; object-fit:cover;"
+		             alt="Nomaya experience">
+		      </div>
+		    </div>
+		  </div>
+		</div>
+		<!-- Image END -->
+
+	</div>
+</section>
+<!-- =======================
+Main banner END -->
+
+<!-- =======================
+About content START -->
+<section class="pt-0 pt-lg-5">
+	<div class="container">
+		<!-- Content START -->
+		<div class="row mb-4 mb-md-5">
+			<div class="col-md-10 mx-auto">
+				<h3 class="mb-4">Bizim Hikâyemiz</h3>
+				<p class="fw-bold">
+					Ben Volkan Güler. Bir Türk vatandaşı olarak yıllarca dünyayı dijital göçebe olarak gezerken teknoloji alanında çalıştım; seyahat hep tutkumdu.
+					Tam rotalarımı yavaşlatacakken, Vietnam’da Thi ile tanıştım. Yol arkadaşlığımız kısa sürede bir aşka, aşkımız da Nomaya’ya dönüştü.
+				</p>
+				<p>
+					Amacımız çok netti: Türkiye ve Vietnam başta olmak üzere farklı kültürleri birbirine yaklaştırmak; insanlara
+					<b>uygun fiyatlı, güvenli ve gerçekten kişisel</b> bir deneyim sunmak. Nomaya’da her paket kişiye özeldir:
+					takviminize uyar, hızınıza saygı duyar, zevklerinize göre şekillenir. Siz kendi maceranızı yaşarken,
+					WhatsApp asistanımız her gün rota önerileri, gizli lezzet durakları ve pratik ipuçlarıyla yanınızdadır.
+				</p>
+				<p class="mb-0">
+					Bir tur şirketi değiliz; <b>yol arkadaşıyız.</b> Uçuşunuzdan konaklamanıza, şehir içi ulaşımınızdan
+					yerel deneyimlere kadar tüm detaylar, bizim gerçek deneyimlerimizin süzgecinden geçerek sizin için tasarlanır.
+					Nomaya ile “dip dibe kalabalık turlar” yok; <b>özgürlük, esneklik ve kalite</b> var.
+				</p>
+			</div>
+		</div>
+		<!-- Content END -->
+
+		<!-- Services START -->
+		<div class="row g-4">
+			<!-- Service item -->
+			<div class="col-sm-6 col-lg-3">
+				<div class="icon-lg bg-orange bg-opacity-10 text-orange rounded-2"><i class="fa-solid fa-hotel fs-5"></i></div>
+				<h5 class="mt-2">Konaklama Seçimi</h5>
+				<p class="mb-0">Deneyimi en güzel yaşayacağınız, kalite–fiyat dengesini tutturan otellerde konaklarsınız.</p>
+			</div>
+
+			<!-- Service item -->
+			<div class="col-sm-6 col-lg-3">
+				<div class="icon-lg bg-success bg-opacity-10 text-success rounded-2"><i class="fa-solid fa-plane fs-5"></i></div>
+				<h5 class="mt-2">Uçuş Planlama</h5>
+				<p class="mb-0">Sizi en güvenli ve keyifli havayollarıyla, bütçenize uygun şekilde uçururuz.</p>
+			</div>
+
+			<!-- Service item -->
+			<div class="col-sm-6 col-lg-3">
+				<div class="icon-lg bg-primary bg-opacity-10 text-primary rounded-2"><i class="fa-solid fa-globe-americas fs-5"></i></div>
+				<h5 class="mt-2">Kişisel Rota</h5>
+				<p class="mb-0">Tüm turlarımız gerçek deneyimlerden süzülür; sıradan paketlere benzemez, tamamen size göre şekillenir.</p>
+			</div>
+
+			<!-- Service item -->
+			<div class="col-sm-6 col-lg-3">
+				<div class="icon-lg bg-info bg-opacity-10 text-info rounded-2"><i class="fa-solid fa-car fs-5"></i></div>
+				<h5 class="mt-2">Rahat Ulaşım</h5>
+				<p class="mb-0">Ülkenin ruhunu hissedeceğiniz en rahat ve pratik yöntemlerle sizi dilediğiniz yere ulaştırırız.</p>
+			</div>
+		</div>
+		<!-- Services END -->
+	</div>
+</section>
+<!-- =======================
+About content END -->
+
+<!-- =======================
+Team START -->
+<section class="pt-0">
+	<div class="container">
+		<!-- Title -->
+		<div class="row mb-4">
+			<div class="col-12">
+				<h2 class="mb-0">Ekibimiz</h2>
+			</div>
+		</div>
+
+		<!-- Team START -->
+		<div class="row g-4">
+			<!-- Thi -->
+			<div class="col-sm-6 col-lg-3">
+			  <div class="card card-element-hover bg-transparent">
+			    <div class="position-relative ratio ratio-1x1">
+			      <img src="{% static 'assets/images/team/thi.png' %}"
+			           class="w-100 h-100 object-fit-cover rounded-4" alt="Thi Nguyen">
+			      <div class="card-img-overlay hover-element d-flex p-3">
+			        <div class="btn-group mt-auto">
+			          <a href="#" class="btn btn-white mb-0"><i class="fa-brands fa-instagram text-instagram"></i></a>
+			          <a href="#" class="btn btn-white mb-0"><i class="fa-brands fa-facebook-f text-facebook"></i></a>
+			          <a href="#" class="btn btn-white mb-0"><i class="fa-brands fa-twitter text-twitter"></i></a>
+			        </div>
+			      </div>
+			    </div>
+			    <div class="card-body px-2 pb-0 text-center">
+			      <h5 class="card-title"><a href="#">Thi Nguyen</a></h5>
+			      <span>💚 Nomaya’nın Kalbi (Kurucu)</span>
+			    </div>
+			  </div>
+			</div>
+
+			<!-- Volkan -->
+			<div class="col-sm-6 col-lg-3">
+			  <div class="card card-element-hover bg-transparent">
+			    <div class="position-relative ratio ratio-1x1">
+			      <img src="{% static 'assets/images/team/volkan.png' %}"
+			           class="w-100 h-100 object-fit-cover rounded-4" alt="Volkan Güler">
+			      <div class="card-img-overlay hover-element d-flex p-3">
+			        <div class="btn-group mt-auto">
+			          <a href="#" class="btn btn-white mb-0"><i class="fa-brands fa-instagram text-instagram"></i></a>
+			          <a href="#" class="btn btn-white mb-0"><i class="fa-brands fa-facebook-f text-facebook"></i></a>
+			          <a href="#" class="btn btn-white mb-0"><i class="fa-brands fa-twitter text-twitter"></i></a>
+			        </div>
+			      </div>
+			    </div>
+			    <div class="card-body px-2 pb-0 text-center">
+			      <h5 class="card-title"><a href="#">Volkan Güler</a></h5>
+			      <span>🌍 Kurucu</span>
+			    </div>
+			  </div>
+			</div>
+
+
+			<!-- (İstersen ileride iki kart daha ekleyebilirsin) -->
+		</div>
+		<!-- Team END -->
+	</div>
+</section>
+<!-- =======================
+Team END -->
+</main>
+{% endblock %}

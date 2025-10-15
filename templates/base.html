@@ -1,0 +1,752 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <title>Nomaya - Yeni Nesil Seyahat Uygulaması</title>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="Nomaya ile uçuş, konaklama, transfer ve aktiviteleri tek yerden planlayın.">
+
+  <script>
+    const getStoredTheme = () => localStorage.getItem('theme');
+    const getPreferredTheme = () => {
+      const t = getStoredTheme();
+      return t ? t : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    };
+
+    const applyTheme = (theme) => {
+      const rootTheme = (theme === 'auto')
+        ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+        : theme;
+      document.documentElement.setAttribute('data-bs-theme', rootTheme);
+      updateActiveIcon(theme); // ikon “seçilen mod”a göre değişsin
+      setActiveToggle(theme);
+    };
+
+    const updateActiveIcon = (theme) => {
+      const el = document.querySelector('.theme-icon-active');
+      if (!el) return;
+      // önce tüm olası bi-* classlarını temizle
+      el.classList.remove('bi-brightness-high-fill','bi-moon-stars-fill','bi-circle-half');
+      // seçime göre ikon ver
+      if (theme === 'light')      el.classList.add('bi-brightness-high-fill');
+      else if (theme === 'dark')  el.classList.add('bi-moon-stars-fill');
+      else                        el.classList.add('bi-circle-half'); // auto
+    };
+
+    const setActiveToggle = (theme) => {
+      document.querySelectorAll('[data-bs-theme-value]').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-bs-theme-value') === theme);
+      });
+    };
+
+    // İlk yükleme
+    applyTheme(getPreferredTheme());
+
+    // OS teması değişirse ve kullanıcı 'auto' ise tekrar uygula
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+      if (getStoredTheme() === 'auto') applyTheme('auto');
+    });
+
+    // Tıklamalar
+    window.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('[data-bs-theme-value]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const theme = btn.getAttribute('data-bs-theme-value');
+          localStorage.setItem('theme', theme);
+          applyTheme(theme);
+        });
+      });
+    });
+  </script>
+
+
+
+  <!-- Favicon -->
+  <link rel="shortcut icon" href="{% static 'assets/images/favicon.ico' %}">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Poppins:wght@400;500;700&display=swap">
+
+  <!-- Vendor CSS -->
+  <link rel="stylesheet" href="{% static 'assets/vendor/splide-master/dist/css/splide.min.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/vendor/glightbox/css/glightbox.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/vendor/font-awesome/css/all.min.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/vendor/choices/css/choices.min.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/vendor/flatpickr/css/flatpickr.min.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/vendor/stepper/css/bs-stepper.min.css' %}">
+
+  <!-- Theme CSS -->
+  <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+
+  <style>
+    /* Bildirimler */
+    .notif-badge{
+      position:absolute; top:-6px; right:-6px;
+      width:14px; height:14px; border-radius:999px;
+      background:#ff2b2b; border:2px solid #fff;
+      box-shadow:0 0 0 2px rgba(0,0,0,.25), 0 2px 6px rgba(0,0,0,.35);
+      z-index:2;
+    }
+    .animation-blink{ animation:pulseDot 1.2s ease-in-out infinite; }
+    @keyframes pulseDot{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.25);opacity:.85}}
+    .no-link{ pointer-events:none; cursor:default; }
+    .notif-time{ color:#16a34a !important; font-weight:600; }
+    /* Baş harf avatar */
+    .avatar-initials{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;line-height:40px;font-size:14px;font-weight:700;user-select:none;}
+    .dropdown .avatar-initials{width:48px;height:48px;line-height:48px;font-size:18px;}
+  </style>
+
+	<style>
+	  /* Zil butonu kapsayıcısı */
+	  .nav-notification{
+	    position: relative;
+	    overflow: visible !important;   /* kırpılmayı engelle */
+	    border-radius: .75rem;          /* mevcut görünüm */
+	  }
+
+	  /* Köşe rozeti */
+	  .notif-badge{
+	    position: absolute;
+	    top: 0;
+	    right: 0;
+	    transform: translate(40%,-40%); /* köşenin DIŞINA taşır ama kırpılmaz */
+	    width: 16px;
+	    height: 16px;
+	    border-radius: 999px;
+	    background: radial-gradient(circle at 30% 30%, #ff6969, #ff2b2b 70%);
+	    border: 2px solid #ffffff;      /* beyaz halka */
+	    box-shadow: 0 0 0 2px rgba(0,0,0,.25), 0 2px 6px rgba(0,0,0,.35);
+	    z-index: 2;
+	    pointer-events: none;
+	  }
+
+	  .animation-blink { animation: pulseDot 1.2s ease-in-out infinite; }
+	  @keyframes pulseDot { 0%,100%{transform:translate(40%,-40%) scale(1)} 50%{transform:translate(40%,-40%) scale(1.25)} }
+	</style>
+
+
+</head>
+
+<body>
+
+<!-- Header START -->
+<header class="navbar-light header-sticky">
+  <nav class="navbar navbar-expand-xl">
+    <div class="container">
+      <!-- Logo -->
+      <a class="navbar-brand d-flex align-items-center"
+         href="{% url 'home' %}"
+         style="line-height:0; gap:.5rem;">
+        <!-- Tek ikon (her iki modda da aynı) -->
+        <img
+          src="{% static 'assets/images/logo-icon.svg' %}"
+          alt=""
+          aria-hidden="true"
+          style="height:80px; width:auto; display:block;"
+        />
+
+        <!-- Tema’ya göre değişen logo -->
+        <img
+          class="light-mode-item navbar-brand-item"
+          src="{% static 'assets/images/logo.svg' %}"
+          alt="Nomaya"
+          style="height:34px; width:auto; display:block;"
+        />
+        <img
+          class="dark-mode-item navbar-brand-item"
+          src="{% static 'assets/images/logo-light.svg' %}"
+          alt="Nomaya"
+          style="height:34px; width:auto; display:block;"
+        />
+      </a>
+
+
+
+      <!-- Toggler -->
+      <button class="navbar-toggler ms-auto mx-3 p-0 p-sm-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-animation"><span></span><span></span><span></span></span>
+      </button>
+
+      <!-- Left Nav -->
+      <div class="navbar-collapse collapse" id="navbarCollapse">
+        <ul class="navbar-nav navbar-nav-scroll mx-auto">
+          <li class="nav-item"><a class="nav-link" href="{% url 'about' %}">Ekibimiz</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'services' %}">Neden Nomaya?</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'faqs' %}">SSS</a></li>
+        </ul>
+      </div>
+
+      <!-- Right side (always shows notifications) -->
+      <ul class="nav flex-row align-items-center list-unstyled ms-xl-auto">
+        <!-- Theme switcher (ALWAYS visible) -->
+        <li class="nav-item dropdown me-3 me-sm-4">
+        <!-- Trigger -->
+        <button class="btn btn-link p-0 mb-0" id="bd-theme" type="button"
+                  data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false"
+                  aria-label="Tema">
+            <i class="bi bi-circle-half theme-icon-active fa-fw"></i>
+        </button>
+
+        <ul class="dropdown-menu min-w-auto dropdown-menu-end" aria-labelledby="bd-theme">
+          <li class="mb-1">
+            <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="light">
+              <i class="bi bi-brightness-high-fill fa-fw me-2"></i> Açık
+            </button>
+          </li>
+          <li class="mb-1">
+            <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark">
+              <i class="bi bi-moon-stars-fill fa-fw me-2"></i> Koyu
+            </button>
+          </li>
+          <li>
+            <button type="button" class="dropdown-item d-flex align-items-center active" data-bs-theme-value="auto">
+              <i class="bi bi-circle-half fa-fw me-2"></i> Oto.
+            </button>
+          </li>
+        </ul>
+
+        </li>
+
+        <!-- Notifications (always visible) -->
+        <li class="nav-item dropdown me-3">
+          <a class="nav-notification btn btn-light p-0 mb-0 position-relative" href="#" id="notifToggle" role="button" data-bs-auto-close="outside" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-bell fa-fw"></i>
+            <span class="notif-badge animation-blink"></span>
+          </a>
+          <div class="dropdown-menu dropdown-animation dropdown-menu-end dropdown-menu-size-md shadow-lg p-0">
+            <div class="card bg-transparent">
+              <div class="card-header bg-transparent d-flex justify-content-between align-items-center border-bottom">
+                <h6 class="m-0">Bildirimler <span class="badge bg-danger bg-opacity-10 text-danger ms-2">3 yeni</span></h6>
+              </div>
+              <div class="card-body p-0">
+                <ul class="list-group list-group-flush list-unstyled p-2">
+                  <li>
+                    <div class="list-group-item rounded notif-unread border-0 mb-1 p-3 no-link">
+                      <h6 class="mb-2">Mil kazanma özelliği yolda! ✈️</h6>
+                      <p class="mb-0 small">Uçuş, otel ve aktivitelerden mil toplayabileceksiniz.</p>
+                      <span class="notif-time">Güncel</span>
+                    </div>
+                  </li>
+                  <li>
+                    <div class="list-group-item rounded border-0 mb-1 p-3 no-link">
+                      <h6 class="mb-2">Kendi planını tasarla 🗺️</h6>
+                      <p class="mb-0 small">Aktiviteleri günlere sürükleyip bırakarak rotanı kişiselleştir.</p>
+                      <span class="notif-time">Güncel</span>
+                    </div>
+                  </li>
+                  <li>
+                    <div class="list-group-item rounded border-0 mb-1 p-3 no-link">
+                      <h6 class="mb-2">WhatsApp Asistan hazır 💬</h6>
+                      <p class="mb-0 small">Seyahatin boyunca anlık bildirimlerle yanındayız.</p>
+                      <span class="notif-time">Güncel</span>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+              <div class="card-footer bg-transparent text-center border-top">
+                <button type="button" class="btn btn-sm btn-link mb-0 p-0" id="notifCloseBtn">Sekmeyi kapat</button>
+              </div>
+            </div>
+          </div>
+        </li>
+
+        {% if user.is_authenticated %}
+          <!-- Profile dropdown -->
+          <li class="nav-item dropdown">
+            <a class="avatar p-0" href="#" id="profileDropdown" role="button" data-bs-auto-close="outside" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{{ user.first_name }} {{ user.last_name }}">
+              {% with fn=user.first_name|default_if_none:""|default:"" ln=user.last_name|default_if_none:""|default:"" uname=user.username|default_if_none:""|default:"" mail=user.email|default_if_none:""|default:"" %}
+                {% with i1=fn|slice:":1"|upper i2=ln|slice:":1"|upper %}
+								{% if i1 or i2 %}
+								  <span class="avatar-initials rounded-2 bg-primary text-white shadow">{{ i1|add:i2 }}</span>
+								{% else %}
+								  {% if uname %}
+								    <span class="avatar-initials rounded-2 bg-primary text-white shadow">{{ uname|slice:":1"|upper }}</span>
+								  {% else %}
+								    <span class="avatar-initials rounded-2 bg-primary text-white shadow">{{ mail|slice:":1"|upper }}</span>
+								  {% endif %}
+								{% endif %}
+                {% endwith %}
+              {% endwith %}
+            </a>
+            <ul class="dropdown-menu dropdown-animation dropdown-menu-end shadow pt-3" aria-labelledby="profileDropdown">
+              <li class="px-3 mb-3">
+                <div class="d-flex align-items-center">
+                  <div class="me-3">
+                    {% with fn=user.first_name|default_if_none:""|default:"" ln=user.last_name|default_if_none:""|default:"" uname=user.username|default_if_none:""|default:"" mail=user.email|default_if_none:""|default:"" %}
+                      {% with i1=fn|slice:":1"|upper i2=ln|slice:":1"|upper %}
+											{% if i1 or i2 %}
+											  <span class="avatar-initials rounded-circle bg-primary text-white shadow">{{ i1|add:i2 }}</span>
+											{% else %}
+											  {% if uname %}
+											    <span class="avatar-initials rounded-circle bg-primary text-white shadow">{{ uname|slice:":1"|upper }}</span>
+											  {% else %}
+											    <span class="avatar-initials rounded-circle bg-primary text-white shadow">{{ mail|slice:":1"|upper }}</span>
+											  {% endif %}
+											{% endif %}
+                      {% endwith %}
+                    {% endwith %}
+                  </div>
+                  <div>
+                    <a class="h6 mt-2 mt-sm-0" href="#">{{ user.first_name }} {{ user.last_name }}</a>
+                    <p class="small m-0">{{ user.email }}</p>
+                  </div>
+                </div>
+              </li>
+
+              <li class="px-3">
+                <div class="alert alert-warning py-2 mb-2 small">Bu menüdeki özellikler <strong>yapım aşamasında</strong>. Çok yakında aktif olacak!</div>
+              </li>
+
+              <li><hr class="dropdown-divider"></li>
+
+              <li><a class="dropdown-item disabled" href="#" aria-disabled="true" tabindex="-1"><i class="bi bi-bookmark-check fa-fw me-2"></i>Rezervasyonlarım</a></li>
+              <li><a class="dropdown-item disabled" href="#" aria-disabled="true" tabindex="-1"><i class="bi bi-heart fa-fw me-2"></i>Favorilerim</a></li>
+              <li><a class="dropdown-item disabled" href="#" aria-disabled="true" tabindex="-1"><i class="bi bi-gear fa-fw me-2"></i>Ayarlar</a></li>
+              <li><a class="dropdown-item disabled" href="#" aria-disabled="true" tabindex="-1"><i class="bi bi-info-circle fa-fw me-2"></i>Yardım Merkezi</a></li>
+
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <form method="post" action="{% url 'logout' %}">
+                  {% csrf_token %}
+                  <button type="submit" class="dropdown-item bg-danger-soft-hover"><i class="bi bi-power fa-fw me-2"></i>Çıkış Yap</button>
+                </form>
+              </li>
+
+              <li><hr class="dropdown-divider"></li>
+
+              <!-- Theme in dropdown -->
+              <li>
+                <div class="nav-pills-primary-soft d-flex justify-content-between align-items-center p-2 pb-0">
+                  <span>Mod:</span>
+
+                  <button type="button"
+                          class="btn btn-link nav-link text-primary-hover mb-0 p-0"
+                          data-bs-theme-value="light"
+                          data-bs-toggle="tooltip" data-bs-title="Light">
+                    <i class="bi bi-brightness-high-fill fa-fw"></i>
+                  </button>
+
+                  <button type="button"
+                          class="btn btn-link nav-link text-primary-hover mb-0 p-0"
+                          data-bs-theme-value="dark"
+                          data-bs-toggle="tooltip" data-bs-title="Dark">
+                    <i class="bi bi-moon-stars-fill fa-fw"></i>
+                  </button>
+
+                  <button type="button"
+                          class="btn btn-link nav-link text-primary-hover mb-0 p-0 active"
+                          data-bs-theme-value="auto"
+                          data-bs-toggle="tooltip" data-bs-title="Auto">
+                    <i class="bi bi-circle-half fa-fw"></i>
+                  </button>
+                </div>
+
+              </li>
+            </ul>
+          </li>
+        {% else %}
+          <!-- Sign In -->
+          <li class="nav-item">
+            <a href="{% url 'sign_in' %}" class="btn btn-sm btn-primary mb-0">
+              <i class="fa-solid fa-right-to-bracket me-sm-2"></i>
+              <span class="d-none d-sm-inline">Hemen Başla</span>
+            </a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  </nav>
+</header>
+<!-- Header END -->
+
+{% block content %}{% endblock %}
+
+<!-- =======================
+Footer START -->
+<footer class="bg-dark pt-5">
+  <div class="container">
+    <div class="row g-4">
+      <!-- Widget 1 -->
+      <div class="col-lg-3">
+        <a href="{% url 'home' %}" class="d-inline-flex align-items-center">
+          <!-- Sabit ikon (tema bağımsız) -->
+          <img src="{% static 'assets/images/logo-icon.svg' %}"
+               class="logo-icon me-2"
+               alt=""
+               aria-hidden="true"
+               width="70" />
+
+          <!-- Wordmark: 90px genişlik -->
+          <img src="{% static 'assets/images/logo-light.svg' %}"
+               class="logo-wordmark"
+               alt="Nomaya logo"
+               width="190" />
+        </a>
+
+        <p class="my-3 text-body-secondary">
+          Nomaya, niş rotalar ve samimi rehberlik sunar. Her şeyinizi planlarız — siz sadece yaşayın!
+        </p>
+        <p class="mb-2">
+          <a href="tel:+905349604109" class="text-body-secondary text-primary-hover">
+            <i class="bi bi-telephone me-2"></i>+90 534 960 41 09
+          </a>
+        </p>
+        <p class="mb-0">
+          <a href="mailto:destek@nomaya.co" class="text-body-secondary text-primary-hover">
+            <i class="bi bi-envelope me-2"></i>destek@nomaya.co
+          </a>
+        </p>
+      </div>
+
+      <!-- Widget 2 -->
+      <div class="col-lg-8 ms-auto">
+        <div class="row g-4">
+          <!-- Sayfalar -->
+          <div class="col-6 col-md-3">
+            <h5 class="text-white mb-2 mb-md-4">Sayfalar</h5>
+            <ul class="nav flex-column text-primary-hover">
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'about' %}">Hakkımızda</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'about' %}">İletişim</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'faqs' %}">SSS</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'about' %}">Ekibimiz</a></li>
+            </ul>
+          </div>
+          <!-- Bağlantılar -->
+          <div class="col-6 col-md-3">
+            <h5 class="text-white mb-2 mb-md-4">Bağlantılar</h5>
+            <ul class="nav flex-column text-primary-hover">
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'sign_up' %}">Kayıt Ol</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'sign_in' %}">Giriş Yap</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="#" data-bs-toggle="modal" data-bs-target="#privacyModal">Gizlilik Politikası</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Şartlar ve Koşullar</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="#" data-bs-toggle="modal" data-bs-target="#cookieModal">Çerez Politikası</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="#" data-bs-toggle="modal" data-bs-target="#supportModal">Destek</a></li>
+            </ul>
+          </div>
+          <!-- Destinasyonlar -->
+          <div class="col-6 col-md-3">
+            <h5 class="text-white mb-2 mb-md-4">Destinasyonlar</h5>
+            <ul class="nav flex-column text-primary-hover">
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}">Vietnam</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}">Japonya</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}">Güney Kore</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}">Kamboçya</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}">Endonezya</a></li>
+            </ul>
+          </div>
+          <!-- Nomaya -->
+          <div class="col-6 col-md-3">
+            <h5 class="text-white mb-2 mb-md-4">Nomaya</h5>
+            <ul class="nav flex-column text-primary-hover">
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}"><i class="fa-solid fa-hotel me-2"></i>Otel</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}"><i class="fa-solid fa-plane me-2"></i>Uçuş</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}"><i class="fa-solid fa-globe-americas me-2"></i>Tur</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}"><i class="fa-solid fa-car me-2"></i>Transfer</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div><!-- Row END -->
+
+    <!-- Top Links -->
+    <div class="row mt-5">
+      <h5 class="mb-2 text-white">Popüler Bağlantılar</h5>
+      <ul class="list-inline text-primary-hover lh-lg">
+        <li class="list-inline-item"><a href="{% url 'tour_grid' %}" class="text-body-secondary">Uçuşlar</a></li>
+        <li class="list-inline-item"><a href="{% url 'tour_grid' %}" class="text-body-secondary">Oteller</a></li>
+        <li class="list-inline-item"><a href="{% url 'tour_grid' %}" class="text-body-secondary">Turlar</a></li>
+        <li class="list-inline-item"><a href="{% url 'tour_grid' %}" class="text-body-secondary">Transfer</a></li>
+        <li class="list-inline-item"><a href="{% url 'about' %}" class="text-body-secondary">Hakkımızda</a></li>
+        <li class="list-inline-item"><a href="{% url 'about' %}" class="text-body-secondary">İletişim</a></li>
+        <li class="list-inline-item"><a href="{% url 'faqs' %}" class="text-body-secondary">SSS</a></li>
+        <li class="list-inline-item"><a href="{% url 'tour_grid' %}" class="text-body-secondary">Paketler</a></li>
+        <li class="list-inline-item"><a href="{% url 'tour_grid' %}" class="text-body-secondary">Destinasyonlar</a></li>
+      </ul>
+    </div>
+
+    <!-- Payment & Social -->
+    <div class="row g-4 justify-content-between mt-0 mt-md-2">
+      <div class="col-sm-7 col-md-6 col-lg-4">
+        <h5 class="text-white mb-2">
+          Ödeme & Güvenlik
+          <span class="badge bg-warning text-dark ms-2 align-middle">Yakında</span>
+        </h5>
+
+        <p class="text-body-secondary mb-2">
+          128-bit SSL şifreleme ve güvenli ödeme altyapıları
+          <span class="text-body-tertiary">(entegrasyon aşamasında)</span>.
+        </p>
+
+        <ul class="list-inline mb-0 mt-3 payment-soon" aria-label="Ödeme yöntemleri yakında aktif olacak">
+          <li class="list-inline-item">
+            <a href="#" aria-disabled="true" tabindex="-1" data-bs-toggle="tooltip" data-bs-title="Yakında">
+              <img src="{% static 'assets/images/element/paypal.svg' %}" class="h-30px" alt="PayPal (yakında)">
+            </a>
+          </li>
+          <li class="list-inline-item">
+            <a href="#" aria-disabled="true" tabindex="-1" data-bs-toggle="tooltip" data-bs-title="Yakında">
+              <img src="{% static 'assets/images/element/visa.svg' %}" class="h-30px" alt="Visa (yakında)">
+            </a>
+          </li>
+          <li class="list-inline-item">
+            <a href="#" aria-disabled="true" tabindex="-1" data-bs-toggle="tooltip" data-bs-title="Yakında">
+              <img src="{% static 'assets/images/element/mastercard.svg' %}" class="h-30px" alt="Mastercard (yakında)">
+            </a>
+          </li>
+          <li class="list-inline-item">
+            <a href="#" aria-disabled="true" tabindex="-1" data-bs-toggle="tooltip" data-bs-title="Yakında">
+              <img src="{% static 'assets/images/element/expresscard.svg' %}" class="h-30px" alt="American Express (yakında)">
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="col-sm-5 col-md-6 col-lg-3 text-sm-end">
+        <h5 class="text-white mb-2">
+          Bizi takip edin
+          <br>
+          <small class="text-body-secondary ms-2">Diğerleri yakında</small>
+        </h5>
+
+        <ul class="list-inline mb-0 mt-3">
+          <!-- Pasif (yakında) -->
+          <li class="list-inline-item">
+            <a class="btn btn-sm px-2 bg-facebook mb-0 pe-none opacity-50 disabled"
+               href="#" tabindex="-1" aria-disabled="true">
+              <i class="fab fa-fw fa-facebook-f"></i>
+            </a>
+          </li>
+          <li class="list-inline-item">
+            <a class="btn btn-sm shadow px-2 bg-instagram mb-0 pe-none opacity-50 disabled"
+               href="#" tabindex="-1" aria-disabled="true">
+              <i class="fab fa-fw fa-instagram"></i>
+            </a>
+          </li>
+          <li class="list-inline-item">
+            <a class="btn btn-sm shadow px-2 bg-twitter mb-0 pe-none opacity-50 disabled"
+               href="#" tabindex="-1" aria-disabled="true">
+              <i class="fab fa-fw fa-twitter"></i>
+            </a>
+          </li>
+          <li class="list-inline-item">
+            <a class="btn btn-sm shadow px-2 bg-linkedin mb-0 pe-none opacity-50 disabled"
+               href="#" tabindex="-1" aria-disabled="true">
+              <i class="fab fa-fw fa-linkedin-in"></i>
+            </a>
+          </li>
+
+          <!-- Aktif (YouTube) -->
+          <li class="list-inline-item">
+            <a class="btn btn-sm shadow px-2 bg-youtube mb-0"
+               href="https://www.youtube.com/@volkangulernguyen" target="_blank" rel="noopener">
+              <i class="fab fa-fw fa-youtube"></i>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+
+    <hr class="mt-4 mb-0">
+
+    <!-- Bottom footer -->
+    <div class="row">
+      <div class="container">
+        <div class="d-lg-flex justify-content-between align-items-center py-3 text-center text-lg-start">
+          <div class="text-body-secondary text-primary-hover">© {% now "Y" %} Nomaya. Tüm hakları saklıdır.</div>
+          <div class="nav mt-2 mt-lg-0">
+            <ul class="list-inline text-primary-hover mx-auto mb-0">
+              <li class="list-inline-item me-0"><a class="nav-link text-body-secondary py-1" href="#" data-bs-toggle="modal" data-bs-target="#privacyModal">Gizlilik Politikası</a></li>
+              <li class="list-inline-item me-0"><a class="nav-link text-body-secondary py-1" href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Şartlar ve Koşullar</a></li>
+              <li class="list-inline-item me-0"><a class="nav-link text-body-secondary py-1 pe-0" href="#" data-bs-toggle="modal" data-bs-target="#refundModal">İade Politikası</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+<!-- Footer END -->
+
+<!-- Global Modals -->
+<div class="modal fade" id="privacyModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content rounded-4">
+      <div class="modal-header">
+        <h5 class="modal-title">Gizlilik Politikası</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body small">
+        <p>Nomaya, yalnızca hizmeti sunmak ve geliştirmek için gerekli kişisel verileri işler. Ödeme, güvenlik ve iletişim altyapıları için üçüncü taraf sağlayıcılar kullanabiliriz. Verilerinize erişim, “bilmesi gereken” prensibiyle sınırlıdır; hiçbir koşulda izinsiz paylaşım yapılmaz.</p>
+        <ul>
+          <li>Çerezler, oturum açma ve tercihlerinizi hatırlamak için kullanılır.</li>
+          <li>Hesabınızı dilediğiniz an silebilir, veri talepleriniz için <a href="mailto:destek@nomaya.co">destek@nomaya.co</a> adresine yazabilirsiniz.</li>
+          <li>Yasal yükümlülükler kapsamında gerekli hallerde veri saklanabilir.</li>
+        </ul>
+      </div>
+      <div class="modal-footer"><button class="btn btn-primary" data-bs-dismiss="modal">Tamam</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="termsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content rounded-4">
+      <div class="modal-header">
+        <h5 class="modal-title">Şartlar ve Koşullar</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body small">
+        <p>Nomaya bir seyahat planlama platformudur. Uçuş, otel, transfer ve aktiviteler tedarikçiler tarafından sağlanır; Nomaya aracı konumundadır.</p>
+        <ul>
+          <li>Rezervasyon ve iptal/değişiklik kuralları tedarikçi şartlarına tabidir.</li>
+          <li>Fiyatlar anlık değişebilir; kesin tutar ödeme anında belirlenir.</li>
+          <li>Kullanıcı, doğru iletişim bilgisi ve seyahat belgelerini temin etmekle yükümlüdür.</li>
+          <li>Nomaya, öngörülemeyen tedarikçi değişikliklerinde kullanıcıyı bilgilendirir ve alternatif sunmak için makul efor gösterir.</li>
+        </ul>
+      </div>
+      <div class="modal-footer"><button class="btn btn-primary" data-bs-dismiss="modal">Anladım</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="cookieModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content rounded-4">
+      <div class="modal-header">
+        <h5 class="modal-title">Çerez Politikası</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body small">
+        <p>Deneyiminizi kişiselleştirmek ve analitik amaçlarla zorunlu ve tercih çerezleri kullanıyoruz. Tarayıcı ayarlarından çerez tercihlerinizi yönetebilirsiniz.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Kapat</button>
+        <button class="btn btn-primary" data-bs-dismiss="modal">Kabul Ediyorum</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="supportModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content rounded-4">
+      <div class="modal-header">
+        <h5 class="modal-title">Destek</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body small">
+        <p>Yardıma mı ihtiyacınız var? Bize <a href="mailto:destek@nomaya.co">destek@nomaya.co</a> adresinden yazın veya WhatsApp üzerinden ulaşın.</p>
+        <a class="btn btn-success w-100" target="_blank" rel="noopener" href="https://wa.me/32476073171?text={{ 'Merhaba Nomaya! Destek rica ediyorum.'|urlencode }}"><i class="bi bi-whatsapp me-2"></i>WhatsApp’tan Yaz</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="refundModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content rounded-4">
+      <div class="modal-header">
+        <h5 class="modal-title">İade Politikası</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body small">
+        <p><strong>İade yoktur.</strong> Turlarımız şeffaf ve uygun fiyatlıdır; iptal ve değişiklik koşulları tedarikçilerin kurallarına tabidir. Lütfen rezervasyon öncesi şartları dikkatle inceleyin.</p>
+      </div>
+      <div class="modal-footer"><button class="btn btn-primary" data-bs-dismiss="modal">Tamam</button></div>
+    </div>
+  </div>
+</div>
+<!-- /Global Modals -->
+
+<!-- Back to top -->
+<div class="back-top"></div>
+
+<!-- JS -->
+<script src="{% static 'assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'assets/vendor/choices/js/choices.min.js' %}"></script>
+<script src="{% static 'assets/vendor/flatpickr/js/flatpickr.min.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/tr.js"></script>
+<script src="{% static 'assets/vendor/glightbox/js/glightbox.js' %}"></script>
+<script src="{% static 'assets/vendor/splide-master/dist/js/splide.min.js' %}"></script>
+<script src="{% static 'assets/js/functions.js' %}"></script>
+<script src="{% static 'assets/vendor/stepper/js/bs-stepper.min.js' %}"></script>
+
+<script>
+  // Notification close only hides dropdown
+  document.addEventListener('DOMContentLoaded', function(){
+    const closeBtn = document.getElementById('notifCloseBtn');
+    const toggleEl = document.getElementById('notifToggle');
+    if (closeBtn && toggleEl){
+      closeBtn.addEventListener('click', function(){
+        const dd = bootstrap.Dropdown.getOrCreateInstance(toggleEl); dd.hide();
+      });
+    }
+  });
+</script>
+
+<!-- PureCounter -->
+<script src="https://cdn.jsdelivr.net/npm/@srexi/purecounterjs/dist/purecounter_vanilla.js" defer></script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  if (!window.flatpickr) return;
+
+  if (flatpickr.l10ns && flatpickr.l10ns.tr) flatpickr.localize(flatpickr.l10ns.tr);
+  // TR’de de ayırıcıyı sabitliyoruz ki URL her zaman aynı gelsin
+  const rangeSep = ' to ';
+
+  document.querySelectorAll('input.flatpickr').forEach(function (el) {
+    if (el._flatpickr) el._flatpickr.destroy();
+    const isRange = (el.getAttribute('name') === 'dates');
+
+    flatpickr(el, {
+      locale: Object.assign({}, flatpickr.l10ns?.tr || {}, { rangeSeparator: rangeSep }),
+      mode: isRange ? 'range' : 'single',
+      dateFormat: 'Y-m-d',     // URL’de gönderilen değer
+      altInput: true,
+      altFormat: 'd F Y',      // Kullanıcıya TR görünen
+      allowInput: true
+    });
+  });
+});
+</script>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    if (!window.flatpickr) return;
+
+    // Varsayılanı TR yap
+    if (flatpickr.l10ns && flatpickr.l10ns.tr) {
+      flatpickr.localize(flatpickr.l10ns.tr);
+    }
+
+    // Sayfadaki tüm tarih alanlarını başlat
+    document.querySelectorAll('input.flatpickr').forEach(function (el) {
+      // Yeniden başlatma durumuna karşı
+      if (el._flatpickr) { el._flatpickr.destroy(); }
+
+      // "dates" isimli alanı range, diğerlerini single başlatalım
+      const isRange = (el.getAttribute('name') === 'dates');
+
+      flatpickr(el, {
+        locale: flatpickr.l10ns?.tr || 'tr',
+        mode: isRange ? 'range' : 'single',
+        dateFormat: 'Y-m-d',        // form’a gönderilecek format
+        altInput: true,             // kullanıcıya gösterilecek güzel format
+        altFormat: 'd F Y',         // "10 Ekim 2025" gibi
+        allowInput: true
+      });
+    });
+  });
+</script>
+
+</body>
+</html>
