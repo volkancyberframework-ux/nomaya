@@ -81,9 +81,10 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # WhiteNoise manifest + sıkıştırma
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+WHITENOISE_MANIFEST_STRICT = False  # eksik referanslarda hata atma
 
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_ROOT = '/data/media'
 
 # Paket statiklerini de bulabilelim (çoğu projede default zaten bunlar)
 STATICFILES_FINDERS = [
