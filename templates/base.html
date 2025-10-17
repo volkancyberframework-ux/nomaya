@@ -84,6 +84,47 @@
   <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
 
   <style>
+
+    /* Mobil header düzeltmeleri */
+    @media (max-width: 576px){
+      header.navbar-light .navbar .container{
+        flex-wrap: nowrap !important;      /* ikinci satıra düşmeyi engelle */
+        align-items: center !important;
+        gap: .5rem;
+      }
+
+      /* Marka alanı: sadece ikon kalsın, wordmark gizlensin */
+      .navbar-brand img[aria-hidden="true"]{
+        height: 56px !important;           /* ikon biraz daha küçük */
+        width: auto !important;
+      }
+      .navbar-brand .navbar-brand-item{     /* light/dark wordmark'lar */
+        display: none !important;
+      }
+
+      /* Toggler ve sağ grup spacing */
+      .navbar-toggler{
+        margin: 0 .25rem 0 auto !important;
+        padding: .25rem .5rem !important;
+      }
+
+      /* Sağdaki butonlar tek satırda kalsın */
+      .nav-tools{
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+      }
+      .nav-tools .nav-item{ margin-right: .25rem; }
+      .nav-tools .nav-item:last-child{ margin-right: 0; }
+
+      /* Zil rozetinin kırpılmaması için */
+      .nav-notification{ overflow: visible !important; }
+    }
+
+    /* Genel: header yüksekliğini toparla */
+    header.navbar-light .navbar{ padding-top: .25rem; padding-bottom: .25rem; }
+
     /* Bildirimler */
     .notif-badge{
       position:absolute; top:-6px; right:-6px;
@@ -182,7 +223,7 @@
       </div>
 
       <!-- Right side (always shows notifications) -->
-      <ul class="nav flex-row align-items-center list-unstyled ms-xl-auto">
+      <ul class="nav flex-row align-items-center list-unstyled ms-xl-auto nav-tools">
         <!-- Theme switcher (ALWAYS visible) -->
         <li class="nav-item dropdown me-3 me-sm-4">
         <!-- Trigger -->
