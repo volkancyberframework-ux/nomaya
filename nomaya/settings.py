@@ -81,21 +81,18 @@ DATABASES = {
     "default": dj_database_url.parse(os.environ["DATABASE_URL"], conn_max_age=600)
 }
 
-# --- Statik / medya ---
+# --- Static ---
 STATIC_URL = "/static/"
-# Projedeki kaynak statikler (ör. BASE_DIR/static)
 STATICFILES_DIRS = [BASE_DIR / "static"]
-# collectstatic çıktısı (Render servisleyecek klasör)
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-# WhiteNoise manifest + sıkıştırma
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+# Use WhiteNoise’s compressed manifest storage (better than Django’s default)
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-WHITENOISE_SKIP_COMPRESS_EXTENSIONS = ['.map']
-
-
+# --- Media (persistent) ---
 MEDIA_URL = "/media/"
-MEDIA_ROOT = '/data/media'
+MEDIA_ROOT = Path(os.environ.get("MEDIA_ROOT", "/data/media"))  # uses /data on Render
+
 
 # Paket statiklerini de bulabilelim (çoğu projede default zaten bunlar)
 STATICFILES_FINDERS = [
@@ -126,9 +123,6 @@ LOCALE_PATHS = [BASE_DIR / "locale"]
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# --- Prod güvenlik (DEBUG=0 iken önerilir) ---
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    SECURE_SSL_REDIRECT = False  # Render TLS terminates; istersen True yap
+    SECURE_SSL_REDIRECT = True

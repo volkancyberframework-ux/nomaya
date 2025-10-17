@@ -31,7 +31,7 @@ urlpatterns = [
     path("sign-in/", views.sign_in, name="sign_in"),
     path("sign-up/", views.sign_up, name="sign_up"),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
-]
+] 
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
