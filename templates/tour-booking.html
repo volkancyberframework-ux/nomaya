@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load i18n %}
 
 {% block content %}
 
@@ -154,8 +155,17 @@
                             <a href="{% url 'tour_detail' tour.slug %}">{{ tour.title }}</a>
                           </h5>
                           <ul class="nav nav-divider small mb-0 mt-2">
-                            {% if tour.start_date and tour.end_date %}
-                              <li class="nav-item mb-1"><i class="far fa-calendar-alt me-2"></i>{{ order.start_date|date:"d F Y" }} – {{ order.end_date|date:"d F Y" }}</li>
+                            {% if order.start_date %}
+                              <li class="nav-item mb-1">
+                                <i class="far fa-calendar-alt me-2"></i>
+                                {% language 'tr' %}
+                                  {% if order.end_date %}
+                                    {{ order.start_date|date:"d F Y, l" }} – {{ order.end_date|date:"d F Y, l" }}
+                                  {% else %}
+                                    {{ order.start_date|date:"d F Y, l" }}
+                                  {% endif %}
+                                {% endlanguage %}
+                              </li>
                             {% endif %}
                             <li class="nav-item mb-1"><i class="bi bi-people-fill me-2"></i>{{ pax }} Kişi{{ pax|pluralize }}</li>
                             {% if order.pax == 2 and not order.hide_hotels %}
@@ -456,12 +466,21 @@
 
                       <!-- Tarih & temel bilgiler -->
                       <ul class="list-unstyled small mb-3">
-                        {% if tour.start_date and tour.end_date %}
+                        {% if order.start_date %}
                           <li class="d-flex justify-content-between">
                             <span>Tarihler</span>
-                            <strong>{{ order.start_date|date:"d F Y" }} – {{ order.end_date|date:"d F Y" }}</strong>
+                            <strong>
+                              {% language 'tr' %}
+                                {% if order.end_date %}
+                                  {{ order.start_date|date:"d F Y, l" }} – {{ order.end_date|date:"d F Y, l" }}
+                                {% else %}
+                                  {{ order.start_date|date:"d F Y, l" }}
+                                {% endif %}
+                              {% endlanguage %}
+                            </strong>
                           </li>
                         {% endif %}
+
                         <li class="d-flex justify-content-between">
                           <span>Kişi sayısı</span>
                           <strong>{{ pax }}</strong>
@@ -736,10 +755,18 @@
 
                       <!-- Tarih & temel bilgiler -->
                       <ul class="list-unstyled small mb-3">
-                        {% if tour.start_date and tour.end_date %}
+                        {% if order.start_date %}
                           <li class="d-flex justify-content-between">
                             <span>Tarihler</span>
-                            <strong>{{ order.start_date|date:"d F Y" }} – {{ order.end_date|date:"d F Y" }}</strong>
+                            <strong>
+                              {% language 'tr' %}
+                                {% if order.end_date %}
+                                  {{ order.start_date|date:"d F Y, l" }} – {{ order.end_date|date:"d F Y, l" }}
+                                {% else %}
+                                  {{ order.start_date|date:"d F Y, l" }}
+                                {% endif %}
+                              {% endlanguage %}
+                            </strong>
                           </li>
                         {% endif %}
                         <li class="d-flex justify-content-between">
@@ -939,12 +966,21 @@
 
                       <!-- Tarih & temel bilgiler -->
                       <ul class="list-unstyled small mb-3">
-                        {% if tour.start_date and tour.end_date %}
+                        {% if order.start_date %}
                           <li class="d-flex justify-content-between">
                             <span>Tarihler</span>
-                            <strong>{{ order.start_date|date:"d F Y" }} – {{ order.end_date|date:"d F Y" }}</strong>
+                            <strong>
+                              {% language 'tr' %}
+                                {% if order.end_date %}
+                                  {{ order.start_date|date:"d F Y, l" }} – {{ order.end_date|date:"d F Y, l" }}
+                                {% else %}
+                                  {{ order.start_date|date:"d F Y, l" }}
+                                {% endif %}
+                              {% endlanguage %}
+                            </strong>
                           </li>
                         {% endif %}
+
                         <li class="d-flex justify-content-between">
                           <span>Kişi sayısı</span>
                           <strong>{{ pax }}</strong>
