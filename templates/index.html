@@ -118,34 +118,79 @@
 </script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-  if (!window.flatpickr) return;
+(function () {
+  const RANGE_SEP = ' - '; // URL’de canonical ayraç; görünüm altFormat ayrı
 
-  const RANGE_SEP_CANON = ' to ';
-  if (flatpickr.l10ns && flatpickr.l10ns.tr) flatpickr.localize(flatpickr.l10ns.tr);
+  function initIndexRange() {
+    if (!window.flatpickr) return;
 
-  // ⬇️ Min tarih hesapla: bugün 00:00 + 2 gün
-  function computeMinDate(){
-    const d = new Date();
-    d.setHours(0,0,0,0);
-    d.setDate(d.getDate() + 2);
-    return d;
+    // inputu bul
+    const el = document.querySelector('input.flatpickr[name="dates"]');
+    if (!el) return;
+
+    // Önce olası eski instance'ı yok et
+    if (el._flatpickr) el._flatpickr.destroy();
+
+    // Flatpickr yerelleştirme
+    if (flatpickr.l10ns && flatpickr.l10ns.tr) flatpickr.localize(flatpickr.l10ns.tr);
+
+    // Bugün + 2 gün (flatpickr Date helper'ı: fp_incr)
+    const minDate = new Date().fp_incr(2); // bugün dahil değil → +2
+
+    // URL'den gelen dates varsa normalize et
+    const params = new URLSearchParams(window.location.search);
+    const raw = (params.get('dates') || '').trim();
+    const isoMatches = raw.match(/\d{4}-\d{2}-\d{2}/g) || [];
+    const initial = isoMatches.length >= 2 ? [isoMatches[0], isoMatches[1]] : [];
+
+    // Kurulum
+    const fp = flatpickr(el, {
+      locale: Object.assign({}, flatpickr.l10ns?.tr || {}, { rangeSeparator: RANGE_SEP }),
+      mode: 'range',
+      dateFormat: 'Y-m-d',   // URL’e gidecek ham
+      altInput: true,
+      altFormat: 'd F Y',    // Kullanıcıya görünen
+      allowInput: true,
+      minDate,               // 🔒 en erken 2 gün sonrası
+      // Ek güvenlik: minDate’ten küçük seçimi engelle/temizle
+      onClose: function (selectedDates, dateStr, instance) {
+        if (!selectedDates || selectedDates.length === 0) return;
+        const tooEarly = selectedDates.some(d => d < minDate);
+        if (tooEarly) {
+          // minDate'e ittir
+          const bumped = selectedDates.map((d,i) => {
+            const base = new Date(minDate);
+            if (i === 1 && selectedDates.length === 2 && selectedDates[1] < minDate) {
+              // bitiş de minDate’ten küçükse en az minDate yap
+              return base;
+            }
+            return d < minDate ? base : d;
+          });
+          instance.setDate(bumped, true, 'Y-m-d');
+        }
+      },
+    });
+
+    // Başlangıç değerini sadece minDate şartına uyuyorsa ver
+    if (initial.length === 2) {
+      const s = new Date(initial[0]);
+      const e = new Date(initial[1]);
+      if (s >= minDate && e >= minDate && e >= s) {
+        fp.setDate(initial, true, 'Y-m-d');
+      } else {
+        // Geçersizse temizle
+        el.value = '';
+        fp.clear();
+      }
+    }
   }
 
-  document.querySelectorAll('input.flatpickr[name="dates"]').forEach(function(el){
-    if (el._flatpickr) el._flatpickr.destroy();
-    flatpickr(el, {
-      locale: Object.assign({}, flatpickr.l10ns?.tr || {}, { rangeSeparator: RANGE_SEP_CANON }),
-      mode: 'range',
-      dateFormat: 'Y-m-d',   // URL'e giden ham değer
-      altInput: true,
-      altFormat: 'd F Y',    // Görünüm: "7 Ekim 2025"
-      allowInput: true,
-      minDate: computeMinDate(), // ⬅️ en erken 2 gün sonrası
-    });
-  });
-});
+  // İlk yükleme + BFCache dönüşleri
+  document.addEventListener('DOMContentLoaded', initIndexRange);
+  window.addEventListener('pageshow', initIndexRange);
+})();
 </script>
+
 
 
 

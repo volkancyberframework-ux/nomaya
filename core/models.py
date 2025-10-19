@@ -494,8 +494,8 @@ class Order(models.Model):
 
 class AirportTransfer(models.Model):
     class Direction(models.TextChoices):
-        A2H = "A2H", "Airport → Hotel"
-        H2A = "H2A", "Hotel → Airport"
+        A2H = "A2H", "Havalimanı → Otel"
+        H2A = "H2A", "Otel → Havalimanı"
 
     city = models.ForeignKey(City, on_delete=models.PROTECT, related_name="transfers")
     airport = models.ForeignKey(Airport, on_delete=models.PROTECT, related_name="airport_transfers")
@@ -524,13 +524,27 @@ class Activity(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     price_currency = models.CharField(max_length=3, choices=Currency.choices, default=Currency.USD)
 
+    # ✅ Yeni alanlar
+    city = models.ForeignKey(
+        City,
+        on_delete=models.PROTECT,
+        related_name="activities",
+        blank=True,
+        null=True,
+        help_text="Aktivitenin gerçekleştiği şehir"
+    )
+    tour_types = models.ManyToManyField(
+        TourType,
+        related_name="activities",
+        blank=True,
+        help_text="Bu aktivitenin uygun olduğu gezgin/tur profilleri"
+    )
+
     class Meta:
         ordering = ["title"]
 
     def __str__(self):
         return self.title
-
-
 class Traveler(models.Model):
     order = models.ForeignKey("Order", on_delete=models.CASCADE, related_name="travelers")
     title = models.CharField(max_length=10, blank=True)

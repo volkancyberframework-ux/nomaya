@@ -306,7 +306,22 @@ class AirportTransferAdmin(admin.ModelAdmin):
     list_filter = ("city__country", "city", "direction", "vehicle_type", "price_currency")
     search_fields = ("airport__iata", "hotel__name")
 
+# admin.py
 @admin.register(Activity)
 class ActivityAdmin(admin.ModelAdmin):
-    list_display = ("title", "location_text", "duration_hours")
+    list_display = ("title", "city", "duration_hours", "price", "price_currency", "tour_types_list")
+    list_filter = (
+        ("city__country", admin.RelatedOnlyFieldListFilter),
+        ("city", admin.RelatedOnlyFieldListFilter),
+        "price_currency",
+        ("tour_types", admin.RelatedOnlyFieldListFilter),
+    )
     search_fields = ("title", "location_text")
+    autocomplete_fields = ("city",)               # ✅ şehir seçiminde autocomplete
+    filter_horizontal = ("tour_types",)           # ✅ çoklu tur tipi rahat seçilsin
+    # Eğer Grappelli/TabularManyToMany yerine raw_id_fields tercih edersen:
+    # raw_id_fields = ("city", "tour_types")
+
+    def tour_types_list(self, obj):
+        return ", ".join(obj.tour_types.values_list("name", flat=True))
+    tour_types_list.short_description = "Tour Types"
