@@ -259,8 +259,14 @@
                                     {% endwith %}
                                     {{ d.title|default:d.city.name }}
 
-                                    {% if day_dates and day_dates|length >= forloop.counter %}
-                                      <small class="text-muted ms-2">{{ day_dates|index:forloop.counter0 }}</small>
+                                    {% load i18n %}
+
+                                    {% if day_dates and day_dates|length > forloop.counter0 %}
+                                      {% with d=day_dates|index:forloop.counter0 %}
+                                        <small class="text-muted ms-2">
+                                          {% language 'tr' %}{{ d|date:"d F Y, l" }}{% endlanguage %}
+                                        </small>
+                                      {% endwith %}
                                     {% endif %}
 
                             </button>

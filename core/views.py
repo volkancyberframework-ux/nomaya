@@ -551,13 +551,12 @@ def tour_detail(request, slug):
     computed_end_date = None
     if dates_start:
         total_days = len(tour_days)
-        for i in range(total_days):
-            d = dates_start + timedelta(days=i)
-            day_dates.append(d.strftime("%d %B %Y, %A"))  # Örn: 10 Ekim 2025, Cuma
+        day_dates = [dates_start + timedelta(days=i) for i in range(total_days)]  # ← date objeleri
         if total_days > 0:
             computed_end_date = dates_start + timedelta(days=total_days - 1)
     else:
         day_dates = [None] * len(tour_days)
+
 
     # --- (8) Toplam hesaplaması ---
     gross_total = Decimal("0.00")
