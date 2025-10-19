@@ -351,53 +351,38 @@ def _days_from_dates(dates_str: str) -> Optional[int]:
 def tour_grid(request):
     country = request.GET.get("country")
     pax = request.GET.get("pax")
-    dates = request.GET.get("dates")                # "YYYY-MM-DD - YYYY-MM-DD"
+    dates = request.GET.get("dates")
     tour_type = request.GET.get("tour_type")
     tour_types = request.GET.getlist("tour_types")
 
-    # --- her durumda requested_days tanımlı olsun ---
-    requested_days = _days_from_dates(dates)  # None veya 1..7 (GECE sayısı)
+    requested_days = _days_from_dates(dates)
 
     qs = (
         Tour.objects.filter(is_published=True)
-        .annotate(hotels_count=Count("hotels", distinct=True))
+        # !!! ÇATIŞMAYAN BİR İSİM KULLAN
+        .annotate(_hotels_count_distinct=Count("hotels", distinct=True))
         .prefetch_related("photos", "places_covered__country", "tour_types")
         .order_by("-created_at")
         .distinct()
     )
 
-    # country filtresi (id veya ad)
-    country_name = None
-    if country:
-        if str(country).isdigit():
-            qs = qs.filter(places_covered__country_id=country)
-            obj = Country.objects.filter(id=country).only("name").first()
-            if obj:
-                country_name = obj.name
-        else:
-            qs = qs.filter(places_covered__country__name__icontains=country)
-            country_name = country
+    # ... senin mevcut filtrelerin ...
 
-    # tur tipi filtreleri
-    if tour_type:
-        qs = qs.filter(tour_types__id=tour_type)
-    if tour_types:
-        qs = qs.filter(tour_types__id__in=tour_types)
-
-    # --- Süreye göre öneri (requested_days None olabilir) ---
     tours_list = list(qs)
+
+    # --- Şablon dokunmadan: runtime'da alanı override et ---
+    for t in tours_list:
+        if hasattr(t, "_hotels_count_distinct"):
+            # Modeldeki hotels_count alanını ŞABLON için geçici olarak değiştiriyoruz
+            t.hotels_count = t._hotels_count_distinct or 0
+
     if requested_days is not None:
-        tours_list = [
-            t for t in tours_list
-            if (t.total_days or 0) > 0 and t.total_days <= requested_days
-        ]
+        tours_list = [t for t in tours_list if (t.total_days or 0) > 0 and t.total_days <= requested_days]
         tours_list.sort(key=lambda t: (t.total_days or 0), reverse=True)
 
-    # Pagination
     paginator = Paginator(tours_list, 12)
     page_obj = paginator.get_page(request.GET.get("page"))
 
-    # Querystring (page hariç)
     params = request.GET.copy()
     params.pop("page", None)
     qs_without_page = urlencode(params, doseq=True)
@@ -408,24 +393,22 @@ def tour_grid(request):
     context = {
         "pax": pax,
         "country": country,
-        "country_name": country_name,
+        "country_name": country_name if country else None,
         "dates": dates,
-        "requested_days": requested_days,   # <-- her zaman tanımlı
-
+        "requested_days": requested_days,
         "tour_type": tour_type,
         "tour_types_selected": set(tour_types),
-
         "tours": page_obj.object_list,
         "paginator": paginator,
         "page_obj": page_obj,
         "qs": qs_without_page,
-
         "countries": countries,
         "tourtype_opts": tourtype_opts,
     }
     with translation.override("tr"):
         return render(request, "tour-grid.html", context)
 
+        
 # views.py
 from django.utils.dateparse import parse_date
 import re
