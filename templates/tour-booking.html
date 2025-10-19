@@ -172,7 +172,7 @@
                               <li class="nav-item mb-1"><i class="fa-solid fa-bed me-2"></i>{% if order.same_room %}1 Oda (shared){% else %}2 Oda{% endif %}</li>
                             {% endif %}
                             {% if tour.start_point %}
-                              <li class="nav-item mb-1"><i class="bi bi-geo-alt-fill me-2"></i>{{ tour.start_point }} Çıkışlı</li>
+                              <li class="nav-item mb-1"><i class="bi bi-geo-alt-fill me-2"></i>{{ tour.start_point }}</li>
                             {% endif %}
                           </ul>
                         </div>
@@ -244,7 +244,7 @@
                     <div class="card-header border-bottom d-flex justify-content-between">
                       <h5 class="mb-0">Otel Detayları</h5>
                       <span class="text-muted small">
-                        {% if order.pax == 2 %}{% if order.same_room %}1 Oda (shared){% else %}2 Oda{% endif %}{% else %}1 Oda{% endif %}
+                        Fiyata Daildir {% if order.pax == 2 %}{% if order.same_room %}1 Oda (shared){% else %}2 Oda{% endif %}{% else %}1 Oda{% endif %}
                       </span>
                     </div>
                     <div class="card-body">
@@ -353,7 +353,7 @@
                                 </h6>
                                 {% if a.location_text %}<small class="text-muted d-block">{{ a.location_text }}</small>{% endif %}
                                 <div class="mt-1 small text-muted">
-                                  {% if a.duration_hours %}<span class="me-3">Duration: {{ a.duration_hours|floatformat:2 }} hrs</span>{% endif %}
+                                  {% if a.duration_hours %}<span class="me-3">Süre: {{ a.duration_hours|floatformat:2 }} saat</span>{% endif %}
                                 </div>
                                 {% if a.points %}
                                   <ul class="list-group list-group-borderless mb-0 mt-2">
@@ -468,13 +468,13 @@
                       <ul class="list-unstyled small mb-3">
                         {% if order.start_date %}
                           <li class="d-flex justify-content-between">
-                            <span>Tarihler</span>
+                            <span>Tarihler </span>
                             <strong>
                               {% language 'tr' %}
                                 {% if order.end_date %}
-                                  {{ order.start_date|date:"d F Y, l" }} – {{ order.end_date|date:"d F Y, l" }}
+                                  {{ order.start_date|date:"d F Y" }} – {{ order.end_date|date:"d F Y" }}
                                 {% else %}
-                                  {{ order.start_date|date:"d F Y, l" }}
+                                  {{ order.start_date|date:"d F Y" }}
                                 {% endif %}
                               {% endlanguage %}
                             </strong>
