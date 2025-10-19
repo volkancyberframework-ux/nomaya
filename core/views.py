@@ -360,7 +360,6 @@ def tour_grid(request):
 
     qs = (
         Tour.objects.filter(is_published=True)
-        # ⬇️ Otelleri DISTINCT say ve 'hotels_count' olarak adlandır
         .annotate(hotels_count=Count("hotels", distinct=True))
         .prefetch_related("photos", "places_covered__country", "tour_types")
         .order_by("-created_at")
