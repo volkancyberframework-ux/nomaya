@@ -290,7 +290,7 @@ def sign_up(request):
     return render(request, "sign-up.html")
 
 def home(request):
-    countries = Country.objects.only("id", "name").order_by("name")
+    countries = Country.objects.exclude(iso2__iexact="TR").only("id", "name").order_by("name")
     return render(request, "index.html", {"countries": countries})
 
 def about(request):
@@ -404,7 +404,7 @@ def tour_grid(request):
     params.pop("page", None)
     qs_without_page = urlencode(params, doseq=True)
 
-    countries = Country.objects.all().only("id", "name").order_by("name")
+    countries = Country.objects.all().exclude(iso2__iexact="TR").only("id", "name").order_by("name")
     tourtype_opts = TourType.objects.all().only("id", "name").order_by("name")
 
     context = {
