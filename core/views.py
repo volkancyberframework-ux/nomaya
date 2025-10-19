@@ -44,6 +44,7 @@ from django.db.models import Prefetch, Sum
 from decimal import Decimal
 from datetime import timedelta
 import locale
+from django.db.models import Count
 
 from .models import (
     Tour, TourPhoto, TourDay, DayImage, DayFlight,
@@ -359,6 +360,8 @@ def tour_grid(request):
 
     qs = (
         Tour.objects.filter(is_published=True)
+        # ⬇️ Otelleri DISTINCT say ve 'hotels_count' olarak adlandır
+        .annotate(hotels_count=Count("hotels", distinct=True))
         .prefetch_related("photos", "places_covered__country", "tour_types")
         .order_by("-created_at")
         .distinct()
@@ -408,7 +411,7 @@ def tour_grid(request):
         "country": country,
         "country_name": country_name,
         "dates": dates,
-        "requested_days": requested_days,   # <-- artık her zaman tanımlı
+        "requested_days": requested_days,   # <-- her zaman tanımlı
 
         "tour_type": tour_type,
         "tour_types_selected": set(tour_types),

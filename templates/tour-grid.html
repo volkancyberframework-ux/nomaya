@@ -337,7 +337,7 @@ Tour grid START -->
                   <i class="fa-solid fa-plane text-orange me-2"></i>{{ tour.flights_count }} Uçuş
                 </li>
                 <li class="nav-item h6 fw-normal mb-0">
-                  <i class="fa-solid fa-hotel text-info me-2"></i>{{ tour.hotels_count }} Otel
+                  <i class="fa-solid fa-hotel text-info me-2"></i>{{ tour.hotels_count }} Gece Otel
                 </li>
                 <li class="nav-item h6 fw-normal mb-0">
                   <i class="fa-solid fa-person-skating text-danger me-2"></i>{{ tour.activities_count }} Aktivite
@@ -489,13 +489,20 @@ Tour grid END -->
 (function(){
   const RANGE_SEP_CANON = ' - ';
 
-  // AYIRICIYA BAKMADAN iki ISO tarihi çek
   function normalizeRange(raw){
     if (!raw) return '';
     const dates = Array.from(raw.matchAll(/\d{4}-\d{2}-\d{2}/g)).map(m => m[0]);
     if (dates.length >= 2) return `${dates[0]}${RANGE_SEP_CANON}${dates[1]}`;
     if (dates.length === 1) return dates[0];
     return '';
+  }
+
+  // ⬇️ Min tarih hesapla: bugün 00:00 + 2 gün
+  function computeMinDate(){
+    const d = new Date();
+    d.setHours(0,0,0,0);
+    d.setDate(d.getDate() + 2);
+    return d;
   }
 
   function initRange(){
@@ -516,13 +523,24 @@ Tour grid END -->
       dateFormat: 'Y-m-d',
       altInput: true,
       altFormat: 'd F Y',
-      allowInput: true
+      allowInput: true,
+      minDate: computeMinDate(), // ⬅️ en erken 2 gün sonrası
     });
 
+    // URL’den gelen tarih aralığı minDate’ten küçükse, görmezden gel
     if (datesParam){
-      el.value = datesParam; // ham değer
-      const parts = datesParam.split(RANGE_SEP_CANON);
-      if (parts.length === 2) fp.setDate(parts, true, 'Y-m-d');
+      const [s, e] = datesParam.split(RANGE_SEP_CANON);
+      const min = computeMinDate();
+      const sD = new Date(s);
+      const eD = new Date(e);
+      if (s && e && sD >= min && eD >= min){
+        el.value = datesParam; // ham değer
+        fp.setDate([s, e], true, 'Y-m-d');
+      } else {
+        // geçersizse temizle
+        el.value = '';
+        fp.clear();
+      }
     }
   }
 
@@ -531,17 +549,34 @@ Tour grid END -->
 })();
 </script>
 
+
 <script>
 (function(){
+  // ⬇️ Min tarih
+  function computeMinDate(){
+    const d = new Date();
+    d.setHours(0,0,0,0);
+    d.setDate(d.getDate() + 2);
+    return d;
+  }
+
   function hasTwoISO(s){
     if(!s) return false;
     const m = String(s).match(/\d{4}-\d{2}-\d{2}/g);
     return !!(m && m.length === 2);
   }
+
   function urlHasValidDates(href){
     try{
       const u = new URL(href, window.location.origin);
-      return hasTwoISO(u.searchParams.get('dates'));
+      const raw = u.searchParams.get('dates');
+      if (!hasTwoISO(raw)) return false;
+      const [s,e] = raw.match(/\d{4}-\d{2}-\d{2}/g);
+      const min = computeMinDate();
+      const sD = new Date(s);
+      const eD = new Date(e);
+      // ⬇️ her iki tarih de minDate’ten küçük olamaz ve e >= s olmalı
+      return (sD >= min && eD >= min && eD >= sD);
     }catch(e){ return false; }
   }
 
@@ -552,16 +587,14 @@ Tour grid END -->
     if (input._flatpickr) input._flatpickr.open();
   }
 
-  // ⬇️ Yeni: önce en üste kaydır, sonra tarih alanına odaklan
   function scrollTopThenFocusDates(){
     window.scrollTo({ top: 0, behavior: 'smooth' });
     const start = Date.now();
     const poll = setInterval(()=>{
       const atTop = (window.scrollY || document.documentElement.scrollTop) === 0;
-      const timeout = Date.now() - start > 1200; // güvenlik süresi
+      const timeout = Date.now() - start > 1200;
       if (atTop || timeout){
         clearInterval(poll);
-        // küçük bir nefes payı verip odakla
         setTimeout(focusDatesInput, 120);
       }
     }, 50);
@@ -578,7 +611,6 @@ Tour grid END -->
       btn._bound = true;
       btn.addEventListener('click', function(){
         m.hide();
-        // modal kapanınca: en üste kaydır + tarih seçtir
         setTimeout(scrollTopThenFocusDates, 150);
       });
     }
@@ -601,6 +633,7 @@ Tour grid END -->
   });
 })();
 </script>
+
 
 <script>
 (function(){

@@ -124,6 +124,14 @@ document.addEventListener('DOMContentLoaded', function () {
   const RANGE_SEP_CANON = ' to ';
   if (flatpickr.l10ns && flatpickr.l10ns.tr) flatpickr.localize(flatpickr.l10ns.tr);
 
+  // ⬇️ Min tarih hesapla: bugün 00:00 + 2 gün
+  function computeMinDate(){
+    const d = new Date();
+    d.setHours(0,0,0,0);
+    d.setDate(d.getDate() + 2);
+    return d;
+  }
+
   document.querySelectorAll('input.flatpickr[name="dates"]').forEach(function(el){
     if (el._flatpickr) el._flatpickr.destroy();
     flatpickr(el, {
@@ -132,11 +140,13 @@ document.addEventListener('DOMContentLoaded', function () {
       dateFormat: 'Y-m-d',   // URL'e giden ham değer
       altInput: true,
       altFormat: 'd F Y',    // Görünüm: "7 Ekim 2025"
-      allowInput: true
+      allowInput: true,
+      minDate: computeMinDate(), // ⬅️ en erken 2 gün sonrası
     });
   });
 });
 </script>
+
 
 
 {% endblock %}

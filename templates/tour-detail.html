@@ -981,6 +981,129 @@
     })();
     </script>
 
+    <!-- ==== Toggle İpucu Modal START ==== -->
+    <div class="modal fade" id="toggleTipsModal" tabindex="-1" aria-labelledby="toggleTipsLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 rounded-4 shadow-lg">
+          <div class="modal-header border-0 bg-primary text-white rounded-top-4">
+            <h5 class="modal-title" id="toggleTipsLabel">Paketinizi Kişiselleştirin ✨</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
+          </div>
+          <div class="modal-body py-4">
+            <div class="row g-4 align-items-center">
+              <div class="col-md-3 text-center">
+                <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center" style="width:90px;height:90px;">
+                  <i class="fa-solid fa-sliders fs-2 text-primary"></i>
+                </div>
+              </div>
+              <div class="col-md-9">
+                <h6 class="mb-2">Dilerseniz <strong>Program / Güzergâh</strong> sekmesinde;</h6>
+                <ul class="mb-3 ps-3">
+                  <li><strong>Uçuşları</strong>, <strong>Otelleri</strong> veya <strong>Transferleri</strong> tek tıkla çıkarabilirsiniz.</li>
+                  <li>Seçimlerinize göre <strong>fiyat otomatik güncellenir</strong>.</li>
+                </ul>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="dontShowToggleTips">
+                  <label class="form-check-label" for="dontShowToggleTips">
+                    Bir daha gösterme
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer border-0 pt-0 d-flex justify-content-between">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Anladım</button>
+            <button type="button" class="btn btn-primary" id="goToProgramTabBtn">
+              Program / Güzergâh Sekmesine Git
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ==== Toggle İpucu Modal END ==== -->
+
+    <style>
+      /* Toggle butonlarını kısa süre parlatmak için */
+      @keyframes pulseOutline {
+        0%   { box-shadow: 0 0 0 0 rgba(13,110,253,.55); }
+        70%  { box-shadow: 0 0 0 8px rgba(13,110,253,.00); }
+        100% { box-shadow: 0 0 0 0 rgba(13,110,253,.00); }
+      }
+      .hint-pulse {
+        animation: pulseOutline 1s ease-out 0s 3; /* 3 kez */
+        border-color: rgba(13,110,253,.5) !important;
+      }
+    </style>
+
+    <script>
+    (function(){
+      const tourId = "{{ tour.id }}"; // tur-bazlı hatırlama
+      const LS_KEY = "nomaya.toggleTips.shown." + tourId;
+
+      function openModalOnce(){
+        // Bir daha gösterme seçilmişse veya zaten gösterilmişse atla
+        if (localStorage.getItem(LS_KEY) === "1") return;
+
+        const modalEl = document.getElementById('toggleTipsModal');
+        if (!modalEl) return;
+        const modal = new bootstrap.Modal(modalEl);
+
+        // Küçük gecikme ile daha “akıcı” görünür
+        setTimeout(() => modal.show(), 500);
+
+        // “Bir daha gösterme” seçilirse kaydet
+        const dontShow = modalEl.querySelector('#dontShowToggleTips');
+        modalEl.addEventListener('hidden.bs.modal', () => {
+          if (dontShow && dontShow.checked) {
+            localStorage.setItem(LS_KEY, "1");
+          } else {
+            // Kullanıcı kapatsa da bu tur için sadece ilk gelişte gösterelim:
+            localStorage.setItem(LS_KEY, "1");
+          }
+        });
+
+        // "Program Sekmesine Git" → sekmeye geç + toggle butonlarını vurgula
+        const goBtn = modalEl.querySelector('#goToProgramTabBtn');
+        goBtn?.addEventListener('click', () => {
+          modal.hide();
+          goProgramTabAndHighlight();
+        });
+      }
+
+      function goProgramTabAndHighlight(){
+        // Sekme butonu (Program / Güzergâh)
+        const tabBtn = document.getElementById('tour-pills-tab-2');
+        if (tabBtn){
+          // Bootstrap tab'ı aktif et
+          const inst = new bootstrap.Tab(tabBtn);
+          inst.show();
+
+          // Sekme içerikleri yüklensin diye kısa gecikme:
+          setTimeout(() => {
+            // Toggle butonları (verdiğin data-toggle-remove attribute'ları)
+            const toggles = document.querySelectorAll('[data-toggle-remove="flights"], [data-toggle-remove="transfers"], [data-toggle-remove="hotels"]');
+            toggles.forEach(btn => {
+              btn.classList.add('hint-pulse');
+              // Birkaç saniye sonra sınıfı kaldır (temiz görüntü için)
+              setTimeout(() => btn.classList.remove('hint-pulse'), 3200);
+            });
+
+            // Sekme başına yumuşak kaydır
+            const target = document.getElementById('tour-pills-tab2');
+            if (target){
+              const top = target.getBoundingClientRect().top + window.scrollY - 80;
+              window.scrollTo({ top, behavior: 'smooth' });
+            }
+          }, 250);
+        }
+      }
+
+      // İlk yükleme
+      document.addEventListener('DOMContentLoaded', openModalOnce);
+    })();
+    </script>
+
+
 
   </section>
 
