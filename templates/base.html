@@ -216,9 +216,29 @@
       <!-- Left Nav -->
       <div class="navbar-collapse collapse" id="navbarCollapse">
         <ul class="navbar-nav navbar-nav-scroll mx-auto">
-          <li class="nav-item"><a class="nav-link" href="{% url 'about' %}">Ekibimiz</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'services' %}">Neden Nomaya?</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'faqs' %}">SSS</a></li>
+          {# Aktif sekmeyi vurgulamak için mevcut url_name'i alalım #}
+          {% with url_name=request.resolver_match.url_name %}
+            <li class="nav-item">
+              <a class="nav-link {% if url_name == 'about' %}active fw-semibold{% endif %}"
+                 href="{% url 'about' %}" aria-current="{% if url_name == 'about' %}page{% endif %}">
+                🧭 <span class="ms-1">Hikayemiz</span>
+              </a>
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link {% if url_name == 'services' %}active fw-semibold{% endif %}"
+                 href="{% url 'services' %}" aria-current="{% if url_name == 'services' %}page{% endif %}">
+                🚀 <span class="ms-1">Neden Nomaya?</span>
+              </a>
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link {% if url_name == 'faqs' %}active fw-semibold{% endif %}"
+                 href="{% url 'faqs' %}" aria-current="{% if url_name == 'faqs' %}page{% endif %}">
+                ❓ <span class="ms-1">SSS</span>
+              </a>
+            </li>
+          {% endwith %}
         </ul>
       </div>
 
