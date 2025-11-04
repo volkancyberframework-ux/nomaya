@@ -2,6 +2,7 @@
 from pathlib import Path
 import os
 import dj_database_url
+from django.conf import settings
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
