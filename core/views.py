@@ -810,3 +810,19 @@ def save_travelers(request, order_id):
     q = {"step": "3"}
     if start_day: q["start_day"] = start_day
     return redirect(reverse("tour_booking_detail", args=[order.id]) + "?" + urlencode(q))
+
+from django.views.decorators.http import require_POST
+from django.http import JsonResponse
+from core.models import Order
+
+@require_POST
+def accept_link_payment(request, order_id):
+    order = Order.objects.filter(pk=order_id).first()
+    if not order:
+        return JsonResponse({"error": "Order not found"}, status=404)
+
+    # Kullanıcı link ile ödemeyi onayladı
+    order.payment_method = "payment_link"
+    order.link_payment_accepted = True
+    order.save(update_fields=["payment_method", "link_payment_accepted"])
+    return JsonResponse({"success": True})

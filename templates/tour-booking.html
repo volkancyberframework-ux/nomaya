@@ -861,17 +861,85 @@
                           </div>
                         </div>
 
-                        <!-- Ödeme seçeneği -->
-                        <div class="form-check p-3 rounded-3 border bg-light">
+                        <!-- Ödeme seçeneği: Banka Havalesi -->
+                        <div class="form-check p-3 rounded-3 border bg-light mb-3">
                           <input class="form-check-input" type="radio" name="payment_method" id="payBank" value="bank_transfer" checked>
                           <label class="form-check-label fw-semibold" for="payBank">
-                            Banka Havalesi / EFT <span class="text-muted fw-normal">(24 saat içinde ödeme)</span>
+                            🏦 Banka Havalesi / EFT <span class="text-muted fw-normal">(24 saat içinde ödeme)</span>
                           </label>
                           <div class="mt-2 small text-muted">
-                            “Öde”ye bastığınızda IBAN bilgilerimiz bir pencerede görünecek.
-                            Lütfen açıklama kısmına <strong>ORDER-{{ order.id }}</strong> yazın.
+                            “Öde”ye bastığınızda IBAN bilgileri gösterilecek.
                           </div>
                         </div>
+
+                        <!-- Ödeme seçeneği: Link ile Öde -->
+                        <div class="form-check p-3 rounded-3 border bg-light mb-3">
+                          <input class="form-check-input" type="radio" name="payment_method" id="payLink" value="payment_link">
+                          <label class="form-check-label fw-semibold" for="payLink">
+                            💳 Link ile Öde <span class="text-muted fw-normal">(Visa / Mastercard / Amex)</span>
+                          </label>
+                          <div class="mt-2 small text-muted">
+                            “Öde”ye bastığınızda küçük bir onay penceresi açılacak. Onayladığınızda sistemde “Link ile ödeme” aktif hale gelecek.
+                          </div>
+                        </div>
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="linkPaymentModal" tabindex="-1" aria-labelledby="linkPaymentLabel" aria-hidden="true">
+                          <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content rounded-3">
+                              <div class="modal-header">
+                                <h5 class="modal-title">Link ile Ödeme Onayı</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                              </div>
+                              <div class="modal-body small text-muted">
+                                Onaylarsanız siparişiniz için “Link ile Ödeme” aktif edilecek.
+                                Size e-posta yoluyla güvenli ödeme linki gönderilecektir.
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">İptal</button>
+                                <button type="button" class="btn btn-primary" id="confirmLinkPaymentBtn">Tamam, e-posta gelsin</button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <script>
+                        document.addEventListener("DOMContentLoaded", () => {
+                          const payLink = document.getElementById("payLink");
+                          const confirmBtn = document.getElementById("confirmLinkPaymentBtn");
+                          const form = document.querySelector("form");
+
+                          // Form gönderimi
+                          form.addEventListener("submit", (e) => {
+                            if (payLink.checked) {
+                              e.preventDefault();
+                              const modal = new bootstrap.Modal(document.getElementById("linkPaymentModal"));
+                              modal.show();
+                            } else {
+                              // Bank transfer seçiliyse backend'e göndermeye gerek yok
+                              // normal form submit devam eder
+                            }
+                          });
+
+                          // Link ödeme onayı
+                          confirmBtn.addEventListener("click", () => {
+                            fetch("{% url 'accept_link_payment' order.id %}", {
+                              method: "POST",
+                              headers: { "X-CSRFToken": "{{ csrf_token }}" },
+                            })
+                              .then((res) => res.json())
+                              .then((data) => {
+                                if (data.success) {
+                                  alert("✅ Link ile ödeme aktif edildi. E-posta adresinize ödeme bağlantısı gönderilecek.");
+                                  window.location.reload();
+                                }
+                              })
+                              .catch(() => alert("Bir hata oluştu, lütfen tekrar deneyin."));
+                          });
+                        });
+                        </script>
+
+
 
                         <!-- İpucu satırı (isteğe bağlı) -->
                         <ul class="small text-muted list-unstyled mt-3 mb-0">

@@ -441,6 +441,17 @@ class Order(models.Model):
     hide_hotels = models.BooleanField(default=False)
     total_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     is_paid = models.BooleanField(default=False)
+
+    payment_method = models.CharField(
+            max_length=30,
+            choices=[
+                ("bank_transfer", "Banka Havalesi"),
+                ("payment_link", "Link ile Ödeme"),
+            ],
+            default="bank_transfer",
+        )
+        link_payment_accepted = models.BooleanField(default=False)
+
     created_at = models.DateTimeField(default=timezone.now)
 
     def compute_total(self):
