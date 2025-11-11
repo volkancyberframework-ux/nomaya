@@ -450,7 +450,7 @@ class Order(models.Model):
             ],
             default="bank_transfer",
         )
-        link_payment_accepted = models.BooleanField(default=False)
+    link_payment_accepted = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(default=timezone.now)
 

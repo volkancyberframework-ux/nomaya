@@ -44,8 +44,10 @@ class TravelerAdmin(admin.ModelAdmin):
 class OrderAdmin(admin.ModelAdmin):
     list_display = (
         "id", "tour", "pax", "email",
-        "start_date", "end_date",      # tarihler
-        "total_price", "is_paid", "created_at",
+        "payment_method", "link_payment_accepted",  # ✅ eklendi
+        "total_price", "is_paid",
+        "start_date", "end_date",
+        "created_at",
     )
     list_display_links = ("id", "tour")
     ordering = ("-created_at",)
@@ -53,6 +55,8 @@ class OrderAdmin(admin.ModelAdmin):
 
     list_filter = (
         "is_paid",
+        "payment_method",            # ✅ eklendi
+        "link_payment_accepted",     # ✅ eklendi
         "hide_flights", "hide_transfers", "hide_hotels",
         ("start_date", admin.DateFieldListFilter),
         ("end_date", admin.DateFieldListFilter),
@@ -68,16 +72,30 @@ class OrderAdmin(admin.ModelAdmin):
         ("Görünürlük / Dahiller", {
             "fields": ("hide_flights", "hide_transfers", "hide_hotels")
         }),
-        ("Ödeme", {"fields": ("total_price", "is_paid", "created_at")}),
+        ("Ödeme", {
+            "fields": (
+                "payment_method",          # ✅ eklendi
+                "link_payment_accepted",   # ✅ eklendi
+                "total_price", "is_paid", "created_at"
+            )
+        }),
     )
 
-    # (opsiyonel) tek sütunda aralık göstermek istersen:
+    # (opsiyonel) tek sütunda tarih aralığı göstermek istersen
     def date_range(self, obj):
         if obj.start_date and obj.end_date:
             return f"{obj.start_date:%d %b} – {obj.end_date:%d %b %Y}"
         return ""
     date_range.short_description = "Tarih Aralığı"
 
+    # 💡 Renkli göstermek istersen (isteğe bağlı)
+    def link_payment_accepted(self, obj):
+        if obj.payment_method == "payment_link":
+            color = "green" if obj.link_payment_accepted else "red"
+            text = "Evet" if obj.link_payment_accepted else "Hayır"
+            return format_html(f'<b style="color:{color}">{text}</b>')
+        return "-"
+    link_payment_accepted.short_description = "Link Ödemesi Onaylı mı?"
 
 # ─────────────────────────────
 # Tour inlines
