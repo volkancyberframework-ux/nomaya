@@ -1356,6 +1356,83 @@
   })();
   </script>
 
+  <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const payLink = document.getElementById("payLink");
+    const payNowBtn = document.getElementById("payNowBtn");
+    const paymentForm = document.getElementById("paymentForm");
+
+    // Modal HTML (dinamik eklenir)
+    const linkModalHtml = `
+      <div class="modal fade" id="linkPayModal" tabindex="-1" aria-labelledby="linkPayModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content rounded-3">
+            <div class="modal-header">
+              <h5 class="modal-title">Link ile Ödeme Onayı</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body small text-muted">
+              Onaylarsanız siparişiniz için “Link ile Ödeme” aktif edilecek.
+              <br>Size e-posta yoluyla güvenli ödeme bağlantısı gönderilecektir.
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">İptal</button>
+              <button type="button" class="btn btn-primary" id="confirmLinkPayBtn">Tamam, e-posta gelsin</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Modal sayfada yoksa ekle
+    if (!document.getElementById("linkPayModal")) {
+      document.body.insertAdjacentHTML("beforeend", linkModalHtml);
+    }
+
+    // Form submit olunca
+    paymentForm.addEventListener("submit", function (e) {
+      if (payLink.checked) {
+        e.preventDefault();
+        const modal = new bootstrap.Modal(document.getElementById("linkPayModal"));
+        modal.show();
+      }
+    });
+
+    // Onay butonu
+    document.body.addEventListener("click", async function (e) {
+      const btn = e.target.closest("#confirmLinkPayBtn");
+      if (!btn) return;
+
+      btn.disabled = true;
+      btn.textContent = "İşleniyor...";
+
+      try {
+        const res = await fetch("{% url 'accept_link_payment' order.id %}", {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ payment_method: "payment_link" })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          alert("✅ Link ile ödeme aktif edildi. E-posta adresinize ödeme bağlantısı gönderilecek.");
+          window.location.reload();
+        } else {
+          alert("⚠️ İşlem tamamlanamadı. Lütfen tekrar deneyin.");
+        }
+      } catch (err) {
+        alert("Bir hata oluştu: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Tamam, e-posta gelsin";
+      }
+    });
+  });
+  </script>
+
 
 </main>
 
