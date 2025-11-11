@@ -7,7 +7,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # --- Güvenlik / genel ---
 SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-@dqu-@telwen(6x(q00gnsg_vk)()r&+atofj-6yyjqopy!s9+")
-DEBUG = True   # local: 1, prod: 0
+DEBUG = False   # local: 1, prod: 0
 
 ALLOWED_HOSTS = ["nomaya.co", "www.nomaya.co", "nomaya.onrender.com"]
 

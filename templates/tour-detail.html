@@ -1109,6 +1109,86 @@
     })();
     </script>
 
+    <!-- ==== İlk Karşılama Popup START ==== -->
+    <div class="modal fade" id="welcomePopup" tabindex="-1" aria-labelledby="welcomePopupLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 rounded-4 shadow-lg">
+          <div class="modal-header bg-gradient bg-primary text-white rounded-top-4">
+            <h5 class="modal-title" id="welcomePopupLabel">👋 Hoş Geldiniz!</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body py-4 text-center">
+            <div class="mb-3">
+              <i class="fa-solid fa-suitcase-rolling fs-1 text-primary"></i>
+            </div>
+            <h4 class="fw-semibold mb-3">Program ve Güzergâh sekmesinde ✈️🏨🚗</h4>
+            <p class="fs-5 text-muted mb-4">
+              Dilerseniz <strong>uçak</strong>, <strong>otel</strong> ve <strong>transfer</strong> seçimlerini değiştirerek
+              <span class="fw-semibold text-primary">paketinizi kişiselleştirebilirsiniz.</span><br>
+              Fiyatlar seçiminize göre otomatik güncellenir 💫
+            </p>
+            <div class="form-check d-inline-block">
+              <input class="form-check-input" type="checkbox" id="dontShowWelcome">
+              <label class="form-check-label" for="dontShowWelcome">
+                Bir daha gösterme
+              </label>
+            </div>
+          </div>
+          <div class="modal-footer border-0 pt-0 d-flex justify-content-between">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Anladım</button>
+            <button type="button" class="btn btn-primary" id="goToProgramTab">👉 Program Sekmesine Git</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ==== İlk Karşılama Popup END ==== -->
+
+    <script>
+    (function(){
+      const tourId = "{{ tour.id }}";
+      const LS_KEY = "nomaya.welcomePopup.shown." + tourId;
+
+      document.addEventListener("DOMContentLoaded", () => {
+        // Daha önce gösterildiyse çıkma
+        if (localStorage.getItem(LS_KEY) === "1") return;
+
+        const modalEl = document.getElementById("welcomePopup");
+        if (!modalEl) return;
+
+        const modal = new bootstrap.Modal(modalEl);
+        setTimeout(() => modal.show(), 800); // 0.8sn gecikmeli açılır (daha doğal görünüm)
+
+        // “Bir daha gösterme” seçeneği
+        const dontShow = modalEl.querySelector("#dontShowWelcome");
+        modalEl.addEventListener("hidden.bs.modal", () => {
+          if (dontShow && dontShow.checked) {
+            localStorage.setItem(LS_KEY, "1");
+          } else {
+            // Yine de aynı oturumda sadece ilk gelişte gösterelim:
+            localStorage.setItem(LS_KEY, "1");
+          }
+        });
+
+        // “Program Sekmesine Git” butonu
+        document.getElementById("goToProgramTab")?.addEventListener("click", () => {
+          modal.hide();
+
+          const tabBtn = document.getElementById("tour-pills-tab-2");
+          if (tabBtn) {
+            const tab = new bootstrap.Tab(tabBtn);
+            tab.show();
+            setTimeout(() => {
+              const target = document.getElementById("tour-pills-tab2");
+              if (target) {
+                window.scrollTo({ top: target.offsetTop - 60, behavior: "smooth" });
+              }
+            }, 400);
+          }
+        });
+      });
+    })();
+    </script>
+
 
 
   </section>
