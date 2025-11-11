@@ -708,3 +708,8 @@ def _dayhotel_changed(sender, instance, **kwargs):
 def _dayactivity_changed(sender, instance, **kwargs):
     if instance.day_id:
         _recompute_for_day(instance.day_id)
+
+@receiver(post_save, sender=Activity)
+def _recalc_when_activity_price_changes(sender, instance, **kwargs):
+    qs = DayActivity.objects.filter(activity=instance)
+    _recompute_days_for_qs(qs)
