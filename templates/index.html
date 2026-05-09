@@ -4,6 +4,7 @@
 {% block content %}
 
 <style>
+  /* Hareketi sevmeyenler için erişilebilirlik */
   @media (prefers-reduced-motion: reduce) {
     .page-fade { transition: none !important; }
   }
@@ -16,85 +17,14 @@
   }
   .page-fade.is-visible { opacity: 1; }
   .page-fade.is-hidden  { opacity: 0; }
-
-  .nomaya-popup-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(15, 23, 42, 0.55);
-    z-index: 9998;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
-
-  .nomaya-popup-backdrop.show {
-    display: flex;
-  }
-
-  .nomaya-popup-box {
-    width: 100%;
-    max-width: 620px;
-    background: #fff;
-    border-radius: 22px;
-    padding: 32px;
-    box-shadow: 0 25px 80px rgba(0,0,0,0.25);
-    position: relative;
-    animation: nomayaPopupIn .25s ease;
-  }
-
-  @keyframes nomayaPopupIn {
-    from { transform: translateY(12px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-
-  .nomaya-popup-close {
-    position: absolute;
-    top: 14px;
-    right: 16px;
-    border: 0;
-    background: transparent;
-    font-size: 26px;
-    line-height: 1;
-    cursor: pointer;
-    color: #64748b;
-  }
-
-  .nomaya-popup-close:hover {
-    color: #0f172a;
-  }
-
-  .nomaya-popup-badge {
-    display: inline-block;
-    background: rgba(13, 202, 240, 0.12);
-    color: #0dcaf0;
-    font-weight: 700;
-    font-size: 13px;
-    padding: 7px 13px;
-    border-radius: 999px;
-    margin-bottom: 14px;
-  }
-
-  .nomaya-popup-title {
-    font-weight: 800;
-    margin-bottom: 14px;
-  }
-
-  .nomaya-popup-text {
-    color: #475569;
-    font-size: 16px;
-    line-height: 1.65;
-  }
-
-  .nomaya-popup-highlight {
-    color: #0f172a;
-    font-weight: 700;
-  }
 </style>
 
 
+<!-- **************** MAIN CONTENT START **************** -->
 <main id="page-fader" class="page-fade" data-fader>
 
+	<!-- =======================
+	Main banner START -->
 	<section class="position-relative py-xl-9" style="background-image:url({% static 'assets/images/bg/10.jpg' %}); background-position: center left; background-size: cover;">
 		<div class="container z-index-9">
 			<div class="row">
@@ -102,6 +32,7 @@
           <form class="form-control-inline my-5" action="{% url 'tour_grid' %}" method="get">
             <div class="d-flex flex-wrap justify-content-center align-items-center">
 
+              <!-- x civarında -->
               <span class="d-inline-block">
                 <select class="form-select js-choice" data-search-enabled="true" name="country">
                   <option value="">Seçiniz</option>
@@ -112,102 +43,31 @@
               </span>
               <label class="form-control-inline-text">civarında</label>
 
+              <!-- x–y tarihleri arasında -->
               <span class="d-inline-block">
                 <input type="text" class="form-control flatpickr" name="dates" placeholder="Başlangıç - Bitiş">
               </span>
               <label class="form-control-inline-text">tarihleri arasında</label>
 
+              <!-- kapanış -->
               <label class="form-control-inline-text">size özel bir seyahat deneyimi yaşayın.</label>
             </div>
 
+            <!-- Button -->
             <button class="icon-xxl bg-primary btn-dark-hover rounded-circle btn fs-6 text-white p-0 mt-4" type="submit">
               Rotamı Bul
             </button>
           </form>
+
 				</div>
-			</div>
+			</div> <!-- Row END -->
 		</div>
 	</section>
-
-
-  <!-- =======================
-  Client START -->
-  <section class="py-5">
-    <div class="container">
-      <div class="row">
-        <div class="col-12">
-          <div class="bg-light rounded-3 p-5">
-            <h5 class="text-center mb-4 mb-md-5">
-              Nomaya, global seyahat ekosistemiyle size en uygun deneyimi sunar
-            </h5>
-
-            <div class="tiny-slider arrow-round">
-              <div class="tiny-slider-inner"
-                   data-arrow="false"
-                   data-autoplay="true"
-                   data-edge="2"
-                   data-dots="false"
-                   data-gutter="80"
-                   data-items-xl="5"
-                   data-items-lg="4"
-                   data-items-md="3"
-                   data-items-sm="2"
-                   data-items-xs="1">
-
-                <div class="item"><img src="{% static 'assets/images/client/01.svg' %}" alt=""></div>
-                <div class="item"><img src="{% static 'assets/images/client/02.svg' %}" alt=""></div>
-                <div class="item"><img src="{% static 'assets/images/client/08.svg' %}" alt=""></div>
-                <div class="item"><img src="{% static 'assets/images/client/05.svg' %}" alt=""></div>
-                <div class="item"><img src="{% static 'assets/images/client/06.svg' %}" alt=""></div>
-                <div class="item"><img src="{% static 'assets/images/client/03.svg' %}" alt=""></div>
-
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-  <!-- =======================
-  Client END -->
+	<!-- =======================
+	Main banner END -->
 
 </main>
-
-
-<!-- Nomaya First Visit Popup -->
-<div id="nomayaWelcomePopup" class="nomaya-popup-backdrop">
-  <div class="nomaya-popup-box">
-    <button type="button" class="nomaya-popup-close" id="nomayaPopupClose" aria-label="Kapat">
-      &times;
-    </button>
-
-    <span class="nomaya-popup-badge">Nomaya ile kişisel seyahat deneyimi</span>
-
-    <h3 class="nomaya-popup-title">
-      Seyahatinizi sadece satın almayın, deneyimleyin.
-    </h3>
-
-    <p class="nomaya-popup-text mb-3">
-      Nomaya, birçok global havayolu, tanınmış konaklama zinciri ve yerel deneyim sağlayıcısıyla çalışarak
-      size aradığınız en optimal seyahat deneyimini sağlar.
-    </p>
-
-    <p class="nomaya-popup-text mb-3">
-      Dilediğiniz tarih ve lokasyonu seçin. İsterseniz yerel rehberle, isterseniz
-      <span class="nomaya-popup-highlight">7/24 WhatsApp desteğiyle</span>
-      yolculuğunuzun her aşamasında yanınızda olalım.
-    </p>
-
-    <p class="nomaya-popup-text mb-4">
-      Dijital göçebeden emekli gezgine, kariyer kaşifinden tarımcıya kadar her deneyiminiz hazır.
-    </p>
-
-    <button type="button" class="btn btn-primary w-100" id="nomayaPopupOk">
-      Rotamı keşfet
-    </button>
-  </div>
-</div>
+<!-- **************** MAIN CONTENT END **************** -->
 
 
 <script>
@@ -217,7 +77,9 @@
   function showFader() {
     const fader = document.querySelector('[data-fader]');
     if (!fader) return;
+    // önce gizli sınıfını temizle, sonra görünür yap
     fader.classList.remove('is-hidden');
+    // raf ile transition tetikle
     requestAnimationFrame(() => fader.classList.add('is-visible'));
   }
 
@@ -226,7 +88,7 @@
     const form  = document.querySelector('form.form-control-inline');
     if (!fader || !form) return;
 
-    if (form.dataset.fadeBound === '1') return;
+    if (form.dataset.fadeBound === '1') return; // iki kez bağlama
     form.dataset.fadeBound = '1';
 
     form.addEventListener('submit', function(e){
@@ -240,54 +102,68 @@
     });
   }
 
+  // İlk yükleme
   document.addEventListener('DOMContentLoaded', () => {
     showFader();
     wireFormFadeOut();
   });
 
-  window.addEventListener('pageshow', () => {
+  // Geri/ileri gezinmede (BFCache) de tetikle
+  window.addEventListener('pageshow', (ev) => {
+    // BFCache’den gelinmiş olsun olmasın görünürlüğü düzelt
     showFader();
     wireFormFadeOut();
   });
 })();
 </script>
 
-
 <script>
 (function () {
-  const RANGE_SEP = ' - ';
+  const RANGE_SEP = ' - '; // URL’de canonical ayraç; görünüm altFormat ayrı
 
   function initIndexRange() {
     if (!window.flatpickr) return;
 
+    // inputu bul
     const el = document.querySelector('input.flatpickr[name="dates"]');
     if (!el) return;
 
+    // Önce olası eski instance'ı yok et
     if (el._flatpickr) el._flatpickr.destroy();
 
+    // Flatpickr yerelleştirme
     if (flatpickr.l10ns && flatpickr.l10ns.tr) flatpickr.localize(flatpickr.l10ns.tr);
 
-    const minDate = new Date().fp_incr(2);
+    // Bugün + 2 gün (flatpickr Date helper'ı: fp_incr)
+    const minDate = new Date().fp_incr(2); // bugün dahil değil → +2
 
+    // URL'den gelen dates varsa normalize et
     const params = new URLSearchParams(window.location.search);
     const raw = (params.get('dates') || '').trim();
     const isoMatches = raw.match(/\d{4}-\d{2}-\d{2}/g) || [];
     const initial = isoMatches.length >= 2 ? [isoMatches[0], isoMatches[1]] : [];
 
+    // Kurulum
     const fp = flatpickr(el, {
       locale: Object.assign({}, flatpickr.l10ns?.tr || {}, { rangeSeparator: RANGE_SEP }),
       mode: 'range',
-      dateFormat: 'Y-m-d',
+      dateFormat: 'Y-m-d',   // URL’e gidecek ham
       altInput: true,
-      altFormat: 'd F Y',
+      altFormat: 'd F Y',    // Kullanıcıya görünen
       allowInput: true,
-      minDate,
+      minDate,               // 🔒 en erken 2 gün sonrası
+      // Ek güvenlik: minDate’ten küçük seçimi engelle/temizle
       onClose: function (selectedDates, dateStr, instance) {
         if (!selectedDates || selectedDates.length === 0) return;
         const tooEarly = selectedDates.some(d => d < minDate);
         if (tooEarly) {
-          const bumped = selectedDates.map((d) => {
+          // minDate'e ittir
+          const bumped = selectedDates.map((d,i) => {
             const base = new Date(minDate);
+            if (i === 1 && selectedDates.length === 2 && selectedDates[1] < minDate) {
+              // bitiş de minDate’ten küçükse en az minDate yap
+              return base;
+            }
             return d < minDate ? base : d;
           });
           instance.setDate(bumped, true, 'Y-m-d');
@@ -295,59 +171,27 @@
       },
     });
 
+    // Başlangıç değerini sadece minDate şartına uyuyorsa ver
     if (initial.length === 2) {
       const s = new Date(initial[0]);
       const e = new Date(initial[1]);
       if (s >= minDate && e >= minDate && e >= s) {
         fp.setDate(initial, true, 'Y-m-d');
       } else {
+        // Geçersizse temizle
         el.value = '';
         fp.clear();
       }
     }
   }
 
+  // İlk yükleme + BFCache dönüşleri
   document.addEventListener('DOMContentLoaded', initIndexRange);
   window.addEventListener('pageshow', initIndexRange);
 })();
 </script>
 
 
-<script>
-(function () {
-  const popup = document.getElementById('nomayaWelcomePopup');
-  const closeBtn = document.getElementById('nomayaPopupClose');
-  const okBtn = document.getElementById('nomayaPopupOk');
-  const storageKey = 'nomaya_welcome_popup_seen';
 
-  if (!popup) return;
-
-  function closePopup() {
-    popup.classList.remove('show');
-    localStorage.setItem(storageKey, '1');
-  }
-
-  document.addEventListener('DOMContentLoaded', function () {
-    if (!localStorage.getItem(storageKey)) {
-      setTimeout(function () {
-        popup.classList.add('show');
-      }, 700);
-    }
-  });
-
-  if (closeBtn) closeBtn.addEventListener('click', closePopup);
-  if (okBtn) okBtn.addEventListener('click', closePopup);
-
-  popup.addEventListener('click', function (e) {
-    if (e.target === popup) closePopup();
-  });
-
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && popup.classList.contains('show')) {
-      closePopup();
-    }
-  });
-})();
-</script>
 
 {% endblock %}
