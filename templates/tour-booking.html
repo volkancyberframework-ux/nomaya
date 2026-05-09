@@ -1136,214 +1136,234 @@
   </script>
 
   <script>
-  (function(){
-    const IBAN="TR35 0006 2000 6510 0006 6687 87";
-    const ALICI="Volkan Güler";
-    const BANKA="Garanti Bankası A.Ş.";
-    const TUTAR="{{ tour.price_currency }} {{ total|floatformat:0 }}";
-    const REFERANS="ORDER-{{ order.id }}";
+  (function () {
+    const IBAN = "TR35 0006 2000 6510 0006 6687 87";
+    const ALICI = "Volkan Güler";
+    const BANKA = "Garanti Bankası A.Ş.";
+    const TUTAR = "{{ tour.price_currency }} {{ total|floatformat:0 }}";
+    const REFERANS = "ORDER-{{ order.id }}";
 
-    function modalHtml(){return `
-  <div class="modal fade" id="bankModal" tabindex="-1" aria-labelledby="bankModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="bankModalLabel">Banka Havalesi Bilgileri</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
-      </div>
-      <div class="modal-body">
-        <p class="mb-2">Lütfen <strong>24 saat içinde</strong> aşağıdaki hesap bilgilerine ödeme yapınız.</p>
-        <div class="alert alert-info small mb-3">Açıklama kısmına <strong>${REFERANS}</strong> yazmanız zorunludur.</div>
+    function modalHtml() {
+      return `
+        <div class="modal fade" id="bankModal" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-3">
 
-        <div class="list-group list-group-borderless">
-          <div class="list-group-item d-flex justify-content-between align-items-start">
-            <div class="me-3">Tutar</div><div><strong id="amountBase">${TUTAR}</strong></div>
-          </div>
-          <div class="list-group-item d-flex justify-content-between align-items-start">
-            <div class="me-3">Tutar (TRY)</div><div><strong id="amountTry">Hesaplanıyor…</strong></div>
-          </div>
-          <div class="list-group-item">
-            <small class="text-muted" id="rateMeta"></small>
-          </div>
-          <div class="list-group-item d-flex justify-content-between align-items-start">
-            <div class="me-3">Alıcı</div><div><strong>${ALICI}</strong></div>
-          </div>
-          <div class="list-group-item d-flex justify-content-between align-items-start">
-            <div class="me-3">Banka</div><div><strong>${BANKA}</strong></div>
-          </div>
-          <div class="list-group-item">
-            <div class="d-flex justify-content-between align-items-center">
-              <div>IBAN<br><strong class="user-select-all" id="ibanText">${IBAN}</strong></div>
-              <button type="button" class="btn btn-outline-primary btn-sm" id="copyIbanBtn">Kopyala</button>
+              <div class="modal-header">
+                <h5 class="modal-title">Banka Havalesi Bilgileri</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+              </div>
+
+              <div class="modal-body">
+                <p class="mb-2">
+                  Lütfen <strong>24 saat içinde</strong> aşağıdaki hesaba ödeme yapınız.
+                </p>
+
+                <div class="alert alert-info small mb-3">
+                  Açıklama kısmına <strong>${REFERANS}</strong> yazmanız zorunludur.
+                </div>
+
+                <div class="list-group list-group-borderless">
+
+                  <div class="list-group-item d-flex justify-content-between">
+                    <span>Tutar</span>
+                    <strong>${TUTAR}</strong>
+                  </div>
+
+                  <div class="list-group-item d-flex justify-content-between">
+                    <span>Tutar (TRY)</span>
+                    <strong id="amountTry">Hesaplanıyor...</strong>
+                  </div>
+
+                  <div class="list-group-item">
+                    <small class="text-muted" id="rateMeta"></small>
+                  </div>
+
+                  <div class="list-group-item d-flex justify-content-between">
+                    <span>Alıcı</span>
+                    <strong>${ALICI}</strong>
+                  </div>
+
+                  <div class="list-group-item d-flex justify-content-between">
+                    <span>Banka</span>
+                    <strong>${BANKA}</strong>
+                  </div>
+
+                  <div class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        IBAN<br>
+                        <strong class="user-select-all" id="ibanText">${IBAN}</strong>
+                      </div>
+                      <button type="button" class="btn btn-outline-primary btn-sm" id="copyIbanBtn">
+                        Kopyala
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="list-group-item">
+                    Ödeme Açıklaması<br>
+                    <code class="user-select-all">${REFERANS}</code>
+                  </div>
+
+                </div>
+
+                <div class="alert alert-warning mt-3 py-2">
+                  Ödemeyi <strong>TRY</strong> olarak yapınız.
+                </div>
+              </div>
+
+              <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-bs-dismiss="modal">
+                  Tamam, Ödeme Yapacağım
+                </button>
+              </div>
+
             </div>
           </div>
-          <div class="list-group-item">Ödeme Açıklaması<br><code class="user-select-all">${REFERANS}</code></div>
         </div>
-
-        <div class="alert alert-warning mt-3 py-2" id="tryNote">
-          Ödemeyi <strong>TRY</strong> olarak yapınız.
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-success" data-bs-dismiss="modal" id="confirmPayBtn">
-          Tamam, Ödeme Yapacağım
-        </button>
-      </div>
-
-    </div></div>
-  </div>`;}
-
-    // — Yardımcı: #payable varsa ordan oku; yoksa TUTAR string’ini parse et
-    function getBaseAmountAndCurrency(){
-      // 1) #payable üzerinden
-      const p = document.getElementById('payable');
-      if (p && (p.dataset.amount || p.dataset.currency)) {
-        // dataset.amount İngilizce biçimde olmalı (örn 1234.56). Yine de temizleyelim:
-        const amt = parseNumberSafe(p.dataset.amount);
-        const cur = (p.dataset.currency || '').toUpperCase() || guessCurrencyFromText(p.textContent);
-        if (amt && cur) return { amount: amt, currency: cur };
-      }
-      // 2) TUTAR string (örn "USD 1,234" / "EUR 12.345,67")
-      const cur2 = guessCurrencyFromText(TUTAR);
-      const num2 = parseNumberSafe(TUTAR);
-      return { amount: num2 || 0, currency: cur2 || 'USD' };
+      `;
     }
 
-    function guessCurrencyFromText(t){
-      const m = (t || '').trim().match(/\b[A-Z]{3}\b/); // USD, EUR, GBP vb
-      return m ? m[0] : null;
-    }
-
-    function parseNumberSafe(text){
+    function parseNumberSafe(text) {
       if (!text) return 0;
+
       let s = String(text).trim();
-      // Sadece sayıları, nokta ve virgülü bırak
-      s = s.replace(/[^\d.,\-]/g, '');
-      // Hem nokta hem virgül varsa: çoğunlukla virgül binliktir
-      if (s.indexOf('.') > -1 && s.indexOf(',') > -1) {
-        // "12.345,67" -> "12345,67"
-        s = s.replace(/\./g,'').replace(',', '.');
-      } else if (s.indexOf(',') > -1 && s.indexOf('.') === -1) {
-        // "12345,67" -> "12345.67"
-        s = s.replace(',', '.');
+      s = s.replace(/[^\d.,\-]/g, "");
+
+      if (s.includes(".") && s.includes(",")) {
+        s = s.replace(/\./g, "").replace(",", ".");
+      } else if (s.includes(",") && !s.includes(".")) {
+        s = s.replace(",", ".");
       }
-      // Binlik boşluklarını temizle
-      s = s.replace(/\s/g,'');
+
       const val = parseFloat(s);
       return isNaN(val) ? 0 : val;
     }
 
-    async function fillTryAmounts(modalEl){
-      const out = modalEl.querySelector('#amountTry');
-      const meta = modalEl.querySelector('#rateMeta');
+    function getAmountAndCurrency() {
+      const payable = document.querySelector("#step-3 #payable") || document.getElementById("payable");
 
-      if (!out) return;
+      if (payable) {
+        return {
+          amount: parseNumberSafe(payable.dataset.amount || payable.textContent),
+          currency: (payable.dataset.currency || "{{ tour.price_currency }}").toUpperCase()
+        };
+      }
 
-      const { amount, currency } = getBaseAmountAndCurrency();
+      return {
+        amount: parseNumberSafe("{{ total|floatformat:'2' }}"),
+        currency: "{{ tour.price_currency }}".toUpperCase()
+      };
+    }
+
+    async function fillTryAmount(modalEl) {
+      const amountTry = modalEl.querySelector("#amountTry");
+      const rateMeta = modalEl.querySelector("#rateMeta");
+
+      const data = getAmountAndCurrency();
+      const amount = data.amount;
+      let currency = data.currency;
+
+      if (currency === "$") currency = "USD";
+      if (currency === "€") currency = "EUR";
+      if (currency === "TL" || currency === "₺") currency = "TRY";
 
       if (!amount) {
-        out.textContent = '—';
+        amountTry.textContent = "Hesaplanamadı";
+        rateMeta.textContent = "Tutar okunamadı.";
         return;
       }
 
-      let cleanCurrency = String(currency || 'EUR').trim().toUpperCase();
-
-      if (cleanCurrency === '€') cleanCurrency = 'EUR';
-      if (cleanCurrency === '$') cleanCurrency = 'USD';
-      if (cleanCurrency === 'TL') cleanCurrency = 'TRY';
-      if (cleanCurrency === '₺') cleanCurrency = 'TRY';
-
-      if (cleanCurrency === 'TRY') {
-        out.textContent = amount.toLocaleString('tr-TR', {
+      if (currency === "TRY") {
+        amountTry.textContent = amount.toLocaleString("tr-TR", {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2
-        }) + ' TRY';
+        }) + " TRY";
 
-        if (meta) {
-          meta.textContent = 'Baz para birimi TRY olduğundan kur çevrimi yapılmadı.';
-        }
-
+        rateMeta.textContent = "Baz para birimi TRY olduğu için kur çevrimi yapılmadı.";
         return;
       }
 
       try {
-        const url =
-        const url =
-          `https://api.exchangerate.host/convert?from=${encodeURIComponent(cleanCurrency)}&to=TRY&amount=${encodeURIComponent(amount)}`;
+        const url = `https://open.er-api.com/v6/latest/${encodeURIComponent(currency)}`;
         const res = await fetch(url);
 
-        if (!res.ok) {
-          throw new Error('Kur API cevap vermedi');
-        }
+        if (!res.ok) throw new Error("Kur API cevap vermedi");
 
-        const data = await res.json();
-        const tl = data?.result;
+        const json = await res.json();
+        const rate = json?.rates?.TRY;
 
-        if (tl != null) {
+        if (!rate) throw new Error("TRY kuru bulunamadı");
 
-          out.textContent =
-            tl.toLocaleString('tr-TR', {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2
-            }) + ' TRY';
+        const tl = amount * rate;
 
-          if (meta) {
-            meta.textContent =
-              `Kur: 1 ${cleanCurrency} = ${(tl / amount).toLocaleString('tr-TR', {
-                minimumFractionDigits: 4,
-                maximumFractionDigits: 4
-              })} TRY (güncel kur)`;
-          }
+        amountTry.textContent = tl.toLocaleString("tr-TR", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }) + " TRY";
 
-          return;
-        }
+        rateMeta.textContent = `Güncel kur kullanıldı: 1 ${currency} = ${rate.toLocaleString("tr-TR", {
+          minimumFractionDigits: 4,
+          maximumFractionDigits: 4
+        })} TRY`;
 
-        throw new Error('TRY kuru bulunamadı');
-
-      } catch (e) {
-
+      } catch (err) {
         const fallbackRates = {
-          EUR: 53,
           USD: 45,
-          GBP: 52
+          EUR: 53,
+          GBP: 58
         };
 
-        const fallbackRate = fallbackRates[cleanCurrency] || 45;
-
+        const fallbackRate = fallbackRates[currency] || 45;
         const tl = amount * fallbackRate;
 
-        out.textContent =
-          tl.toLocaleString('tr-TR', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-          }) + ' TRY';
+        amountTry.textContent = tl.toLocaleString("tr-TR", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }) + " TRY";
 
-        if (meta) {
-          meta.textContent =
-            `Kur otomatik alınamadı. Geçici kur kullanıldı: 1 ${cleanCurrency} = ${fallbackRate} TRY`;
-        }
+        rateMeta.textContent = `Canlı kur geçici olarak alınamadı. Yaklaşık kur kullanıldı: 1 ${currency} = ${fallbackRate} TRY`;
       }
     }
 
-    const form=document.getElementById('paymentForm'); if(!form) return;
-    form.addEventListener('submit',function(ev){
-      const method=(form.querySelector('input[name="payment_method"]:checked')||{}).value;
-      if(method==='bank_transfer'){
+    document.addEventListener("DOMContentLoaded", function () {
+      const form = document.getElementById("paymentForm");
+      if (!form) return;
+
+      form.addEventListener("submit", function (ev) {
+        const selected = form.querySelector('input[name="payment_method"]:checked');
+        const method = selected ? selected.value : null;
+
+        if (method !== "bank_transfer") return;
+
         ev.preventDefault();
-        if(!document.getElementById('bankModal')){document.body.insertAdjacentHTML('beforeend',modalHtml());}
-        const modalEl = document.getElementById('bankModal');
+
+        if (!document.getElementById("bankModal")) {
+          document.body.insertAdjacentHTML("beforeend", modalHtml());
+        }
+
+        const modalEl = document.getElementById("bankModal");
         const modal = new bootstrap.Modal(modalEl);
+
         modal.show();
+        fillTryAmount(modalEl);
+      });
 
-        // IBAN kopyala
-        modalEl.addEventListener('click',function(e){
-          const btn=e.target.closest('#copyIbanBtn'); if(!btn) return;
-          const txt=document.getElementById('ibanText').textContent.trim();
-          navigator.clipboard.writeText(txt).then(()=>{btn.textContent='Kopyalandı!'; setTimeout(()=>btn.textContent='Kopyala',1500);});
+      document.body.addEventListener("click", function (e) {
+        const btn = e.target.closest("#copyIbanBtn");
+        if (!btn) return;
+
+        const ibanText = document.getElementById("ibanText");
+        if (!ibanText) return;
+
+        navigator.clipboard.writeText(ibanText.textContent.trim()).then(function () {
+          btn.textContent = "Kopyalandı!";
+          setTimeout(function () {
+            btn.textContent = "Kopyala";
+          }, 1500);
         });
-
-        // TRY hesapla ve yaz
-        fillTryAmounts(modalEl);
-      }
+      });
     });
   })();
   </script>
