@@ -1267,8 +1267,8 @@
 
       try {
         const url =
-          `https://api.frankfurter.app/latest?amount=${encodeURIComponent(amount)}&from=${encodeURIComponent(cleanCurrency)}&to=TRY`;
-
+        const url =
+          `https://api.exchangerate.host/convert?from=${encodeURIComponent(cleanCurrency)}&to=TRY&amount=${encodeURIComponent(amount)}`;
         const res = await fetch(url);
 
         if (!res.ok) {
@@ -1276,7 +1276,7 @@
         }
 
         const data = await res.json();
-        const tl = data?.rates?.TRY;
+        const tl = data?.result;
 
         if (tl != null) {
 
@@ -1291,7 +1291,7 @@
               `Kur: 1 ${cleanCurrency} = ${(tl / amount).toLocaleString('tr-TR', {
                 minimumFractionDigits: 4,
                 maximumFractionDigits: 4
-              })} TRY (tarih: ${data.date})`;
+              })} TRY (güncel kur)`;
           }
 
           return;
@@ -1302,8 +1302,8 @@
       } catch (e) {
 
         const fallbackRates = {
-          EUR: 45,
-          USD: 42,
+          EUR: 53,
+          USD: 45,
           GBP: 52
         };
 
@@ -1380,41 +1380,7 @@
   });
   </script>
 
-  <script>
-  (async function () {
-    const baseEl = document.getElementById('payable');
-    if (!baseEl) return;
 
-    const amount = parseFloat(baseEl.dataset.amount || '0');
-    const from   = (baseEl.dataset.currency || 'USD').toUpperCase();
-    const to     = 'TRY';
-
-    // Aynı para birimiyse dönüştürme yapma
-    if (from === to) {
-      document.getElementById('payableTry').textContent =
-        amount.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' TRY';
-      return;
-    }
-
-    try {
-      // Frankfurter: ücretsiz, CORS açık
-      const res  = await fetch(`https://api.frankfurter.app/latest?amount=${amount}&from=${from}&to=${to}`);
-      const data = await res.json();
-      const tryAmt = data.rates?.[to];
-
-      if (tryAmt) {
-        document.getElementById('payableTry').textContent =
-          tryAmt.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' TRY';
-        // İstersen tooltip’e tarih yaz
-        baseEl.title = `Kur tarihi: ${data.date} (${from}→${to})`;
-      } else {
-        document.getElementById('payableTry').textContent = 'kur alınamadı';
-      }
-    } catch (e) {
-      document.getElementById('payableTry').textContent = 'kur alınamadı';
-    }
-  })();
-  </script>
 
   <script>
   document.addEventListener("DOMContentLoaded", function () {
