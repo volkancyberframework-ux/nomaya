@@ -1235,32 +1235,92 @@
     async function fillTryAmounts(modalEl){
       const out = modalEl.querySelector('#amountTry');
       const meta = modalEl.querySelector('#rateMeta');
+
       if (!out) return;
 
       const { amount, currency } = getBaseAmountAndCurrency();
-      if (!amount) { out.textContent = '—'; return; }
 
-      if (currency === 'TRY') {
-        out.textContent = amount.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' TRY';
-        meta.textContent = 'Baz para birimi TRY olduğundan kur çevrimi yapılmadı.';
+      if (!amount) {
+        out.textContent = '—';
+        return;
+      }
+
+      let cleanCurrency = String(currency || 'EUR').trim().toUpperCase();
+
+      if (cleanCurrency === '€') cleanCurrency = 'EUR';
+      if (cleanCurrency === '$') cleanCurrency = 'USD';
+      if (cleanCurrency === 'TL') cleanCurrency = 'TRY';
+      if (cleanCurrency === '₺') cleanCurrency = 'TRY';
+
+      if (cleanCurrency === 'TRY') {
+        out.textContent = amount.toLocaleString('tr-TR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }) + ' TRY';
+
+        if (meta) {
+          meta.textContent = 'Baz para birimi TRY olduğundan kur çevrimi yapılmadı.';
+        }
+
         return;
       }
 
       try {
-        const url = `https://api.frankfurter.app/latest?amount=${encodeURIComponent(amount)}&from=${encodeURIComponent(currency)}&to=TRY`;
+        const url =
+          `https://api.frankfurter.app/latest?amount=${encodeURIComponent(amount)}&from=${encodeURIComponent(cleanCurrency)}&to=TRY`;
+
         const res = await fetch(url);
+
+        if (!res.ok) {
+          throw new Error('Kur API cevap vermedi');
+        }
+
         const data = await res.json();
         const tl = data?.rates?.TRY;
+
         if (tl != null) {
-          out.textContent = tl.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' TRY';
-          meta.textContent = `Kur: 1 ${currency} = ${(tl/amount).toLocaleString('tr-TR', {minimumFractionDigits:4, maximumFractionDigits:4})} TRY (tarih: ${data.date})`;
-        } else {
-          out.textContent = 'kur alınamadı';
-          meta.textContent = '';
+
+          out.textContent =
+            tl.toLocaleString('tr-TR', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            }) + ' TRY';
+
+          if (meta) {
+            meta.textContent =
+              `Kur: 1 ${cleanCurrency} = ${(tl / amount).toLocaleString('tr-TR', {
+                minimumFractionDigits: 4,
+                maximumFractionDigits: 4
+              })} TRY (tarih: ${data.date})`;
+          }
+
+          return;
         }
+
+        throw new Error('TRY kuru bulunamadı');
+
       } catch (e) {
-        out.textContent = 'kur alınamadı';
-        if (meta) meta.textContent = '';
+
+        const fallbackRates = {
+          EUR: 45,
+          USD: 42,
+          GBP: 52
+        };
+
+        const fallbackRate = fallbackRates[cleanCurrency] || 45;
+
+        const tl = amount * fallbackRate;
+
+        out.textContent =
+          tl.toLocaleString('tr-TR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          }) + ' TRY';
+
+        if (meta) {
+          meta.textContent =
+            `Kur otomatik alınamadı. Geçici kur kullanıldı: 1 ${cleanCurrency} = ${fallbackRate} TRY`;
+        }
       }
     }
 
