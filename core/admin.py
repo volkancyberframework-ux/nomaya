@@ -14,6 +14,14 @@ from .models import (
 
 
 # ─────────────────────────────
+# Helpers
+# ─────────────────────────────
+def admin_id(obj):
+    return obj.pk
+admin_id.short_description = "ID"
+
+
+# ─────────────────────────────
 # Custom Filters
 # ─────────────────────────────
 class TourFilterForActivity(admin.SimpleListFilter):
@@ -21,13 +29,11 @@ class TourFilterForActivity(admin.SimpleListFilter):
     parameter_name = "tour"
 
     def lookups(self, request, model_admin):
-        return [(t.id, t.title) for t in Tour.objects.order_by("title")]
+        return [(t.id, f"#{t.id} - {t.title}") for t in Tour.objects.order_by("title")]
 
     def queryset(self, request, queryset):
         if self.value():
-            return queryset.filter(
-                days__tourday__tour_id=self.value()
-            ).distinct()
+            return queryset.filter(days__tourday__tour_id=self.value()).distinct()
         return queryset
 
 
@@ -37,7 +43,7 @@ class DayFilterForActivity(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
         return [
-            (d.id, f"{d.city.name} - Day {d.day_number} - {d.title or d.city.name}")
+            (d.id, f"#{d.id} - {d.city.name} - Day {d.day_number} - {d.title or d.city.name}")
             for d in Day.objects.select_related("city").order_by("city__name", "day_number")
         ]
 
@@ -52,7 +58,7 @@ class TourFilterForDay(admin.SimpleListFilter):
     parameter_name = "tour"
 
     def lookups(self, request, model_admin):
-        return [(t.id, t.title) for t in Tour.objects.order_by("title")]
+        return [(t.id, f"#{t.id} - {t.title}") for t in Tour.objects.order_by("title")]
 
     def queryset(self, request, queryset):
         if self.value():
@@ -66,8 +72,13 @@ class TourFilterForDay(admin.SimpleListFilter):
 class TravelerInline(admin.TabularInline):
     model = Traveler
     extra = 0
-    fields = ("title", "first_name", "last_name", "dob", "passport_no", "phone")
+    fields = ("admin_id", "title", "first_name", "last_name", "dob", "passport_no", "phone")
+    readonly_fields = ("admin_id",)
     ordering = ("id",)
+
+    def admin_id(self, obj):
+        return obj.pk or "New"
+    admin_id.short_description = "ID"
 
 
 @admin.register(Traveler)
@@ -78,7 +89,7 @@ class TravelerAdmin(admin.ModelAdmin):
     )
     list_filter = ("title", "order__tour", "created_at")
     search_fields = (
-        "first_name", "last_name", "passport_no", "phone",
+        "id", "first_name", "last_name", "passport_no", "phone",
         "order__id", "order__tour__title"
     )
     ordering = ("id",)
@@ -113,11 +124,11 @@ class OrderAdmin(admin.ModelAdmin):
         ("created_at", admin.DateFieldListFilter),
         "tour",
     )
-    search_fields = ("public_id", "email", "tour__title")
+    search_fields = ("id", "public_id", "email", "tour__title")
 
-    readonly_fields = ("public_id", "created_at",)
+    readonly_fields = ("id", "public_id", "created_at",)
     fieldsets = (
-        ("Bağlantı", {"fields": ("tour", "public_id", "session_key")}),
+        ("Bağlantı", {"fields": ("id", "tour", "public_id", "session_key")}),
         ("Müşteri", {"fields": ("email", "pax", "same_room")}),
         ("Tarihler", {"fields": ("start_date", "end_date")}),
         ("Görünürlük / Dahiller", {
@@ -132,17 +143,11 @@ class OrderAdmin(admin.ModelAdmin):
         }),
     )
 
-    def date_range(self, obj):
-        if obj.start_date and obj.end_date:
-            return f"{obj.start_date:%d %b} – {obj.end_date:%d %b %Y}"
-        return ""
-    date_range.short_description = "Tarih Aralığı"
-
     def link_payment_status(self, obj):
         if obj.payment_method == "payment_link":
             color = "green" if obj.link_payment_accepted else "red"
             text = "Evet" if obj.link_payment_accepted else "Hayır"
-            return format_html(f'<b style="color:{color}">{text}</b>')
+            return format_html('<b style="color:{}">{}</b>', color, text)
         return "-"
     link_payment_status.short_description = "Link Ödemesi Onaylı mı?"
 
@@ -153,24 +158,39 @@ class OrderAdmin(admin.ModelAdmin):
 class TourDayInline(admin.TabularInline):
     model = TourDay
     extra = 0
-    fields = ("day", "order", "title")
+    fields = ("admin_id", "day", "order", "title")
+    readonly_fields = ("admin_id",)
     ordering = ("order", "id")
+
+    def admin_id(self, obj):
+        return obj.pk or "New"
+    admin_id.short_description = "ID"
 
 
 class TourPhotoInline(SortableInlineAdminMixin, admin.TabularInline):
     model = TourPhoto
     extra = 1
     max_num = 10
-    fields = ("order", "image", "alt_text")
+    fields = ("admin_id", "order", "image", "alt_text")
+    readonly_fields = ("admin_id",)
     ordering = ("order",)
+
+    def admin_id(self, obj):
+        return obj.pk or "New"
+    admin_id.short_description = "ID"
 
 
 class TourBulletInline(SortableInlineAdminMixin, admin.TabularInline):
     model = TourBullet
     extra = 1
     autocomplete_fields = ("bullet",)
-    fields = ("section", "bullet", "order")
+    fields = ("admin_id", "section", "bullet", "order")
+    readonly_fields = ("admin_id",)
     ordering = ("section", "order")
+
+    def admin_id(self, obj):
+        return obj.pk or "New"
+    admin_id.short_description = "ID"
 
 
 # ─────────────────────────────
@@ -180,17 +200,26 @@ class DayImageInline(SortableInlineAdminMixin, admin.TabularInline):
     model = DayImage
     extra = 1
     max_num = 3
-    fields = ("order", "image", "alt_text")
+    fields = ("admin_id", "order", "image", "alt_text")
+    readonly_fields = ("admin_id",)
     ordering = ("order",)
+
+    def admin_id(self, obj):
+        return obj.pk or "New"
+    admin_id.short_description = "ID"
 
 
 class DayFlightInline(SortableInlineAdminMixin, admin.TabularInline):
     model = DayFlight
     extra = 0
     autocomplete_fields = ("flight",)
-    fields = ("order", "flight", "flight_price")
-    readonly_fields = ("flight_price",)
+    fields = ("admin_id", "order", "flight", "flight_price")
+    readonly_fields = ("admin_id", "flight_price")
     ordering = ("order",)
+
+    def admin_id(self, obj):
+        return obj.pk or "New"
+    admin_id.short_description = "ID"
 
     def flight_price(self, obj):
         f = getattr(obj, "flight", None)
@@ -204,9 +233,13 @@ class DayTransferInline(SortableInlineAdminMixin, admin.TabularInline):
     model = DayTransfer
     extra = 0
     autocomplete_fields = ("transfer",)
-    fields = ("order", "transfer", "transfer_price")
-    readonly_fields = ("transfer_price",)
+    fields = ("admin_id", "order", "transfer", "transfer_price")
+    readonly_fields = ("admin_id", "transfer_price")
     ordering = ("order",)
+
+    def admin_id(self, obj):
+        return obj.pk or "New"
+    admin_id.short_description = "ID"
 
     def transfer_price(self, obj):
         t = getattr(obj, "transfer", None)
@@ -220,25 +253,33 @@ class DayHotelInline(SortableInlineAdminMixin, admin.TabularInline):
     model = DayHotel
     extra = 0
     autocomplete_fields = ("hotel",)
-    fields = ("order", "hotel", "hotel_price")
-    readonly_fields = ("hotel_price",)
+    fields = ("admin_id", "order", "hotel", "hotel_price")
+    readonly_fields = ("admin_id", "hotel_price")
     ordering = ("order",)
+
+    def admin_id(self, obj):
+        return obj.pk or "New"
+    admin_id.short_description = "ID"
 
     def hotel_price(self, obj):
         h = getattr(obj, "hotel", None)
         if not h:
             return "—"
         return f"{h.price_per_night} {getattr(h, 'price_currency', '')}".strip()
-    hotel_price.short_description = "Hotel Price (per night)"
+    hotel_price.short_description = "Hotel Price / Night"
 
 
 class DayActivityInline(SortableInlineAdminMixin, admin.TabularInline):
     model = DayActivity
     extra = 0
     autocomplete_fields = ("activity",)
-    fields = ("order", "activity", "activity_price")
-    readonly_fields = ("activity_price",)
+    fields = ("admin_id", "order", "activity", "activity_price")
+    readonly_fields = ("admin_id", "activity_price")
     ordering = ("order",)
+
+    def admin_id(self, obj):
+        return obj.pk or "New"
+    admin_id.short_description = "ID"
 
     def activity_price(self, obj):
         a = getattr(obj, "activity", None)
@@ -254,9 +295,10 @@ class DayActivityInline(SortableInlineAdminMixin, admin.TabularInline):
 @admin.register(Tour)
 class TourAdmin(SortableAdminBase, admin.ModelAdmin):
     list_display = (
-        "title", "duration_label", "days_total_for_list",
+        "id", "title", "duration_label", "days_total_for_list",
         "commission", "price", "price_currency", "is_published"
     )
+    list_display_links = ("id", "title")
     list_filter = (
         "is_published",
         "places_covered__country",
@@ -265,12 +307,13 @@ class TourAdmin(SortableAdminBase, admin.ModelAdmin):
         "tour_types",
         ("created_at", admin.DateFieldListFilter),
     )
-    search_fields = ("title", "overview", "info", "places_covered__name", "tour_types__name")
+    search_fields = ("id", "title", "overview", "info", "places_covered__name", "tour_types__name")
     prepopulated_fields = {"slug": ("title",)}
     filter_horizontal = ("places_covered", "tour_types")
 
-    readonly_fields = ("duration_label", "start_point", "end_point", "days_total_preview",)
+    readonly_fields = ("id", "duration_label", "start_point", "end_point", "days_total_preview",)
     fields = (
+        "id",
         "title", "slug", "is_published", "badge_text",
         ("start_date", "end_date"),
         "overview", "info",
@@ -312,7 +355,8 @@ class TourAdmin(SortableAdminBase, admin.ModelAdmin):
 # ─────────────────────────────
 @admin.register(Day)
 class DayAdmin(SortableAdminBase, admin.ModelAdmin):
-    list_display = ("city", "day_number", "title", "price", "price_currency")
+    list_display = ("id", "city", "day_number", "title", "price", "price_currency")
+    list_display_links = ("id", "city")
     list_filter = (
         TourFilterForDay,
         "city__country",
@@ -320,14 +364,82 @@ class DayAdmin(SortableAdminBase, admin.ModelAdmin):
         "price_currency",
     )
     search_fields = (
+        "id",
         "title",
         "description",
         "city__name",
         "city__country__name",
         "tourday__tour__title",
     )
-    readonly_fields = ("price",)
+    readonly_fields = ("id", "price",)
     inlines = [DayImageInline, DayFlightInline, DayTransferInline, DayHotelInline, DayActivityInline]
+
+
+# ─────────────────────────────
+# Through / Inline Models Admin
+# ─────────────────────────────
+@admin.register(TourDay)
+class TourDayAdmin(admin.ModelAdmin):
+    list_display = ("id", "tour", "day", "order", "title")
+    list_display_links = ("id", "tour")
+    list_filter = ("tour", "day__city", "day__city__country")
+    search_fields = ("id", "tour__title", "day__title", "day__city__name", "title")
+    autocomplete_fields = ("tour", "day")
+    ordering = ("tour", "order", "id")
+
+
+@admin.register(DayFlight)
+class DayFlightAdmin(admin.ModelAdmin):
+    list_display = ("id", "day", "flight", "order")
+    list_display_links = ("id", "day")
+    list_filter = ("day__city", "day__city__country", "flight__airline")
+    search_fields = ("id", "day__title", "day__city__name", "flight__flight_number")
+    autocomplete_fields = ("day", "flight")
+    ordering = ("day", "order", "id")
+
+
+@admin.register(DayTransfer)
+class DayTransferAdmin(admin.ModelAdmin):
+    list_display = ("id", "day", "transfer", "order")
+    list_display_links = ("id", "day")
+    list_filter = ("day__city", "day__city__country", "transfer__city")
+    search_fields = ("id", "day__title", "day__city__name", "transfer__vehicle_type")
+    autocomplete_fields = ("day", "transfer")
+    ordering = ("day", "order", "id")
+
+
+@admin.register(DayHotel)
+class DayHotelAdmin(admin.ModelAdmin):
+    list_display = ("id", "day", "hotel", "order")
+    list_display_links = ("id", "day")
+    list_filter = ("day__city", "day__city__country", "hotel__city")
+    search_fields = ("id", "day__title", "day__city__name", "hotel__name")
+    autocomplete_fields = ("day", "hotel")
+    ordering = ("day", "order", "id")
+
+
+@admin.register(DayActivity)
+class DayActivityAdmin(admin.ModelAdmin):
+    list_display = ("id", "day", "activity", "order", "day_city", "activity_city")
+    list_display_links = ("id", "day")
+    list_filter = ("day__city", "day__city__country", "activity__city", "activity__city__country")
+    search_fields = (
+        "id",
+        "day__title",
+        "day__city__name",
+        "activity__title",
+        "activity__city__name",
+    )
+    autocomplete_fields = ("day", "activity")
+    ordering = ("day", "order", "id")
+
+    def day_city(self, obj):
+        return obj.day.city if obj.day_id else "-"
+    day_city.short_description = "Day City"
+
+    def activity_city(self, obj):
+        return obj.activity.city if obj.activity_id else "-"
+    activity_city.short_description = "Activity City"
 
 
 # ─────────────────────────────
@@ -335,51 +447,58 @@ class DayAdmin(SortableAdminBase, admin.ModelAdmin):
 # ─────────────────────────────
 @admin.register(Bullet)
 class BulletAdmin(admin.ModelAdmin):
-    list_display = ("text", "icon", "is_active", "tags")
+    list_display = ("id", "text", "icon", "is_active", "tags")
+    list_display_links = ("id", "text")
     list_filter = ("icon", "is_active", "tags")
-    search_fields = ("text", "tags")
+    search_fields = ("id", "text", "tags")
 
 
 @admin.register(Country)
 class CountryAdmin(admin.ModelAdmin):
-    list_display = ("name", "iso2")
+    list_display = ("id", "name", "iso2")
+    list_display_links = ("id", "name")
     list_filter = ("iso2",)
-    search_fields = ("name", "iso2")
+    search_fields = ("id", "name", "iso2")
 
 
 @admin.register(City)
 class CityAdmin(admin.ModelAdmin):
-    list_display = ("name", "country")
+    list_display = ("id", "name", "country")
+    list_display_links = ("id", "name")
     list_filter = ("country",)
-    search_fields = ("name", "country__name")
+    search_fields = ("id", "name", "country__name")
 
 
 @admin.register(TourType)
 class TourTypeAdmin(admin.ModelAdmin):
-    list_display = ("name",)
-    search_fields = ("name",)
+    list_display = ("id", "name")
+    list_display_links = ("id", "name")
+    search_fields = ("id", "name")
 
 
 @admin.register(Airport)
 class AirportAdmin(admin.ModelAdmin):
-    list_display = ("iata", "name", "city")
+    list_display = ("id", "iata", "name", "city")
+    list_display_links = ("id", "iata")
     list_filter = ("city__country", "city")
-    search_fields = ("iata", "name", "city__name", "city__country__name")
+    search_fields = ("id", "iata", "name", "city__name", "city__country__name")
 
 
 @admin.register(Airline)
 class AirlineAdmin(admin.ModelAdmin):
-    list_display = ("name",)
-    search_fields = ("name",)
+    list_display = ("id", "name")
+    list_display_links = ("id", "name")
+    search_fields = ("id", "name")
 
 
 @admin.register(Flight)
 class FlightAdmin(admin.ModelAdmin):
     list_display = (
-        "flight_number", "airline", "origin", "destination",
+        "id", "flight_number", "airline", "origin", "destination",
         "departure_time", "arrival_time", "duration_minutes",
         "price", "price_currency"
     )
+    list_display_links = ("id", "flight_number")
     list_filter = (
         "airline",
         "origin__city__country",
@@ -389,6 +508,7 @@ class FlightAdmin(admin.ModelAdmin):
         "price_currency",
     )
     search_fields = (
+        "id",
         "flight_number",
         "airline__name",
         "origin__iata",
@@ -400,14 +520,16 @@ class FlightAdmin(admin.ModelAdmin):
 
 @admin.register(Hotel)
 class HotelAdmin(admin.ModelAdmin):
-    list_display = ("name", "city", "star", "hotel_type", "price_per_night", "price_currency")
+    list_display = ("id", "name", "city", "star", "hotel_type", "price_per_night", "price_currency")
+    list_display_links = ("id", "name")
     list_filter = ("city__country", "city", "star", "hotel_type", "price_currency")
-    search_fields = ("name", "address", "city__name", "city__country__name")
+    search_fields = ("id", "name", "address", "city__name", "city__country__name")
 
 
 @admin.register(AirportTransfer)
 class AirportTransferAdmin(admin.ModelAdmin):
-    list_display = ("city", "direction", "airport", "hotel", "vehicle_type", "price", "price_currency")
+    list_display = ("id", "city", "direction", "airport", "hotel", "vehicle_type", "price", "price_currency")
+    list_display_links = ("id", "city")
     list_filter = (
         "city__country",
         "city",
@@ -418,6 +540,7 @@ class AirportTransferAdmin(admin.ModelAdmin):
         "price_currency",
     )
     search_fields = (
+        "id",
         "airport__iata",
         "airport__name",
         "hotel__name",
@@ -432,9 +555,10 @@ class AirportTransferAdmin(admin.ModelAdmin):
 @admin.register(Activity)
 class ActivityAdmin(admin.ModelAdmin):
     list_display = (
-        "title", "city", "duration_hours", "price", "price_currency",
+        "id", "title", "city", "duration_hours", "price", "price_currency",
         "tour_types_list", "connected_days", "connected_tours"
     )
+    list_display_links = ("id", "title")
 
     list_filter = (
         TourFilterForActivity,
@@ -446,6 +570,7 @@ class ActivityAdmin(admin.ModelAdmin):
     )
 
     search_fields = (
+        "id",
         "title",
         "location_text",
         "city__name",
@@ -464,20 +589,21 @@ class ActivityAdmin(admin.ModelAdmin):
     tour_types_list.short_description = "Tour Types"
 
     def connected_days(self, obj):
-        day_ids = obj.dayactivity_set.values_list(
+        items = obj.dayactivity_set.select_related("day", "day__city").values_list(
+            "id",
+            "day__id",
             "day__day_number",
             "day__title",
             "day__city__name",
         ).distinct()
 
-        if not day_ids:
+        if not items:
             return "-"
 
         return ", ".join([
-            f"{city} / Day {day_number} - {title or city}"
-            for day_number, title, city in day_ids
+            f"DayActivity #{da_id} | Day #{day_id} | {city} / Day {day_number} - {title or city}"
+            for da_id, day_id, day_number, title, city in items
         ])
-
     connected_days.short_description = "Connected Days"
 
     def connected_tours(self, obj):
@@ -488,6 +614,6 @@ class ActivityAdmin(admin.ModelAdmin):
         if not tours.exists():
             return "-"
 
-        return ", ".join(tours.values_list("title", flat=True))
+        return ", ".join([f"#{t.id} - {t.title}" for t in tours])
 
     connected_tours.short_description = "Connected Tours"
