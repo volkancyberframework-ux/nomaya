@@ -4,7 +4,7 @@ from decimal import Decimal
 from django import forms
 from django.contrib import admin
 from adminsortable2.admin import SortableInlineAdminMixin, SortableAdminBase
-
+from django.utils.html import format_html
 from .models import (
     Country, City, Airport, Airline, Flight,
     Tour, TourDay, TourPhoto, Bullet, TourBullet,
@@ -327,7 +327,10 @@ class AirportTransferAdmin(admin.ModelAdmin):
 # admin.py
 @admin.register(Activity)
 class ActivityAdmin(admin.ModelAdmin):
-    list_display = ("title", "city", "duration_hours", "price", "price_currency", "tour_types_list")
+    list_display = (
+        "title", "city", "duration_hours", "price", "price_currency",
+        "tour_types_list", "connected_days", "connected_tours"
+    )
     list_filter = (
         ("city__country", admin.RelatedOnlyFieldListFilter),
         ("city", admin.RelatedOnlyFieldListFilter),
@@ -343,3 +346,29 @@ class ActivityAdmin(admin.ModelAdmin):
     def tour_types_list(self, obj):
         return ", ".join(obj.tour_types.values_list("name", flat=True))
     tour_types_list.short_description = "Tour Types"
+
+    def connected_days(self, obj):
+        day_ids = obj.dayactivity_set.values_list("day__day_number", "day__title").distinct()
+
+        if not day_ids:
+            return "-"
+
+        return ", ".join([
+            f"Day {day_number} - {title}"
+            for day_number, title in day_ids
+        ])
+
+    connected_days.short_description = "Connected Days"
+
+
+    def connected_tours(self, obj):
+        tours = Tour.objects.filter(
+            tour_days__day__dayactivity__activity=obj
+        ).distinct()
+
+        if not tours.exists():
+            return "-"
+
+        return ", ".join(tours.values_list("title", flat=True))
+
+    connected_tours.short_description = "Connected Tours"
