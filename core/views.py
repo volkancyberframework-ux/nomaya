@@ -946,15 +946,14 @@ def update_location(request):
 
 
     LiveLocation.objects.update_or_create(
-         session_id=code,
-         defaults={
-             "name": order.email or code,
-             "latitude": data.get("latitude"),
-             "longitude": data.get("longitude"),
-             "accuracy": data.get("accuracy"),
-             "speed": data.get("speed"),
-             "updated_at": timezone.now(),
-         }
-     )
+        session_id=code,
+        defaults={
+            "name": order.email or code,
+            "latitude": data.get("latitude"),
+            "longitude": data.get("longitude"),
+            "accuracy": data.get("accuracy"),
+            "updated_at": timezone.now(),
+        }
+    )
 
     return JsonResponse({"success": True})
