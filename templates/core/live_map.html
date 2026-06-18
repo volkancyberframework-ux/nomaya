@@ -1,53 +1,36 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
-  <title>Live Locations</title>
+  <title>Nomaya Live Locations</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
 
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #111;
-    }
-
-    #map {
-      height: 100vh;
-      width: 100%;
-    }
+    html, body { margin:0; height:100%; font-family:Arial,sans-serif; }
+    #map { height:100vh; width:100%; }
 
     .panel {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      z-index: 999;
-      background: rgba(20,20,20,0.88);
-      color: white;
-      padding: 14px 16px;
-      border-radius: 14px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.35);
-      min-width: 220px;
+      position:absolute; top:20px; left:20px; z-index:999;
+      background:rgba(20,20,20,.9); color:white;
+      padding:14px 16px; border-radius:16px;
+      box-shadow:0 8px 30px rgba(0,0,0,.35);
+      width:260px; max-height:80vh; overflow:auto;
     }
 
-    .panel h3 {
-      margin: 0 0 8px;
-      font-size: 16px;
+    .panel h3 { margin:0 0 8px; font-size:17px; }
+    .count { font-size:13px; opacity:.8; margin-bottom:10px; }
+
+    .person {
+      padding:10px 12px; margin-top:8px;
+      background:rgba(255,255,255,.12);
+      border-radius:12px; cursor:pointer;
+      font-size:14px;
     }
 
-    .count {
-      font-size: 13px;
-      opacity: 0.8;
-    }
+    .person:hover { background:rgba(255,255,255,.24); }
 
-    .marker-label {
-      background: #111;
-      color: white;
-      padding: 4px 8px;
-      border-radius: 999px;
-      font-size: 12px;
-      border: 1px solid white;
+    .small {
+      font-size:11px; opacity:.7; margin-top:3px;
     }
   </style>
 </head>
@@ -57,6 +40,7 @@
 <div class="panel">
   <h3>📍 Live Locations</h3>
   <div class="count" id="count">Loading...</div>
+  <div id="peopleList"></div>
 </div>
 
 <div id="map"></div>
@@ -64,88 +48,102 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
-const map = L.map('map', {
-  zoomControl: false
-}).setView([10.7303, 106.6461], 12);
+const map = L.map("map", { zoomControl:false }).setView([10.7303, 106.6461], 12);
 
-L.control.zoom({
-  position: 'bottomright'
-}).addTo(map);
+L.control.zoom({ position:"bottomright" }).addTo(map);
 
-// Daha Google Maps benzeri temiz map
-L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-  maxZoom: 20,
-  attribution: '&copy; OpenStreetMap &copy; CARTO'
+L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+  maxZoom:20,
+  attribution:"&copy; OpenStreetMap &copy; CARTO"
 }).addTo(map);
 
 let markers = {};
-let boundsGroup = L.featureGroup().addTo(map);
+let firstLoad = true;
 
 function getInitials(name) {
-  return name.substring(0, 2).toUpperCase();
+  return String(name || "NA").substring(0, 2).toUpperCase();
 }
 
 function createIcon(name) {
   return L.divIcon({
     html: `
       <div style="
-        background:#1677ff;
-        color:white;
-        width:42px;
-        height:42px;
-        border-radius:50%;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        font-weight:bold;
-        border:3px solid white;
-        box-shadow:0 4px 12px rgba(0,0,0,.35);
-      ">
-        ${getInitials(name)}
-      </div>
+        background:#1677ff;color:white;width:44px;height:44px;border-radius:50%;
+        display:flex;align-items:center;justify-content:center;font-weight:bold;
+        border:3px solid white;box-shadow:0 5px 14px rgba(0,0,0,.38);
+      ">${getInitials(name)}</div>
     `,
-    className: "",
-    iconSize: [42, 42],
-    iconAnchor: [21, 21],
+    className:"",
+    iconSize:[44,44],
+    iconAnchor:[22,22],
   });
 }
 
 async function loadLocations() {
-  const res = await fetch("/api/live-locations/");
-  const locations = await res.json();
+  try {
+    const res = await fetch("/api/live-locations/?t=" + Date.now());
+    const locations = await res.json();
 
-  document.getElementById("count").innerText = `${locations.length} kişi takipte`;
+    const peopleList = document.getElementById("peopleList");
+    peopleList.innerHTML = "";
+    document.getElementById("count").innerText = `${locations.length} kişi takipte`;
 
-  boundsGroup.clearLayers();
+    const bounds = [];
 
-  locations.forEach(loc => {
-    const key = loc.session_id || "Unknown";
-    const latlng = [loc.latitude, loc.longitude];
+    locations.forEach(loc => {
+      const key = loc.session_id || "Unknown";
+      const lat = Number(loc.latitude);
+      const lng = Number(loc.longitude);
 
-    if (markers[key]) {
-      markers[key].setLatLng(latlng);
-    } else {
-      markers[key] = L.marker(latlng, {
-        icon: createIcon(key)
-      }).addTo(map);
+      if (!lat || !lng) return;
+
+      const latlng = [lat, lng];
+      bounds.push(latlng);
+
+      if (markers[key]) {
+        markers[key].setLatLng(latlng);
+      } else {
+        markers[key] = L.marker(latlng, { icon:createIcon(key) }).addTo(map);
+      }
+
+      markers[key].bindPopup(`
+        <b>${key}</b><br>
+        Lat: ${lat}<br>
+        Lng: ${lng}<br>
+        Accuracy: ${loc.accuracy || "-"} m<br>
+        Updated: ${loc.updated_at || "-"}
+      `);
+
+      markers[key].off("click");
+      markers[key].on("click", function() {
+        map.setView(latlng, 16);
+        markers[key].openPopup();
+      });
+
+      const div = document.createElement("div");
+      div.className = "person";
+      div.innerHTML = `
+        <b>${key}</b>
+        <div class="small">📍 ${lat.toFixed(5)}, ${lng.toFixed(5)}</div>
+        <div class="small">🕒 ${loc.updated_at || "-"}</div>
+      `;
+
+      div.onclick = function() {
+        map.setView(latlng, 16);
+        markers[key].openPopup();
+      };
+
+      peopleList.appendChild(div);
+    });
+
+    if (firstLoad && bounds.length > 0) {
+      map.fitBounds(bounds, { padding:[80,80], maxZoom:8 });
+      firstLoad = false;
     }
 
-    markers[key].bindPopup(`
-      <b>${key}</b><br>
-      Lat: ${loc.latitude}<br>
-      Lng: ${loc.longitude}<br>
-      Accuracy: ${loc.accuracy || "-"} m<br>
-      Updated: ${loc.updated_at}
-    `);
-
-    boundsGroup.addLayer(markers[key]);
-  });
-
-  if (locations.length > 0) {
-    map.fitBounds(boundsGroup.getBounds(), {
-      padding: [80, 80],
-      maxZoom: 15
-    });
+  } catch (e) {
+    document.getElementById("count").innerText = "Konumlar yüklenemedi.";
+    console.error(e);
   }
 }
 
