@@ -1,35 +1,157 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Live Map</title>
+  <title>Live Locations</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+
   <style>
-    #map { height: 100vh; width: 100%; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #111;
+    }
+
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
+
+    .panel {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 999;
+      background: rgba(20,20,20,0.88);
+      color: white;
+      padding: 14px 16px;
+      border-radius: 14px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+      min-width: 220px;
+    }
+
+    .panel h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+    }
+
+    .count {
+      font-size: 13px;
+      opacity: 0.8;
+    }
+
+    .marker-label {
+      background: #111;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      border: 1px solid white;
+    }
   </style>
 </head>
+
 <body>
+
+<div class="panel">
+  <h3>📍 Live Locations</h3>
+  <div class="count" id="count">Loading...</div>
+</div>
 
 <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script>
-const map = L.map('map').setView([10.730305520409406, 106.64619687800875], 14);
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 19
+<script>
+const map = L.map('map', {
+  zoomControl: false
+}).setView([10.7303, 106.6461], 12);
+
+L.control.zoom({
+  position: 'bottomright'
 }).addTo(map);
 
-{% for loc in locations %}
-L.marker([{{ loc.latitude }}, {{ loc.longitude }}])
-  .addTo(map)
-  .bindPopup("{{ loc.session_id }}<br>{{ loc.updated_at }}");
-{% endfor %}
+// Daha Google Maps benzeri temiz map
+L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+  maxZoom: 20,
+  attribution: '&copy; OpenStreetMap &copy; CARTO'
+}).addTo(map);
+
+let markers = {};
+let boundsGroup = L.featureGroup().addTo(map);
+
+function getInitials(name) {
+  return name.substring(0, 2).toUpperCase();
+}
+
+function createIcon(name) {
+  return L.divIcon({
+    html: `
+      <div style="
+        background:#1677ff;
+        color:white;
+        width:42px;
+        height:42px;
+        border-radius:50%;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-weight:bold;
+        border:3px solid white;
+        box-shadow:0 4px 12px rgba(0,0,0,.35);
+      ">
+        ${getInitials(name)}
+      </div>
+    `,
+    className: "",
+    iconSize: [42, 42],
+    iconAnchor: [21, 21],
+  });
+}
+
+async function loadLocations() {
+  const res = await fetch("/api/live-locations/");
+  const locations = await res.json();
+
+  document.getElementById("count").innerText = `${locations.length} kişi takipte`;
+
+  boundsGroup.clearLayers();
+
+  locations.forEach(loc => {
+    const key = loc.session_id || "Unknown";
+    const latlng = [loc.latitude, loc.longitude];
+
+    if (markers[key]) {
+      markers[key].setLatLng(latlng);
+    } else {
+      markers[key] = L.marker(latlng, {
+        icon: createIcon(key)
+      }).addTo(map);
+    }
+
+    markers[key].bindPopup(`
+      <b>${key}</b><br>
+      Lat: ${loc.latitude}<br>
+      Lng: ${loc.longitude}<br>
+      Accuracy: ${loc.accuracy || "-"} m<br>
+      Updated: ${loc.updated_at}
+    `);
+
+    boundsGroup.addLayer(markers[key]);
+  });
+
+  if (locations.length > 0) {
+    map.fitBounds(boundsGroup.getBounds(), {
+      padding: [80, 80],
+      maxZoom: 15
+    });
+  }
+}
+
+loadLocations();
+setInterval(loadLocations, 5000);
 </script>
 
-<script>
-setTimeout(() => {
-  window.location.reload();
-}, 5000);
-</script>
 </body>
 </html>

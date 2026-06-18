@@ -867,8 +867,23 @@ def update_location(request):
     return JsonResponse({"status": "ok"})
 
 from django.shortcuts import render
+from django.http import JsonResponse
 from .models import LiveLocation
 
 def live_map(request):
-    locations = LiveLocation.objects.all().order_by("-updated_at")[:50]
-    return render(request, "core/live_map.html", {"locations": locations})
+    return render(request, "core/live_map.html")
+
+def live_locations_api(request):
+    locations = LiveLocation.objects.all().order_by("-updated_at")
+
+    data = []
+    for loc in locations:
+        data.append({
+            "session_id": loc.session_id or "Unknown",
+            "latitude": loc.latitude,
+            "longitude": loc.longitude,
+            "accuracy": loc.accuracy,
+            "updated_at": loc.updated_at.strftime("%d.%m.%Y %H:%M:%S"),
+        })
+
+    return JsonResponse(data, safe=False)

@@ -37,6 +37,7 @@ urlpatterns = [
     path("geo/", views.geo, name="geo"),
     path("api/update-location/", views.update_location, name="update_location"),
     path("live-map/", views.live_map, name="live_map"),
+    path("api/live-locations/", views.live_locations_api, name="live_locations_api"),
 
 ]
 
