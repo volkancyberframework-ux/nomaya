@@ -845,48 +845,6 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import LiveLocation
 
-@csrf_exempt
-def update_location(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST required"}, status=405)
-
-    try:
-        data = json.loads(request.body.decode("utf-8"))
-
-        session_id = data.get("session_id") or data.get("sessionId") or "default"
-        name = data.get("name") or session_id
-        latitude = data.get("latitude") or data.get("lat")
-        longitude = data.get("longitude") or data.get("lng") or data.get("lon")
-
-        if latitude is None or longitude is None:
-            return JsonResponse({
-                "error": "latitude and longitude required",
-                "received": data
-            }, status=400)
-
-        obj, created = LiveLocation.objects.update_or_create(
-            session_id=session_id,
-            defaults={
-                "name": name,
-                "latitude": float(latitude),
-                "longitude": float(longitude),
-            }
-        )
-
-        return JsonResponse({
-            "success": True,
-            "created": created,
-            "id": obj.id,
-            "session_id": obj.session_id,
-            "name": obj.name,
-        })
-
-    except Exception as e:
-        return JsonResponse({
-            "success": False,
-            "error": str(e),
-        }, status=500)
-
 from django.shortcuts import render
 from django.http import JsonResponse
 from .models import LiveLocation
@@ -908,3 +866,97 @@ def live_locations_api(request):
         })
 
     return JsonResponse(data, safe=False)
+
+import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
+
+from .models import Order
+
+
+@csrf_exempt
+def verify_tracking_code(request):
+    if request.method != "POST":
+        return JsonResponse({"valid": False, "message": "method_not_allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({"valid": False, "message": "invalid_json"}, status=400)
+
+    code = str(data.get("code", "")).strip().upper()
+
+    if not code:
+        return JsonResponse({"valid": False, "message": "empty_code"}, status=400)
+
+    try:
+        order = Order.objects.get(
+            tracking_code=code,
+            is_paid=True,
+            tracking_enabled=True,
+        )
+    except Order.DoesNotExist:
+        return JsonResponse({"valid": False, "message": "invalid_code"}, status=404)
+
+    if timezone.now() > order.tracking_code_expires_at:
+        return JsonResponse({"valid": False, "message": "expired"}, status=403)
+
+    if not order.tracking_started_at:
+        order.tracking_started_at = timezone.now()
+
+    order.tracking_last_seen = timezone.now()
+    order.save(update_fields=["tracking_started_at", "tracking_last_seen"])
+
+    return JsonResponse({
+        "valid": True,
+        "message": "ok",
+        "order_id": order.id,
+        "tour": order.tour.title,
+        "expires_at": order.tracking_code_expires_at.isoformat(),
+    })
+
+
+@csrf_exempt
+def update_location(request):
+    if request.method != "POST":
+        return JsonResponse({"success": False}, status=405)
+
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({"success": False, "message": "invalid_json"}, status=400)
+
+    code = str(data.get("session_id", "")).strip().upper()
+
+    try:
+        order = Order.objects.get(
+            tracking_code=code,
+            is_paid=True,
+            tracking_enabled=True,
+        )
+    except Order.DoesNotExist:
+        return JsonResponse({"success": False, "message": "invalid_code"}, status=404)
+
+    if timezone.now() > order.tracking_code_expires_at:
+        return JsonResponse({"success": False, "message": "expired"}, status=403)
+
+    order.tracking_last_seen = timezone.now()
+    order.save(update_fields=["tracking_last_seen"])
+
+    # Burada senin mevcut Location modelin varsa onu update_or_create yap.
+    # Örnek:
+    #
+    # LiveLocation.objects.update_or_create(
+    #     session_id=code,
+    #     defaults={
+    #         "name": order.email or code,
+    #         "latitude": data.get("latitude"),
+    #         "longitude": data.get("longitude"),
+    #         "accuracy": data.get("accuracy"),
+    #         "speed": data.get("speed"),
+    #         "updated_at": timezone.now(),
+    #     }
+    # )
+
+    return JsonResponse({"success": True})

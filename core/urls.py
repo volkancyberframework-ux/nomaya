@@ -33,7 +33,7 @@ urlpatterns = [
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
 
     path("orders/<int:order_id>/accept-link/", views.accept_link_payment, name="accept_link_payment"),
-
+    path("api/verify-code/", views.verify_tracking_code, name="verify_tracking_code"),
     path("geo/", views.geo, name="geo"),
     path("api/update-location/", views.update_location, name="update_location"),
     path("live-map/", views.live_map, name="live_map"),

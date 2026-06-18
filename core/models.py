@@ -437,39 +437,89 @@ class Hotel(models.Model):
         return f"{self.name} – {self.city}"
 
 
+import uuid
+import secrets
+import string
+from datetime import timedelta
+from decimal import Decimal, ROUND_HALF_UP
+
+from django.core.validators import MinValueValidator
+from django.db import models
+from django.utils import timezone
+
+
+def generate_tracking_code():
+    chars = string.ascii_uppercase + string.digits
+    return ''.join(secrets.choice(chars) for _ in range(12))
+
+
+def default_tracking_expiry():
+    return timezone.now() + timedelta(days=30)
+
+
 class Order(models.Model):
     tour = models.ForeignKey("Tour", on_delete=models.CASCADE, related_name="orders")
     pax = models.PositiveIntegerField(validators=[MinValueValidator(1)])
-    email = models.EmailField(blank=True, null=True, help_text="Customer contact e-mail for this order")
+    email = models.EmailField(blank=True, null=True)
 
-    # Tarihler (kullanıcı seçimi)
     start_date = models.DateField(null=True, blank=True, db_index=True)
     end_date = models.DateField(null=True, blank=True, db_index=True)
 
     session_key = models.CharField(max_length=40, blank=True, db_index=True)
     public_id = models.UUIDField(default=uuid.uuid4, unique=True, db_index=True)
 
+    tracking_code = models.CharField(
+        max_length=12,
+        unique=True,
+        default=generate_tracking_code,
+        db_index=True
+    )
+
+    tracking_code_expires_at = models.DateTimeField(
+        default=default_tracking_expiry,
+        db_index=True
+    )
+
+    tracking_enabled = models.BooleanField(default=True)
+    tracking_started_at = models.DateTimeField(null=True, blank=True)
+    tracking_last_seen = models.DateTimeField(null=True, blank=True)
+
     same_room = models.BooleanField(default=True)
     hide_flights = models.BooleanField(default=False)
     hide_transfers = models.BooleanField(default=False)
     hide_hotels = models.BooleanField(default=False)
+
     total_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     is_paid = models.BooleanField(default=False)
 
     payment_method = models.CharField(
-            max_length=30,
-            choices=[
-                ("bank_transfer", "Banka Havalesi"),
-                ("payment_link", "Link ile Ödeme"),
-            ],
-            default="bank_transfer",
-        )
-    link_payment_accepted = models.BooleanField(default=False)
+        max_length=30,
+        choices=[
+            ("bank_transfer", "Banka Havalesi"),
+            ("payment_link", "Link ile Ödeme"),
+        ],
+        default="bank_transfer",
+    )
 
+    link_payment_accepted = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=timezone.now)
+
+    def mark_paid(self):
+        self.is_paid = True
+
+        if self.end_date:
+            self.tracking_code_expires_at = timezone.make_aware(
+                timezone.datetime.combine(
+                    self.end_date + timedelta(days=2),
+                    timezone.datetime.max.time()
+                )
+            )
+
+        self.save(update_fields=["is_paid", "tracking_code_expires_at"])
 
     def compute_total(self):
         t = self.tour
+
         try:
             commission = Decimal(str(t.commission)) if t.commission is not None else Decimal("1")
         except Exception:
@@ -480,6 +530,7 @@ class Order(models.Model):
         hotels = Decimal(t.hotels_total() or 0) if not self.hide_hotels else Decimal("0")
 
         activities = Decimal("0")
+
         if hasattr(t, "days"):
             for d in t.days.all():
                 for da in d.dayactivity_set.all():
@@ -488,9 +539,11 @@ class Order(models.Model):
                         activities += Decimal(price)
 
         pax_dec = Decimal(self.pax)
+
         m_flights = pax_dec
         m_activities = pax_dec
         m_transfers = Decimal("1")
+
         if self.hide_hotels:
             m_hotels = Decimal("0")
         else:
@@ -505,17 +558,14 @@ class Order(models.Model):
             hotels * m_hotels +
             transfers * m_transfers
         )
-        grand = (net_total * commission)
+
+        grand = net_total * commission
         self.total_price = grand.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
         return self.total_price
 
-    def mark_paid(self):
-        self.is_paid = True
-        self.save(update_fields=["is_paid"])
-
     def __str__(self):
-        return f"{self.tour.title} — {self.pax} pax ({'Paid' if self.is_paid else 'Pending'})"
-
+        return f"{self.tour.title} — {self.pax} pax — {self.tracking_code}"
 
 class AirportTransfer(models.Model):
     class Direction(models.TextChoices):
