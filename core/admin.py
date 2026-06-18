@@ -102,24 +102,28 @@ class TravelerAdmin(admin.ModelAdmin):
     ordering = ("id",)
 
 
-# ─────────────────────────────
-# Orders
-# ─────────────────────────────
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = (
         "id", "tour", "pax", "email",
         "payment_method", "link_payment_status",
         "total_price", "is_paid",
+        "tracking_enabled",
+        "tracking_code",
+        "tracking_code_expires_at",
+        "tracking_started_at",
+        "tracking_last_seen",
         "start_date", "end_date",
         "created_at",
     )
+
     list_display_links = ("id", "tour")
     ordering = ("-created_at",)
     inlines = [TravelerInline]
 
     list_filter = (
         "is_paid",
+        "tracking_enabled",
         "payment_method",
         "link_payment_accepted",
         "same_room",
@@ -131,13 +135,39 @@ class OrderAdmin(admin.ModelAdmin):
         ("created_at", admin.DateFieldListFilter),
         "tour",
     )
-    search_fields = ("id", "public_id", "email", "tour__title")
 
-    readonly_fields = ("id", "public_id", "created_at",)
+    search_fields = (
+        "id", "public_id", "email", "tour__title",
+        "tracking_code",
+    )
+
+    readonly_fields = (
+        "id",
+        "public_id",
+        "created_at",
+        "tracking_started_at",
+        "tracking_last_seen",
+    )
+
     fieldsets = (
-        ("Bağlantı", {"fields": ("id", "tour", "public_id", "session_key")}),
-        ("Müşteri", {"fields": ("email", "pax", "same_room")}),
-        ("Tarihler", {"fields": ("start_date", "end_date")}),
+        ("Bağlantı", {
+            "fields": ("id", "tour", "public_id", "session_key")
+        }),
+        ("Müşteri", {
+            "fields": ("email", "pax", "same_room")
+        }),
+        ("Tarihler", {
+            "fields": ("start_date", "end_date")
+        }),
+        ("Konum Takibi", {
+            "fields": (
+                "tracking_enabled",
+                "tracking_code",
+                "tracking_code_expires_at",
+                "tracking_started_at",
+                "tracking_last_seen",
+            )
+        }),
         ("Görünürlük / Dahiller", {
             "fields": ("hide_flights", "hide_transfers", "hide_hotels")
         }),
@@ -145,7 +175,9 @@ class OrderAdmin(admin.ModelAdmin):
             "fields": (
                 "payment_method",
                 "link_payment_accepted",
-                "total_price", "is_paid", "created_at"
+                "total_price",
+                "is_paid",
+                "created_at",
             )
         }),
     )
@@ -156,9 +188,8 @@ class OrderAdmin(admin.ModelAdmin):
             text = "Evet" if obj.link_payment_accepted else "Hayır"
             return format_html('<b style="color:{}">{}</b>', color, text)
         return "-"
+
     link_payment_status.short_description = "Link Ödemesi Onaylı mı?"
-
-
 # ─────────────────────────────
 # Tour inlines
 # ─────────────────────────────
