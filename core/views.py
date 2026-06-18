@@ -865,3 +865,10 @@ def update_location(request):
     )
 
     return JsonResponse({"status": "ok"})
+
+from django.shortcuts import render
+from .models import LiveLocation
+
+def live_map(request):
+    locations = LiveLocation.objects.all().order_by("-updated_at")[:50]
+    return render(request, "core/live_map.html", {"locations": locations})
