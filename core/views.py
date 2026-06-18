@@ -840,44 +840,52 @@ def geo(request):
         request.session.create()
     return render(request, "core/geo.html")
 
+import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import LiveLocation
 
 @csrf_exempt
 def update_location(request):
     if request.method != "POST":
-        return JsonResponse({"error": "Only POST allowed"}, status=405)
+        return JsonResponse({"error": "POST required"}, status=405)
 
     try:
-        data = json.loads(request.body)
+        data = json.loads(request.body.decode("utf-8"))
 
-        name = data.get("name")
-        session_id = data.get("session_id")
-        latitude = data.get("latitude")
-        longitude = data.get("longitude")
+        session_id = data.get("session_id") or data.get("sessionId") or "default"
+        name = data.get("name") or session_id
+        latitude = data.get("latitude") or data.get("lat")
+        longitude = data.get("longitude") or data.get("lng") or data.get("lon")
 
-        if not name or not session_id or latitude is None or longitude is None:
-            return JsonResponse({"error": "Missing data"}, status=400)
+        if latitude is None or longitude is None:
+            return JsonResponse({
+                "error": "latitude and longitude required",
+                "received": data
+            }, status=400)
 
-        location, created = LiveLocation.objects.update_or_create(
+        obj, created = LiveLocation.objects.update_or_create(
             session_id=session_id,
             defaults={
                 "name": name,
-                "latitude": latitude,
-                "longitude": longitude,
-                "updated_at": timezone.now(),
+                "latitude": float(latitude),
+                "longitude": float(longitude),
             }
         )
 
         return JsonResponse({
             "success": True,
             "created": created,
-            "session_id": session_id,
-            "name": name,
-            "latitude": latitude,
-            "longitude": longitude,
+            "id": obj.id,
+            "session_id": obj.session_id,
+            "name": obj.name,
         })
 
     except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+        return JsonResponse({
+            "success": False,
+            "error": str(e),
+        }, status=500)
 
 from django.shortcuts import render
 from django.http import JsonResponse
