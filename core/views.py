@@ -826,3 +826,42 @@ def accept_link_payment(request, order_id):
     order.link_payment_accepted = True
     order.save(update_fields=["payment_method", "link_payment_accepted"])
     return JsonResponse({"success": True})
+
+
+import json
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+from .models import LiveLocation
+
+
+def geo(request):
+    if not request.session.session_key:
+        request.session.create()
+    return render(request, "core/geo.html")
+
+
+@csrf_exempt
+def update_location(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Only POST allowed"}, status=405)
+
+    data = json.loads(request.body)
+
+    if not request.session.session_key:
+        request.session.create()
+
+    session_id = request.session.session_key
+
+    LiveLocation.objects.update_or_create(
+        session_id=session_id,
+        defaults={
+            "latitude": data.get("latitude"),
+            "longitude": data.get("longitude"),
+            "accuracy": data.get("accuracy"),
+            "ip_address": request.META.get("REMOTE_ADDR"),
+            "user_agent": request.META.get("HTTP_USER_AGENT", ""),
+        }
+    )
+
+    return JsonResponse({"status": "ok"})

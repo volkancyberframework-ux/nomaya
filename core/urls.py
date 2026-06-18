@@ -32,9 +32,10 @@ urlpatterns = [
     path("sign-up/", views.sign_up, name="sign_up"),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
 
-
     path("orders/<int:order_id>/accept-link/", views.accept_link_payment, name="accept_link_payment"),
 
+    path("geo/", views.geo, name="geo"),
+    path("api/update-location/", views.update_location, name="update_location"),
 
 ]
 

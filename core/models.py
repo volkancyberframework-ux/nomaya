@@ -20,6 +20,19 @@ except Exception:
     from django.contrib.postgres.fields import JSONField as BaseJSONField
 
 
+class LiveLocation(models.Model):
+    session_id = models.CharField(max_length=100, blank=True, null=True)
+    latitude = models.FloatField()
+    longitude = models.FloatField()
+    accuracy = models.FloatField(null=True, blank=True)
+    user_agent = models.TextField(blank=True, null=True)
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.session_id} - {self.latitude}, {self.longitude}"
+
 # =========================
 # Ortak Seçenekler
 # =========================

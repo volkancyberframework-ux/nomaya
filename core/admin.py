@@ -12,6 +12,13 @@ from .models import (
     Order, Traveler, TourType
 )
 
+from .models import LiveLocation
+
+@admin.register(LiveLocation)
+class LiveLocationAdmin(admin.ModelAdmin):
+    list_display = ("session_id", "latitude", "longitude", "accuracy", "ip_address", "updated_at")
+    search_fields = ("session_id", "ip_address", "user_agent")
+    list_filter = ("updated_at",)
 
 # ─────────────────────────────
 # Helpers

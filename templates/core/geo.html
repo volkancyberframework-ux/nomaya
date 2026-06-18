@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Nomaya Geo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: white;
+      padding: 24px;
+    }
+
+    .card {
+      background: #1f1f1f;
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    button {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 14px;
+      background: #facc15;
+      color: #111;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    small {
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Nomaya 🎧</h1>
+  <p>Şehri kendi hızında keşfet.</p>
+
+  <div class="card">
+    <h2>Konum İzni</h2>
+    <p>
+      Deneyimi başlatmak için konumunu paylaşman gerekir.
+      Konumun deneyim sırasında anlık olarak kullanılabilir.
+    </p>
+    <small>Devam ederek konum paylaşımına izin vermiş olursun.</small>
+  </div>
+
+  <div class="card">
+    <h2>Durum</h2>
+    <p id="status">Henüz başlamadı.</p>
+    <p id="coords"></p>
+  </div>
+
+  <button onclick="startTracking()">Konumumu Aç</button>
+
+<script>
+function startTracking() {
+  if (!navigator.geolocation) {
+    document.getElementById("status").innerText = "Tarayıcın konum desteklemiyor.";
+    return;
+  }
+
+  document.getElementById("status").innerText = "Konum izni bekleniyor...";
+
+  navigator.geolocation.watchPosition(
+    function(position) {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+      const accuracy = position.coords.accuracy;
+
+      document.getElementById("status").innerText = "Konum takip ediliyor.";
+      document.getElementById("coords").innerText =
+        `Lat: ${lat.toFixed(5)} | Lng: ${lng.toFixed(5)} | Accuracy: ${Math.round(accuracy)}m`;
+
+      fetch("/api/update-location/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          latitude: lat,
+          longitude: lng,
+          accuracy: accuracy
+        })
+      });
+    },
+    function(error) {
+      document.getElementById("status").innerText = "Konum izni alınamadı.";
+    },
+    {
+      enableHighAccuracy: true,
+      maximumAge: 0,
+      timeout: 10000
+    }
+  );
+}
+</script>
+
+</body>
+</html>
