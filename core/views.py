@@ -846,25 +846,38 @@ def update_location(request):
     if request.method != "POST":
         return JsonResponse({"error": "Only POST allowed"}, status=405)
 
-    data = json.loads(request.body)
+    try:
+        data = json.loads(request.body)
 
-    if not request.session.session_key:
-        request.session.create()
+        name = data.get("name")
+        session_id = data.get("session_id")
+        latitude = data.get("latitude")
+        longitude = data.get("longitude")
 
-    session_id = request.session.session_key
+        if not name or not session_id or latitude is None or longitude is None:
+            return JsonResponse({"error": "Missing data"}, status=400)
 
-    LiveLocation.objects.update_or_create(
-        session_id=session_id,
-        defaults={
-            "latitude": data.get("latitude"),
-            "longitude": data.get("longitude"),
-            "accuracy": data.get("accuracy"),
-            "ip_address": request.META.get("REMOTE_ADDR"),
-            "user_agent": request.META.get("HTTP_USER_AGENT", ""),
-        }
-    )
+        location, created = LiveLocation.objects.update_or_create(
+            session_id=session_id,
+            defaults={
+                "name": name,
+                "latitude": latitude,
+                "longitude": longitude,
+                "updated_at": timezone.now(),
+            }
+        )
 
-    return JsonResponse({"status": "ok"})
+        return JsonResponse({
+            "success": True,
+            "created": created,
+            "session_id": session_id,
+            "name": name,
+            "latitude": latitude,
+            "longitude": longitude,
+        })
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
 
 from django.shortcuts import render
 from django.http import JsonResponse

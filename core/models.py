@@ -21,7 +21,8 @@ except Exception:
 
 
 class LiveLocation(models.Model):
-    session_id = models.CharField(max_length=100, blank=True, null=True)
+    session_id = models.CharField(max_length=100, unique=True, blank=True, null=True)
+    name = models.CharField(max_length=100, blank=True, null=True)
     latitude = models.FloatField()
     longitude = models.FloatField()
     accuracy = models.FloatField(null=True, blank=True)
