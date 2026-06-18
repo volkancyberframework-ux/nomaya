@@ -944,19 +944,17 @@ def update_location(request):
     order.tracking_last_seen = timezone.now()
     order.save(update_fields=["tracking_last_seen"])
 
-    # Burada senin mevcut Location modelin varsa onu update_or_create yap.
-    # Örnek:
-    #
-    # LiveLocation.objects.update_or_create(
-    #     session_id=code,
-    #     defaults={
-    #         "name": order.email or code,
-    #         "latitude": data.get("latitude"),
-    #         "longitude": data.get("longitude"),
-    #         "accuracy": data.get("accuracy"),
-    #         "speed": data.get("speed"),
-    #         "updated_at": timezone.now(),
-    #     }
-    # )
+
+    LiveLocation.objects.update_or_create(
+         session_id=code,
+         defaults={
+             "name": order.email or code,
+             "latitude": data.get("latitude"),
+             "longitude": data.get("longitude"),
+             "accuracy": data.get("accuracy"),
+             "speed": data.get("speed"),
+             "updated_at": timezone.now(),
+         }
+     )
 
     return JsonResponse({"success": True})
