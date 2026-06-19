@@ -957,3 +957,117 @@ def update_location(request):
     )
 
     return JsonResponse({"success": True})
+
+from django.http import JsonResponse
+from django.utils import timezone
+from .models import Order, TourDay
+
+
+def order_itinerary(request, code):
+    try:
+        order = Order.objects.select_related("tour").get(
+            tracking_code=code.upper(),
+            tracking_enabled=True,
+            tracking_code_expires_at__gte=timezone.now()
+        )
+    except Order.DoesNotExist:
+        return JsonResponse({
+            "valid": False,
+            "message": "Geçersiz veya süresi dolmuş kod"
+        }, status=404)
+
+    tour = order.tour
+
+    tour_days = (
+        TourDay.objects
+        .filter(tour=tour)
+        .select_related("day", "day__city")
+        .order_by("order", "id")
+    )
+
+    days_data = []
+
+    for td in tour_days:
+        day = td.day
+
+        activities = []
+        for da in day.dayactivity_set.select_related("activity").order_by("order"):
+            activity = da.activity
+            activities.append({
+                "title": activity.title,
+                "location": activity.location_text,
+                "points": activity.points or [],
+                "duration_hours": str(activity.duration_hours) if activity.duration_hours else None,
+            })
+
+        hotels = []
+        for dh in day.dayhotel_set.select_related("hotel", "hotel__city").order_by("order"):
+            hotel = dh.hotel
+            hotels.append({
+                "name": hotel.name,
+                "city": hotel.city.name,
+                "star": hotel.star,
+                "type": hotel.hotel_type,
+            })
+
+        flights = []
+        for df in day.dayflight_set.select_related(
+            "flight",
+            "flight__origin",
+            "flight__destination",
+            "flight__airline"
+        ).order_by("order"):
+            flight = df.flight
+            flights.append({
+                "airline": flight.airline.name,
+                "flight_number": flight.flight_number,
+                "origin": flight.origin.iata,
+                "destination": flight.destination.iata,
+                "departure_time": str(flight.departure_time) if flight.departure_time else None,
+                "arrival_time": str(flight.arrival_time) if flight.arrival_time else None,
+            })
+
+        transfers = []
+        for dt in day.daytransfer_set.select_related(
+            "transfer",
+            "transfer__airport",
+            "transfer__hotel"
+        ).order_by("order"):
+            transfer = dt.transfer
+            transfers.append({
+                "direction": transfer.get_direction_display(),
+                "vehicle_type": transfer.vehicle_type,
+                "airport": transfer.airport.iata,
+                "hotel": transfer.hotel.name,
+            })
+
+        days_data.append({
+            "order": td.order,
+            "title": td.title,
+            "city": day.city.name,
+            "day_number": day.day_number,
+            "description": day.description,
+            "bullets": day.bullets or [],
+            "activities": activities,
+            "hotels": hotels if not order.hide_hotels else [],
+            "flights": flights if not order.hide_flights else [],
+            "transfers": transfers if not order.hide_transfers else [],
+        })
+
+    return JsonResponse({
+        "valid": True,
+        "tour": {
+            "title": tour.title,
+            "duration": tour.duration_label,
+            "start_point": tour.start_point,
+            "end_point": tour.end_point,
+            "overview": tour.overview,
+        },
+        "order": {
+            "tracking_code": order.tracking_code,
+            "start_date": str(order.start_date) if order.start_date else None,
+            "end_date": str(order.end_date) if order.end_date else None,
+            "pax": order.pax,
+        },
+        "days": days_data,
+    })

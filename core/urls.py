@@ -31,7 +31,7 @@ urlpatterns = [
     path("sign-in/", views.sign_in, name="sign_in"),
     path("sign-up/", views.sign_up, name="sign_up"),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
-
+    path("api/order-itinerary/<str:code>/", views.order_itinerary, name="order_itinerary"),
     path("orders/<int:order_id>/accept-link/", views.accept_link_payment, name="accept_link_payment"),
     path("api/verify-code/", views.verify_tracking_code, name="verify_tracking_code"),
     path("geo/", views.geo, name="geo"),
