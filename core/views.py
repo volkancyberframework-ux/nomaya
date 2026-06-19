@@ -24,7 +24,7 @@ from urllib.parse import urlencode
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.utils.dateparse import parse_date
-
+from .models import Order, TourDay, DayActivity, ActivityProgress
 from .models import Tour, Country, TourType  # <-- TourType eklendi
 # core/views.py
 from urllib.parse import urlencode
@@ -1070,4 +1070,184 @@ def order_itinerary(request, code):
             "pax": order.pax,
         },
         "days": days_data,
+    })
+
+@csrf_exempt
+def today_plan(request, code):
+    try:
+        order = Order.objects.select_related("tour").get(
+            tracking_code=code.upper(),
+            is_paid=True,
+            tracking_enabled=True,
+            tracking_code_expires_at__gte=timezone.now()
+        )
+    except Order.DoesNotExist:
+        return JsonResponse({
+            "valid": False,
+            "message": "Geçersiz veya süresi dolmuş kod"
+        }, status=404)
+
+    tour = order.tour
+
+    tour_days = (
+        TourDay.objects
+        .filter(tour=tour)
+        .select_related("day", "day__city")
+        .order_by("order", "id")
+    )
+
+    if not tour_days.exists():
+        return JsonResponse({
+            "valid": False,
+            "message": "Bu tur için gün planı bulunamadı"
+        }, status=404)
+
+    # Bugünün hangi tur günü olduğunu hesapla
+    selected_tour_day = None
+
+    if order.start_date:
+        today = timezone.localdate()
+        day_index = (today - order.start_date).days + 1
+
+        if day_index < 1:
+            day_index = 1
+
+        selected_tour_day = tour_days.filter(order=day_index).first()
+
+    if selected_tour_day is None:
+        selected_tour_day = tour_days.first()
+
+    day = selected_tour_day.day
+
+    day_activities = (
+        DayActivity.objects
+        .filter(day=day)
+        .select_related("activity")
+        .order_by("order", "id")
+    )
+
+    activities = []
+
+    for da in day_activities:
+        progress, _ = ActivityProgress.objects.get_or_create(
+            order=order,
+            day_activity=da
+        )
+
+        activity = da.activity
+
+        activities.append({
+            "day_activity_id": da.id,
+            "activity_id": activity.id,
+            "title": activity.title,
+            "location": activity.location_text,
+            "points": activity.points or [],
+            "duration_hours": str(activity.duration_hours) if activity.duration_hours else None,
+            "status": progress.status,
+        })
+
+    return JsonResponse({
+        "valid": True,
+        "tour": {
+            "title": tour.title,
+        },
+        "order": {
+            "tracking_code": order.tracking_code,
+            "start_date": str(order.start_date) if order.start_date else None,
+            "end_date": str(order.end_date) if order.end_date else None,
+        },
+        "day": {
+            "tour_day_order": selected_tour_day.order,
+            "title": selected_tour_day.title,
+            "city": day.city.name,
+            "description": day.description,
+            "bullets": day.bullets or [],
+        },
+        "activities": activities,
+    })
+
+
+def telegram_activity_hook(order, day_activity, status):
+    # Şimdilik boş.
+    # İleride Telegram bildirimi burada tetiklenecek.
+    pass
+
+
+@csrf_exempt
+def update_activity_progress(request):
+    if request.method != "POST":
+        return JsonResponse({
+            "valid": False,
+            "message": "method_not_allowed"
+        }, status=405)
+
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({
+            "valid": False,
+            "message": "invalid_json"
+        }, status=400)
+
+    code = str(data.get("code", "")).strip().upper()
+    day_activity_id = data.get("day_activity_id")
+    status = str(data.get("status", "")).strip()
+
+    if status not in ["pending", "completed", "skipped"]:
+        return JsonResponse({
+            "valid": False,
+            "message": "invalid_status"
+        }, status=400)
+
+    try:
+        order = Order.objects.get(
+            tracking_code=code,
+            is_paid=True,
+            tracking_enabled=True,
+            tracking_code_expires_at__gte=timezone.now()
+        )
+    except Order.DoesNotExist:
+        return JsonResponse({
+            "valid": False,
+            "message": "Geçersiz veya süresi dolmuş kod"
+        }, status=404)
+
+    try:
+        day_activity = DayActivity.objects.select_related(
+            "activity", "day"
+        ).get(id=day_activity_id)
+    except DayActivity.DoesNotExist:
+        return JsonResponse({
+            "valid": False,
+            "message": "Aktivite bulunamadı"
+        }, status=404)
+
+    # Güvenlik: bu aktivite gerçekten bu turun içinde mi?
+    belongs_to_tour = TourDay.objects.filter(
+        tour=order.tour,
+        day=day_activity.day
+    ).exists()
+
+    if not belongs_to_tour:
+        return JsonResponse({
+            "valid": False,
+            "message": "Bu aktivite bu tura ait değil"
+        }, status=403)
+
+    progress, _ = ActivityProgress.objects.get_or_create(
+        order=order,
+        day_activity=day_activity
+    )
+
+    progress.status = status
+    progress.telegram_sent = False
+    progress.save(update_fields=["status", "telegram_sent", "updated_at"])
+
+    telegram_activity_hook(order, day_activity, status)
+
+    return JsonResponse({
+        "valid": True,
+        "day_activity_id": day_activity.id,
+        "activity_title": day_activity.activity.title,
+        "status": progress.status,
     })

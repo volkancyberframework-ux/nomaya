@@ -677,6 +677,45 @@ class DayActivity(models.Model):
         unique_together = ("day", "activity")
 
 
+class ActivityProgress(models.Model):
+    class Status(models.TextChoices):
+        PENDING = "pending", "Bekliyor"
+        COMPLETED = "completed", "Tamamlandı"
+        SKIPPED = "skipped", "Atlandı"
+
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        related_name="activity_progresses"
+    )
+
+    day_activity = models.ForeignKey(
+        DayActivity,
+        on_delete=models.CASCADE,
+        related_name="progresses"
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PENDING,
+        db_index=True
+    )
+
+    note = models.CharField(max_length=255, blank=True)
+    telegram_sent = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ("order", "day_activity")
+        ordering = ["day_activity__day_id", "day_activity__order"]
+
+    def __str__(self):
+        return f"{self.order.tracking_code} - {self.day_activity.activity.title} - {self.status}"
+
+
 # --- Day içindeki through kayıtları değişince Day fiyatını yeniden hesapla
 @receiver(post_save, sender=DayFlight)
 @receiver(post_delete, sender=DayFlight)

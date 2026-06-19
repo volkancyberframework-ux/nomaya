@@ -22,6 +22,8 @@ urlpatterns = [
     # path("tours/booking/<int:order_id>/", views.legacy_booking_redirect, name="tour_booking_detail"),
     # path("tours/booking/<int:order_id>/traveler/", views.legacy_booking_redirect, name="save_travelers"),
     # path('tours/booking/<int:order_id>/success/', views.legacy_booking_redirect, name='order_success'),
+    path("api/today-plan/<str:code>/", views.today_plan, name="today_plan"),
+    path("api/activity-status/", views.update_activity_status, name="activity_status"),
 
     path("tours/<slug:slug>/", views.tour_detail, name="tour_detail"),
     path("about/", views.about, name="about"),
