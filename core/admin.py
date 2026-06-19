@@ -9,7 +9,7 @@ from .models import (
     Tour, TourDay, TourPhoto, Bullet, TourBullet,
     Day, DayImage, Hotel, AirportTransfer,
     Activity, DayFlight, DayTransfer, DayHotel, DayActivity,
-    Order, Traveler, TourType
+    Order, Traveler, TourType, ActivityProgress
 )
 
 from .models import LiveLocation
@@ -87,6 +87,34 @@ class TravelerInline(admin.TabularInline):
         return obj.pk or "New"
     admin_id.short_description = "ID"
 
+class ActivityProgressInline(admin.TabularInline):
+    model = ActivityProgress
+    extra = 0
+    fields = (
+        "admin_id",
+        "day_activity",
+        "activity_title",
+        "status",
+        "telegram_sent",
+        "updated_at",
+    )
+    readonly_fields = (
+        "admin_id",
+        "activity_title",
+        "updated_at",
+    )
+    autocomplete_fields = ("day_activity",)
+    ordering = ("day_activity__day_id", "day_activity__order")
+
+    def admin_id(self, obj):
+        return obj.pk or "New"
+    admin_id.short_description = "ID"
+
+    def activity_title(self, obj):
+        if obj.day_activity_id and obj.day_activity.activity_id:
+            return obj.day_activity.activity.title
+        return "-"
+    activity_title.short_description = "Activity"
 
 @admin.register(Traveler)
 class TravelerAdmin(admin.ModelAdmin):
@@ -119,7 +147,7 @@ class OrderAdmin(admin.ModelAdmin):
 
     list_display_links = ("id", "tour")
     ordering = ("-created_at",)
-    inlines = [TravelerInline]
+    inlines = [TravelerInline,ActivityProgressInline]
 
     list_filter = (
         "is_paid",
@@ -655,3 +683,100 @@ class ActivityAdmin(admin.ModelAdmin):
         return ", ".join([f"#{t.id} - {t.title}" for t in tours])
 
     connected_tours.short_description = "Connected Tours"
+
+@admin.register(ActivityProgress)
+class ActivityProgressAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "order",
+        "tracking_code",
+        "tour",
+        "day_activity",
+        "activity_title",
+        "day_title",
+        "status",
+        "telegram_sent",
+        "updated_at",
+        "created_at",
+    )
+
+    list_display_links = ("id", "order")
+
+    list_filter = (
+        "status",
+        "telegram_sent",
+        "order__tour",
+        "day_activity__day__city",
+        "updated_at",
+        "created_at",
+    )
+
+    search_fields = (
+        "id",
+        "order__tracking_code",
+        "order__email",
+        "order__tour__title",
+        "day_activity__activity__title",
+        "day_activity__day__title",
+        "day_activity__day__city__name",
+    )
+
+    readonly_fields = (
+        "id",
+        "created_at",
+        "updated_at",
+        "tracking_code",
+        "tour",
+        "activity_title",
+        "day_title",
+    )
+
+    autocomplete_fields = (
+        "order",
+        "day_activity",
+    )
+
+    ordering = ("-updated_at",)
+
+    fieldsets = (
+        ("Progress", {
+            "fields": (
+                "id",
+                "order",
+                "tracking_code",
+                "tour",
+                "day_activity",
+                "activity_title",
+                "day_title",
+                "status",
+                "note",
+                "telegram_sent",
+            )
+        }),
+        ("Tarih", {
+            "fields": (
+                "created_at",
+                "updated_at",
+            )
+        }),
+    )
+
+    def tracking_code(self, obj):
+        return obj.order.tracking_code if obj.order_id else "-"
+    tracking_code.short_description = "Tracking Code"
+
+    def tour(self, obj):
+        return obj.order.tour.title if obj.order_id and obj.order.tour_id else "-"
+    tour.short_description = "Tour"
+
+    def activity_title(self, obj):
+        if obj.day_activity_id and obj.day_activity.activity_id:
+            return obj.day_activity.activity.title
+        return "-"
+    activity_title.short_description = "Activity"
+
+    def day_title(self, obj):
+        if obj.day_activity_id and obj.day_activity.day_id:
+            return obj.day_activity.day.title or str(obj.day_activity.day)
+        return "-"
+    day_title.short_description = "Day"
