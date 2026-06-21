@@ -1411,3 +1411,31 @@ def request_miles_payment(request, order_id):
     send_telegram_message(order_telegram_text(order, title="🪙 Miles ile Ödeme Talebi"))
 
     return JsonResponse({"success": True})
+
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.shortcuts import get_object_or_404
+from .models import Order
+
+
+@require_POST
+def request_bank_transfer(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+
+    order.payment_method = "bank_transfer"
+    order.save(update_fields=["payment_method"])
+
+    try:
+        send_telegram_message(
+            f"🏦 Banka transferi seçildi\n\n"
+            f"Order: #{order.id}\n"
+            f"Tur: {order.tour.title if order.tour else '-'}\n"
+            f"E-posta: {order.email or '-'}\n"
+            f"Kişi: {order.pax}\n"
+            f"Tutar: {order.total_price} {getattr(order.tour, 'price_currency', '')}\n"
+            f"Tracking Code: {order.tracking_code or '-'}"
+        )
+    except Exception:
+        pass
+
+    return JsonResponse({"success": True})

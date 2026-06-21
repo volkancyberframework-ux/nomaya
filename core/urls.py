@@ -40,6 +40,11 @@ urlpatterns = [
     views.request_miles_payment,
     name="request_miles_payment",
     ),
+    path(
+    "orders/<int:order_id>/request-bank-transfer/",
+    views.request_bank_transfer,
+    name="request_bank_transfer"
+    ),
     path("api/verify-code/", views.verify_tracking_code, name="verify_tracking_code"),
     path("geo/", views.geo, name="geo"),
     path("api/update-location/", views.update_location, name="update_location"),

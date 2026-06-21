@@ -836,18 +836,7 @@
                           </label>
 
                           <div class="mt-2 small text-muted">
-                            Mil ile ödeme talebiniz <strong>5 dakika içinde onaylanacaktır.</strong>
-                          </div>
-
-                          <div class="mt-2 small">
-                            Lütfen aşağıdaki e-posta bağlantısına tıklayarak talebinizi bize iletin:
-                            <br>
-                            <a
-                              href="mailto:destek@nomaya.co?subject=Mil%20ile%20%C3%96deme%20Talebi%20-%20ORDER-{{ order.id }}&body=Merhaba%20Nomaya%20Ekibi,%0D%0A%0D%0AORDER-{{ order.id }}%20numaral%C4%B1%20sipari%C5%9Fimde%20mil%20d%C3%BC%C5%9F%C3%BCm%C3%BC%20ile%20paketi%20sat%C4%B1n%20almak%20istiyorum.%0D%0A%0D%0ATe%C5%9Fekk%C3%BCrler."
-                              class="fw-semibold"
-                            >
-                              destek@nomaya.co adresine e-posta gönder
-                            </a>
+                            Mil ile ödeme talebiniz <strong>5 dakika içinde onaylanacaktır. E-posta ile bilgilendirilirsiniz.</strong>
                           </div>
                         </div>
 
@@ -1341,11 +1330,6 @@
 
     if (!paymentForm) return;
 
-    function milesMailtoUrl(){
-      return "mailto:destek@nomaya.co"
-        + "?subject=Mil%20ile%20%C3%96deme%20Talebi%20-%20ORDER-{{ order.id }}"
-        + "&body=Merhaba%20Nomaya%20Ekibi,%0D%0A%0D%0AORDER-{{ order.id }}%20numaral%C4%B1%20sipari%C5%9Fimde%20mil%20d%C3%BC%C5%9F%C3%BCm%C3%BC%20ile%20paketi%20sat%C4%B1n%20almak%20istiyorum.%0D%0A%0D%0ATe%C5%9Fekk%C3%BCrler.";
-    }
 
     paymentForm.addEventListener("submit", function (e) {
       const selected = paymentForm.querySelector('input[name="payment_method"]:checked');
@@ -1353,14 +1337,17 @@
 
       if (method === "bank_transfer") {
         e.preventDefault();
-        window.openBankTransferModal();
-        return;
-      }
 
-      if (method === "payment_link" && payLink.checked) {
-        e.preventDefault();
-        const modal = new bootstrap.Modal(document.getElementById("linkPayModal"));
-        modal.show();
+        fetch("{% url 'request_bank_transfer' order.id %}", {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ payment_method: "bank_transfer" })
+        }).catch(() => {});
+
+        window.openBankTransferModal();
         return;
       }
 
@@ -1379,7 +1366,7 @@
         .then(data => {
           if (data.success) {
             alert("✅ Mil ile ödeme talebiniz alındı. 5 dakika içinde onaylanacaktır.");
-            window.location.href = milesMailtoUrl();
+            window.location.reload();
           } else {
             alert("⚠️ Mil ile ödeme talebi oluşturulamadı.");
           }
