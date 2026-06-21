@@ -63,6 +63,15 @@ def tour_booking_detail_public(request, public_id):
     order = get_order_for_request_by_public(request, public_id)
     tour = order.tour
 
+    if not tour.allow_flights:
+        order.hide_flights = True
+
+    if not tour.allow_transfers:
+        order.hide_transfers = True
+
+    if not tour.allow_hotels:
+        order.hide_hotels = True
+
     # Başlangıç günü (opsiyonel)
     try:
         start_day_number = int(request.GET.get("start_day", "1"))
@@ -506,6 +515,15 @@ def tour_detail(request, slug):
         slug=slug, is_published=True,
     )
 
+    if not tour.allow_flights:
+        hide_flights = True
+
+    if not tour.allow_transfers:
+        hide_transfers = True
+
+    if not tour.allow_hotels:
+        hide_hotels = True
+
     # --- (4) Günler ---
     tour_days = (
         TourDay.objects
@@ -596,6 +614,9 @@ def tour_detail(request, slug):
         "activities_total": activities_total,
         "per_person": per_person,
         "total": gross_total,
+        "allow_flights": tour.allow_flights,
+        "allow_hotels": tour.allow_hotels,
+        "allow_transfers": tour.allow_transfers,
     }
     with translation.override("tr"):
         return render(request, "tour-detail.html", ctx)
@@ -667,6 +688,16 @@ def tour_booking(request):
     hide_flights   = _to_bool(request.POST.get("hide_flights"))
     hide_transfers = _to_bool(request.POST.get("hide_transfers"))
     hide_hotels    = _to_bool(request.POST.get("hide_hotels"))
+
+
+    if not tour.allow_flights:
+        hide_flights = True
+
+    if not tour.allow_transfers:
+        hide_transfers = True
+
+    if not tour.allow_hotels:
+        hide_hotels = True
 
     # same_room boş gelebilir (otel dahil değilse veya pax=1 ise). Varsayılan True.
     same_room_param = request.POST.get("same_room", "")
@@ -1245,9 +1276,13 @@ def update_activity_progress(request):
 
     telegram_activity_hook(order, day_activity, status)
 
+    earned_miles = day_activity.activity.miles_reward if status == "completed" else 0
+
     return JsonResponse({
         "valid": True,
         "day_activity_id": day_activity.id,
         "activity_title": day_activity.activity.title,
         "status": progress.status,
+        "earned_miles": earned_miles,
+        "order_total_miles": order.earned_miles,
     })

@@ -128,6 +128,10 @@ class Tour(models.Model):
     title = models.CharField(max_length=180)
     slug = models.SlugField(max_length=220, unique=True, blank=True)
 
+    allow_flights = models.BooleanField(default=True)
+    allow_hotels = models.BooleanField(default=True)
+    allow_transfers = models.BooleanField(default=True)
+
     start_date = models.DateField(blank=True, null=True)
     end_date = models.DateField(blank=True, null=True)
 
@@ -188,6 +192,20 @@ class Tour(models.Model):
         self.activities_count = activities
         if save:
             self.save(update_fields=["flights_count", "hotels_count", "activities_count"])
+
+    @property
+    def total_miles_reward(self):
+        total = 0
+        day_ids = self.days.values_list("id", flat=True)
+
+        activities = Activity.objects.filter(
+            dayactivity__day_id__in=day_ids
+        ).distinct()
+
+        for a in activities:
+            total += a.miles_reward or 0
+
+        return total
 
     # --- start/end points (Day -> City) ---
     @property
@@ -504,6 +522,19 @@ class Order(models.Model):
     link_payment_accepted = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=timezone.now)
 
+    @property
+    def earned_miles(self):
+        total = 0
+
+        progresses = self.activity_progresses.filter(
+            status=ActivityProgress.Status.COMPLETED
+        ).select_related("day_activity__activity")
+
+        for p in progresses:
+            total += p.day_activity.activity.miles_reward or 0
+
+        return total
+
     def mark_paid(self):
         self.is_paid = True
 
@@ -598,6 +629,8 @@ class Activity(models.Model):
 
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     price_currency = models.CharField(max_length=3, choices=Currency.choices, default=Currency.USD)
+
+    miles_reward = models.PositiveIntegerField(default=10)
 
     # ✅ Yeni alanlar
     city = models.ForeignKey(

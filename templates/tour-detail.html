@@ -227,15 +227,21 @@
                 <div class="card-header bg-transparent border-bottom p-0 pb-3 d-flex align-items-center justify-content-between">
                   <h3 class="mb-0">Program</h3>
                   <div class="d-flex gap-2">
+                    {% if allow_flights %}
                     <button type="button" class="btn btn-sm btn-outline-danger" data-toggle-remove="flights">
                       <i class="fa-solid fa-plane me-1"></i><span class="btn-text">Uçuşları Çıkar</span>
                     </button>
+                    {% endif %}
+                    {% if allow_transfers %}
                     <button type="button" class="btn btn-sm btn-outline-danger" data-toggle-remove="transfers">
                       <i class="fa-solid fa-car-side me-1"></i><span class="btn-text">Transferleri Çıkar</span>
                     </button>
+                    {% endif %}
+                    {% if allow_hotels %}
                     <button type="button" class="btn btn-sm btn-outline-danger" data-toggle-remove="hotels">
                       <i class="fa-solid fa-hotel me-1"></i><span class="btn-text">Otelleri Çıkar</span>
                     </button>
+                    {% endif %}
                   </div>
                 </div>
 
@@ -414,19 +420,27 @@
                                           {% if a.cover_image %}<img src="{{ a.cover_image.url }}" class="card-img" alt="{{ a.title }}">{% endif %}
                                         </div>
                                         <div class="col-sm-8">
-                                          <h5 class="card-title mb-0">{{ a.title }}</h5>
-                                          {% if a.location_text %}<small class="mb-2"><i class="bi bi-geo-alt me-2"></i>{{ a.location_text }}</small>{% endif %}
-                                          {% if a.points %}
-                                            <ul class="list-group list-group-borderless mb-0 mt-2">
-                                              {% for pt in a.points|slice:":5" %}
-                                                <li class="list-group-item d-flex p-0"><i class="bi bi-arrow-right text-primary me-2"></i>{{ pt }}</li>
-                                              {% endfor %}
-                                            </ul>
+
+                                          <h5 class="card-title mb-0 d-flex align-items-center flex-wrap gap-2">
+                                            <span>{{ a.title }}</span>
+
+                                            {% if a.miles_reward %}
+                                              <span
+                                                class="badge rounded-pill bg-warning text-dark"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-placement="top"
+                                                title="Bu milleri kazandıktan sonra ilerideki Nomaya alışverişlerinizde harcayabilirsiniz!"
+                                              >
+                                                ✨ +{{ a.miles_reward }} mil
+                                              </span>
+                                            {% endif %}
+                                          </h5>
+
+                                          {% if a.location_text %}
+                                            <small class="mb-2">
+                                              <i class="bi bi-geo-alt me-2"></i>{{ a.location_text }}
+                                            </small>
                                           {% endif %}
-                                          <div class="hstack gap-3 flex-wrap mt-2">
-                                            {% if a.duration_hours %}<p class="mb-0">Süre:<span class="h6 fw-light mb-0 ms-1">{{ a.duration_hours }} hrs</span></p>{% endif %}
-                                          </div>
-                                        </div>
                                       </div>
                                     </div>
                                   </div>
@@ -614,9 +628,9 @@
               <!-- NET toplamlar ve commission -->
               <div class="card card-body border bg-transparent" id="priceBox"
                    data-commission="{{ tour.commission|default_if_none:'1' }}"
-                   data-flight-total="{{ flights_total|default_if_none:'0' }}"
-                   data-transfer-total="{{ transfers_total|default_if_none:'0' }}"
-                   data-hotel-total="{{ hotels_total|default_if_none:'0' }}"
+                   data-flight-total="{% if allow_flights %}{{ flights_total|default_if_none:'0' }}{% else %}0{% endif %}"
+                   data-transfer-total="{% if allow_transfers %}{{ transfers_total|default_if_none:'0' }}{% else %}0{% endif %}"
+                   data-hotel-total="{% if allow_hotels %}{{ hotels_total|default_if_none:'0' }}{% else %}0{% endif %}"
                    data-activities-total="{{ activities_total|default_if_none:'0' }}"
                    data-currency="{{ tour.price_currency }}">
 
@@ -986,7 +1000,7 @@
       }
     })();
     </script>
-
+    {% if allow_flights or allow_transfers or allow_hotels %}
     <!-- ==== Toggle İpucu Modal START ==== -->
     <div class="modal fade" id="toggleTipsModal" tabindex="-1" aria-labelledby="toggleTipsLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -1188,9 +1202,16 @@
       });
     })();
     </script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+        new bootstrap.Tooltip(el);
+      });
+    });
+    </script>
 
 
-
+  {% endif %}
   </section>
 
 </main>

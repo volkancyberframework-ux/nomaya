@@ -362,7 +362,8 @@ class DayActivityInline(SortableInlineAdminMixin, admin.TabularInline):
 class TourAdmin(SortableAdminBase, admin.ModelAdmin):
     list_display = (
         "id", "title", "duration_label", "days_total_for_list",
-        "commission", "price", "price_currency", "is_published"
+        "commission", "price", "price_currency", "is_published",
+        "allow_flights", "allow_hotels", "allow_transfers"
     )
     list_display_links = ("id", "title")
     list_filter = (

@@ -308,10 +308,21 @@ Tour grid START -->
             </div>
 
             <div class="card-body px-3">
-              <h5 class="card-title mb-0">
+              <h5 class="card-title mb-0 d-flex align-items-center flex-wrap gap-2">
                 <a href="{% url 'tour_detail' slug=tour.slug %}?{{ request.GET.urlencode }}" class="stretched-link">
                   {{ tour.title }}
                 </a>
+
+                {% if tour.total_miles_reward %}
+                  <span
+                    class="badge rounded-pill bg-success-subtle text-success border border-success-subtle position-relative z-2"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                    title="Bu milleri kazandıktan sonra ilerideki Nomaya alışverişlerinizde harcayabilirsiniz!"
+                  >
+                    🌱 +{{ tour.total_miles_reward }} mil kazanın
+                  </span>
+                {% endif %}
               </h5>
 
               {% if tour.start_date and tour.end_date %}
@@ -679,5 +690,12 @@ Tour grid END -->
 })();
 </script>
 
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+    new bootstrap.Tooltip(el);
+  });
+});
+</script>
 
 {% endblock %}
