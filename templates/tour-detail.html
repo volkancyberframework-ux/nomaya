@@ -5,6 +5,17 @@
 {% block content %}
 <main>
 
+
+<style>
+  .activity-miles-badge{
+  font-size: .68rem !important;
+  font-weight: 500 !important;
+  padding: .22rem .55rem !important;
+  line-height: 1.1;
+  opacity: .92;
+}
+
+</style>
   <!-- ======================= Title + Gallery ======================= -->
   <section class="pt-4 pt-lg-5">
     <div class="container position-relative">
@@ -426,19 +437,18 @@
 
                                             {% if a.miles_reward %}
                                               <span
-                                                class="badge rounded-pill px-3 py-2"
-                                                style="
-                                                  background:#E8F8EE;
-                                                  color:#2E8B57;
-                                                  border:1px solid #D5F0DD;
-                                                  font-weight:500;
-                                                "
-                                                data-bs-toggle="tooltip"
-                                                data-bs-placement="top"
-                                                title="Bu milleri kazandıktan sonra ilerideki Nomaya alışverişlerinizde harcayabilirsiniz!"
-                                              >
-                                                ✨ +{{ a.miles_reward }} mil
-                                              </span>
+                                              class="badge rounded-pill activity-miles-badge"
+                                              style="
+                                                background:#E8F8EE;
+                                                color:#2E8B57;
+                                                border:1px solid #D5F0DD;
+                                              "
+                                              data-bs-toggle="tooltip"
+                                              data-bs-placement="top"
+                                              title="Bu milleri kazandıktan sonra ilerideki Nomaya alışverişlerinizde harcayabilirsiniz!"
+                                            >
+                                              ✨ +{{ a.miles_reward }} mil
+                                            </span>
                                             {% endif %}
                                           </h5>
 

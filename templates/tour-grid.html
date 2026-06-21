@@ -4,6 +4,12 @@
 
 
 <style>
+  .miles-badge{
+    font-size: .72rem !important; /* küçült */
+    font-weight: 600;
+    padding: .25rem .6rem !important;
+    line-height: 1.1;
+  }
   /* Varsayılan: açık zeminde koyu rozet */
   .badge-contrast{
     background:#111 !important;
@@ -315,12 +321,12 @@ Tour grid START -->
 
                 {% if tour.total_miles_reward %}
                   <span
-                    class="badge rounded-pill bg-success-subtle text-success border border-success-subtle position-relative z-2"
+                    class="badge rounded-pill bg-success-subtle text-success border border-success-subtle position-relative z-2 miles-badge"
                     data-bs-toggle="tooltip"
                     data-bs-placement="top"
                     title="Bu milleri kazandıktan sonra ilerideki Nomaya alışverişlerinizde harcayabilirsiniz!"
                   >
-                    🌱 +{{ tour.total_miles_reward }} mil kazanın
+                    🌱 +{{ tour.total_miles_reward }} mil
                   </span>
                 {% endif %}
               </h5>
