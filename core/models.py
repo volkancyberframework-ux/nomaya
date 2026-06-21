@@ -767,6 +767,76 @@ class ActivityProgress(models.Model):
         return f"{self.order.tracking_code} - {self.day_activity.activity.title} - {self.status}"
 
 
+class ActivityProgressLocationLog(models.Model):
+    class Action(models.TextChoices):
+        PENDING = "pending", "Bekliyor"
+        COMPLETED = "completed", "Tamamlandı"
+        SKIPPED = "skipped", "Atlandı"
+
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        related_name="activity_location_logs"
+    )
+
+    activity_progress = models.ForeignKey(
+        ActivityProgress,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="location_logs"
+    )
+
+    day_activity = models.ForeignKey(
+        DayActivity,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="activity_location_logs"
+    )
+
+    tracking_code = models.CharField(max_length=12, db_index=True)
+    action = models.CharField(max_length=20, choices=Action.choices, db_index=True)
+
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+    accuracy = models.FloatField(null=True, blank=True)
+
+    session_id = models.CharField(max_length=100, blank=True, null=True, db_index=True)
+    user_agent = models.TextField(blank=True, null=True)
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    MAX_ROWS = 100000
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["tracking_code", "created_at"]),
+            models.Index(fields=["action", "created_at"]),
+        ]
+
+    def __str__(self):
+        return f"{self.tracking_code} - {self.action} - {self.latitude},{self.longitude}"
+
+    @classmethod
+    def prune_if_needed(cls):
+        total = cls.objects.count()
+
+        if total <= cls.MAX_ROWS:
+            return
+
+        excess = total - cls.MAX_ROWS
+
+        old_ids = list(
+            cls.objects
+            .order_by("id")
+            .values_list("id", flat=True)[:excess]
+        )
+
+        if old_ids:
+            cls.objects.filter(id__in=old_ids).delete()
 # --- Day içindeki through kayıtları değişince Day fiyatını yeniden hesapla
 @receiver(post_save, sender=DayFlight)
 @receiver(post_delete, sender=DayFlight)

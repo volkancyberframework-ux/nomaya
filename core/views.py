@@ -15,6 +15,7 @@ from .models import Tour, Order,  Traveler
 from .forms import OrderForm
 from decimal import Decimal
 from django.db.models import Sum
+from .models import LiveLocation, ActivityProgressLocationLog
 import re
 from datetime import datetime
 from django.core.paginator import Paginator
@@ -45,13 +46,15 @@ from decimal import Decimal
 from datetime import timedelta
 import locale
 from django.db.models import Count
-
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import user_passes_test
 from .models import (
     Tour, TourPhoto, TourDay, DayImage, DayFlight,
     DayTransfer, DayHotel, DayActivity
 )
 from .utils import _parse_dates_param  # eğer ayrı utils'te tanımlıysa
 from django.utils import translation
+from .models import ActivityProgressLocationLog
 
 User = get_user_model()
 
@@ -952,8 +955,13 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from .models import LiveLocation
 
+def superuser_required(user):
+    return user.is_authenticated and user.is_active and user.is_staff and user.is_superuser
+
+
+@user_passes_test(superuser_required, login_url="/admin/login/")
 def live_map(request):
-    return render(request, "core/live_map.html")
+    return render(request, "live_map.html")
 
 def live_locations_api(request):
     locations = LiveLocation.objects.all().order_by("-updated_at")
@@ -1369,6 +1377,28 @@ def update_activity_progress(request):
 
     progress.status = status
     progress.save(update_fields=["status", "updated_at"])
+
+    last_location = LiveLocation.objects.filter(
+        session_id=order.tracking_code
+    ).order_by("-updated_at").first()
+
+    ActivityProgressLocationLog.objects.create(
+        order=order,
+        activity_progress=progress,
+        day_activity=day_activity,
+        tracking_code=order.tracking_code,
+        action=status,
+        latitude=last_location.latitude if last_location else None,
+        longitude=last_location.longitude if last_location else None,
+        accuracy=last_location.accuracy if last_location else None,
+        session_id=order.tracking_code,
+        user_agent=request.META.get("HTTP_USER_AGENT", ""),
+        ip_address=request.META.get("HTTP_CF_CONNECTING_IP")
+        or request.META.get("HTTP_TRUE_CLIENT_IP")
+        or request.META.get("REMOTE_ADDR"),
+    )
+
+    ActivityProgressLocationLog.prune_if_needed()
 
     if status in ["completed", "skipped"] and old_status != status:
         sent = telegram_activity_hook(order, day_activity, status)
