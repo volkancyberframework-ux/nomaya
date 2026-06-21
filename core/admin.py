@@ -14,6 +14,48 @@ from .models import (
 
 from .models import LiveLocation
 
+from django.contrib import admin
+from django.contrib.auth import get_user_model
+from django.contrib.auth.admin import UserAdmin as DefaultUserAdmin
+
+from .models import UserProfile
+
+User = get_user_model()
+
+
+class UserProfileInline(admin.StackedInline):
+    model = UserProfile
+    can_delete = False
+    extra = 0
+    fields = ("miles",)
+
+
+try:
+    admin.site.unregister(User)
+except admin.sites.NotRegistered:
+    pass
+
+
+@admin.register(User)
+class UserAdmin(DefaultUserAdmin):
+    inlines = (UserProfileInline,)
+
+    list_display = (
+        "id",
+        "username",
+        "email",
+        "first_name",
+        "last_name",
+        "nomaya_miles",
+        "is_staff",
+        "is_active",
+    )
+
+    @admin.display(description="Nomaya Milleri")
+    def nomaya_miles(self, obj):
+        profile, _ = UserProfile.objects.get_or_create(user=obj)
+        return profile.miles
+
 @admin.register(LiveLocation)
 class LiveLocationAdmin(admin.ModelAdmin):
     list_display = ("session_id", "latitude", "longitude", "accuracy", "ip_address", "updated_at")

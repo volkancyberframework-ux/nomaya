@@ -154,303 +154,344 @@
     <div id="tourBox"></div>
     <div id="todayBox"></div>
   </div>
+  <script>
+  let verified = false;
+  let tracking = false;
+  let watchId = null;
+  let lastPosition = null;
+  let currentCode = "";
 
-<script>
-let verified = false;
-let tracking = false;
-let watchId = null;
-let lastPosition = null;
-let currentCode = "";
+  const verifyUrl = "/api/verify-code/";
+  const locationUrl = "/api/update-location/";
+  const todayPlanBaseUrl = "/api/today-plan/";
+  const progressUrl = "/api/activity-progress/";
 
-const verifyUrl = "/api/verify-code/";
-const locationUrl = "/api/update-location/";
-const todayPlanBaseUrl = "/api/today-plan/";
-const progressUrl = "/api/activity-progress/";
+  function setStatus(text) {
+    document.getElementById("status").innerText = text;
+  }
 
-function setStatus(text) {
-  document.getElementById("status").innerText = text;
-}
+  function getCode() {
+    return document.getElementById("code").value.trim().toUpperCase();
+  }
 
-function getCode() {
-  return document.getElementById("code").value.trim().toUpperCase();
-}
+  function saveCode(code) {
+    localStorage.setItem("nomaya_tracking_code", code);
+  }
 
-async function verifyCode() {
-  const code = getCode();
+  function loadSavedCode() {
+    const params = new URLSearchParams(window.location.search);
+    const urlCode = params.get("code");
 
-  if (code.length !== 12) {
-    setStatus("Lütfen 12 haneli tur kodunu gir.");
+    if (urlCode && urlCode.length === 12) {
+      localStorage.setItem("nomaya_tracking_code", urlCode.toUpperCase());
+      return urlCode.toUpperCase();
+    }
+
+    return localStorage.getItem("nomaya_tracking_code") || "";
+  }
+
+  async function verifyCode() {
+    const code = getCode();
+
+    if (code.length !== 12) {
+      setStatus("Lütfen 12 haneli tur kodunu gir.");
+      return false;
+    }
+
+    const res = await fetch(verifyUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify({ code })
+    });
+
+    const data = await res.json();
+
+    if (res.ok && data.valid === true) {
+      verified = true;
+      currentCode = code;
+      saveCode(code);
+
+      const cleanUrl = `/nomayaasistan/?code=${code}`;
+      window.history.replaceState({}, "", cleanUrl);
+
+      document.getElementById("tourBox").innerHTML = `
+        <div class="card">
+          <strong>${data.tour || "Tur doğrulandı"}</strong>
+          <div class="muted">Kod doğrulandı.</div>
+        </div>
+      `;
+
+      setStatus("Kod doğrulandı. Bugünün planı yükleniyor...");
+      return true;
+    }
+
+    verified = false;
+    setStatus(data.message === "expired" ? "Bu tur kodunun süresi dolmuş." : "Geçersiz tur kodu.");
     return false;
   }
 
-  const res = await fetch(verifyUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Accept": "application/json"
-    },
-    body: JSON.stringify({ code })
-  });
-
-  const data = await res.json();
-
-  if (res.ok && data.valid === true) {
-    verified = true;
-    currentCode = code;
-
-    document.getElementById("tourBox").innerHTML = `
-      <div class="card">
-        <strong>${data.tour || "Tur doğrulandı"}</strong>
-        <div class="muted">Kod doğrulandı.</div>
-      </div>
-    `;
-
-    setStatus("Kod doğrulandı.");
-    return true;
+  async function getSingleLocation() {
+    return new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          lastPosition = pos;
+          resolve(pos);
+        },
+        err => reject(err),
+        {
+          enableHighAccuracy: true,
+          timeout: 12000,
+          maximumAge: 0
+        }
+      );
+    });
   }
 
-  verified = false;
-  setStatus(data.message === "expired" ? "Bu tur kodunun süresi dolmuş." : "Geçersiz tur kodu.");
-  return false;
-}
+  async function sendLocation(extra = {}) {
+    const code = currentCode || getCode();
+    if (!code || code.length !== 12) return;
 
-async function sendLocation(extra = {}) {
-  const code = currentCode || getCode();
-
-  if (!code || code.length !== 12) return;
-
-  if (!lastPosition) {
-    try {
-      await getSingleLocation();
-    } catch (e) {
-      setStatus("Konum alınamadı. Tarayıcı konum iznini kontrol et.");
-      return;
+    if (!lastPosition) {
+      try {
+        await getSingleLocation();
+      } catch (e) {
+        return;
+      }
     }
-  }
 
-  const p = lastPosition.coords;
+    const p = lastPosition.coords;
 
-  const body = {
-    session_id: code,
-    latitude: p.latitude,
-    longitude: p.longitude,
-    accuracy: p.accuracy,
-    speed: p.speed || 0,
-    timestamp: new Date().toISOString(),
-    source: "web",
-    ...extra
-  };
-
-  try {
-    const res = await fetch(locationUrl, {
+    await fetch(locationUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(body)
+      body: JSON.stringify({
+        session_id: code,
+        latitude: p.latitude,
+        longitude: p.longitude,
+        accuracy: p.accuracy,
+        speed: p.speed || 0,
+        timestamp: new Date().toISOString(),
+        source: "web",
+        ...extra
+      })
     });
-
-    if (res.ok) {
-      setStatus(
-        `Nomaya Asistan aktif:\n${p.latitude.toFixed(5)}, ${p.longitude.toFixed(5)}`
-      );
-    } else {
-      setStatus("Konum gönderilemedi: " + res.status);
-    }
-  } catch (e) {
-    setStatus("Konum gönderim hatası. Tekrar denenecek.");
-  }
-}
-
-function getSingleLocation() {
-  return new Promise((resolve, reject) => {
-    navigator.geolocation.getCurrentPosition(
-      pos => {
-        lastPosition = pos;
-        resolve(pos);
-      },
-      err => reject(err),
-      {
-        enableHighAccuracy: true,
-        timeout: 12000,
-        maximumAge: 0
-      }
-    );
-  });
-}
-
-async function startTour() {
-  setStatus("Tur kodu doğrulanıyor...");
-
-  const ok = await verifyCode();
-  if (!ok) return;
-
-  if (!navigator.geolocation) {
-    setStatus("Bu tarayıcı konum takibini desteklemiyor.");
-    return;
   }
 
-  setStatus("Konum izni bekleniyor...");
+  async function startTour() {
+    setStatus("Tur kodu doğrulanıyor...");
 
-  try {
-    await getSingleLocation();
-    await sendLocation({ event: "tour_started" });
-  } catch (e) {
-    setStatus("Konum izni verilmedi veya konum alınamadı.");
-    return;
-  }
-
-  tracking = true;
-
-  if (watchId !== null) {
-    navigator.geolocation.clearWatch(watchId);
-  }
-
-  watchId = navigator.geolocation.watchPosition(
-    async pos => {
-      lastPosition = pos;
-      await sendLocation({ event: "location_watch" });
-    },
-    err => {
-      setStatus("Konum kısa süreli kesildi. Sayfa açık kaldıkça tekrar denenecek.");
-    },
-    {
-      enableHighAccuracy: true,
-      maximumAge: 0,
-      timeout: 15000
-    }
-  );
-
-  setStatus("Nomaya Asistan aktif.");
-}
-
-function stopTracking() {
-  tracking = false;
-
-  if (watchId !== null) {
-    navigator.geolocation.clearWatch(watchId);
-    watchId = null;
-  }
-
-  sendLocation({ event: "tour_stopped" });
-  setStatus("Nomaya Asistan durduruldu.");
-}
-
-async function loadTodayPlan() {
-  if (!verified) {
     const ok = await verifyCode();
     if (!ok) return;
-  }
 
-  await sendLocation({ event: "today_plan_opened" });
-
-  const res = await fetch(todayPlanBaseUrl + currentCode + "/", {
-    headers: {
-      "Accept": "application/json"
+    if (!navigator.geolocation) {
+      setStatus("Bu tarayıcı konum takibini desteklemiyor.");
+      return;
     }
-  });
 
-  const data = await res.json();
+    try {
+      await getSingleLocation();
+      await sendLocation({ event: "tour_started" });
+    } catch (e) {
+      setStatus("Konum izni verilmedi veya konum alınamadı.");
+      return;
+    }
 
-  if (!res.ok || data.valid !== true) {
-    setStatus(data.message || "Bugünün planı alınamadı.");
-    return;
+    tracking = true;
+
+    if (watchId !== null) {
+      navigator.geolocation.clearWatch(watchId);
+    }
+
+    watchId = navigator.geolocation.watchPosition(
+      async pos => {
+        lastPosition = pos;
+        await sendLocation({ event: "location_watch" });
+      },
+      err => {
+        setStatus("Konum kısa süreli kesildi. Sayfa açık kaldıkça tekrar denenecek.");
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 15000
+      }
+    );
+
+    setStatus("Nomaya Asistan aktif.");
+    await loadTodayPlan();
   }
 
-  renderTodayPlan(data);
-}
+  function stopTracking() {
+    tracking = false;
 
-function renderTodayPlan(data) {
-  const tour = data.tour || {};
-  const day = data.day || {};
-  const activities = data.activities || [];
+    if (watchId !== null) {
+      navigator.geolocation.clearWatch(watchId);
+      watchId = null;
+    }
 
-  let completed = activities.filter(a => a.status === "completed").length;
+    sendLocation({ event: "tour_stopped" });
+    setStatus("Nomaya Asistan durduruldu.");
+  }
 
-  let html = `
-    <div class="card">
-      <div class="muted">${tour.title || "Nomaya"}</div>
-      <h2>${day.title || "Bugünün Planı"}</h2>
-      <div class="blue">${day.city || ""}</div>
-      <div class="badge">✅ ${completed}/${activities.length}</div>
-      ${day.description ? `<p class="muted">${day.description}</p>` : ""}
-    </div>
-  `;
+  async function loadTodayPlan() {
+    if (!verified) {
+      const ok = await verifyCode();
+      if (!ok) return;
+    }
 
-  activities.forEach((a, index) => {
-    const status = a.status || "pending";
-    const dayActivityId = a.day_activity_id;
+    await sendLocation({ event: "today_plan_opened" });
 
-    let statusText = "Bekliyor";
-    if (status === "completed") statusText = "Tamamlandı ✅";
-    if (status === "skipped") statusText = "Atlandı ⏭️";
+    const res = await fetch(todayPlanBaseUrl + currentCode + "/", {
+      headers: {
+        "Accept": "application/json"
+      }
+    });
 
-    html += `
-      <div class="activity">
-        <h3>${a.title || ""}</h3>
-        ${a.location ? `<div class="blue">${a.location}</div>` : ""}
-        ${a.miles ? `<div class="muted">${a.miles} mil kazanılabilir</div>` : ""}
-        <p class="muted">${statusText}</p>
+    const data = await res.json();
 
-        ${(a.points || []).map(p => `<div class="muted">• ${p}</div>`).join("")}
+    if (!res.ok || data.valid !== true) {
+      setStatus(data.message || "Bugünün planı alınamadı.");
+      return;
+    }
 
-        ${status === "pending" ? `
-          <button class="green" onclick="updateActivity(${dayActivityId}, 'completed')">
-            Tamamladım ✅
-          </button>
+    renderTodayPlan(data);
+  }
 
-          <button class="orange" onclick="updateActivity(${dayActivityId}, 'skipped')">
-            İstemiyorum, Sonrakine Geç ⏭️
-          </button>
-        ` : `
-          <button class="dark" onclick="updateActivity(${dayActivityId}, 'pending')">
-            Geri Al ↩️
-          </button>
-        `}
+  function previousActivityDone(activities, index) {
+    if (index === 0) return true;
+
+    const previous = activities[index - 1];
+    const previousStatus = previous.status || "pending";
+
+    return previousStatus === "completed" || previousStatus === "skipped";
+  }
+
+  function renderTodayPlan(data) {
+    const tour = data.tour || {};
+    const day = data.day || {};
+    const activities = data.activities || [];
+
+    const completed = activities.filter(a => a.status === "completed").length;
+    const skipped = activities.filter(a => a.status === "skipped").length;
+
+    let html = `
+      <div class="card">
+        <div class="muted">${tour.title || "Nomaya"}</div>
+        <h2>${day.title || "Bugünün Planı"}</h2>
+        <div class="blue">${day.city || ""}</div>
+        <div class="badge">✅ ${completed}/${activities.length}</div>
+        <p class="muted">${completed} tamamlandı • ${skipped} atlandı • ${activities.length} aktivite</p>
+        ${day.description ? `<p class="muted">${day.description}</p>` : ""}
       </div>
     `;
-  });
 
-  document.getElementById("todayBox").innerHTML = html;
-}
+    activities.forEach((a, index) => {
+      const status = a.status || "pending";
+      const dayActivityId = a.day_activity_id;
+      const canAct = previousActivityDone(activities, index);
 
-async function updateActivity(dayActivityId, status) {
-  await sendLocation({
-    event: "activity_button_clicked",
-    day_activity_id: dayActivityId,
-    activity_status: status
-  });
+      let statusText = "Bekliyor";
+      if (status === "completed") statusText = "Tamamlandı ✅";
+      if (status === "skipped") statusText = "Atlandı ⏭️";
 
-  const res = await fetch(progressUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Accept": "application/json"
-    },
-    body: JSON.stringify({
-      code: currentCode,
-      day_activity_id: dayActivityId,
-      status: status
-    })
-  });
+      html += `
+        <div class="activity">
+          <h3 style="${!canAct ? 'color:#777;' : ''}">
+            ${!canAct ? "🔒 " : ""}${a.title || ""}
+          </h3>
 
-  const data = await res.json();
+          ${a.location ? `<div class="blue">${a.location}</div>` : ""}
+          ${a.miles ? `<div class="muted">${a.miles} mil kazanılabilir</div>` : ""}
 
-  if (res.ok && data.valid === true) {
-    if (status === "completed") {
-      const miles = data.miles_awarded || data.miles || 0;
-      setStatus(miles ? `Aktivite tamamlandı ✅ ${miles} mil kazanıldı` : "Aktivite tamamlandı ✅");
-    } else if (status === "skipped") {
-      setStatus("Aktivite atlandı ⏭️");
-    } else {
-      setStatus("Geri alındı ↩️");
-    }
+          <p class="muted">${statusText}</p>
 
-    await loadTodayPlan();
-  } else {
-    setStatus(data.message || "Aktivite güncellenemedi.");
+          ${(a.points || []).map(p => `<div class="muted">• ${p}</div>`).join("")}
+
+          ${
+            !canAct
+              ? `
+                <div class="muted" style="margin-top:12px;">
+                  Bu aktivitede işlem yapmak için önce önceki aktiviteyi tamamlamalı veya atlamalısın.
+                </div>
+              `
+              : status === "pending"
+                ? `
+                  <button class="green" onclick="updateActivity(${dayActivityId}, 'completed')">
+                    Tamamladım ✅
+                  </button>
+
+                  <button class="orange" onclick="updateActivity(${dayActivityId}, 'skipped')">
+                    İstemiyorum, Sonrakine Geç ⏭️
+                  </button>
+                `
+                : `
+                  <div class="card" style="margin-top:12px;">
+                    ${status === "completed" ? "Bu aktivite tamamlandı ✅" : "Bu aktivite atlandı ⏭️"}
+                  </div>
+                `
+          }
+        </div>
+      `;
+    });
+
+    document.getElementById("todayBox").innerHTML = html;
   }
-}
-</script>
+
+  async function updateActivity(dayActivityId, status) {
+    await sendLocation({
+      event: "activity_button_clicked",
+      day_activity_id: dayActivityId,
+      activity_status: status
+    });
+
+    const res = await fetch(progressUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify({
+        code: currentCode,
+        day_activity_id: dayActivityId,
+        status: status
+      })
+    });
+
+    const data = await res.json();
+
+    if (res.ok && data.valid === true) {
+      if (status === "completed") {
+        const miles = data.miles_awarded || data.miles || 0;
+        setStatus(miles ? `Aktivite tamamlandı ✅ ${miles} mil kazanıldı` : "Aktivite tamamlandı ✅");
+      } else {
+        setStatus("Aktivite atlandı ⏭️");
+      }
+
+      await loadTodayPlan();
+    } else {
+      setStatus(data.message || "Aktivite güncellenemedi.");
+    }
+  }
+
+  window.addEventListener("load", async () => {
+    const savedCode = loadSavedCode();
+
+    if (savedCode && savedCode.length === 12) {
+      document.getElementById("code").value = savedCode;
+      currentCode = savedCode;
+
+      const ok = await verifyCode();
+
+      if (ok) {
+        await loadTodayPlan();
+      }
+    }
+  });
+  </script>
 </body>
 </html>
