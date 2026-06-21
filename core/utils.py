@@ -70,3 +70,32 @@ def _parse_dates_param(value: str):
         except ValueError:
             d = None
     return d, None
+
+# core/utils/telegram.py
+
+import requests
+from django.conf import settings
+
+
+def send_telegram_message(message: str) -> bool:
+    token = getattr(settings, "TELEGRAM_BOT_TOKEN", "")
+    chat_id = getattr(settings, "TELEGRAM_CHAT_ID", "")
+
+    if not token or not chat_id:
+        return False
+
+    try:
+        url = f"https://api.telegram.org/bot{token}/sendMessage"
+        requests.post(
+            url,
+            json={
+                "chat_id": chat_id,
+                "text": message,
+                "parse_mode": "HTML",
+                "disable_web_page_preview": True,
+            },
+            timeout=5,
+        )
+        return True
+    except Exception:
+        return False

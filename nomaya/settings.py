@@ -6,7 +6,7 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # --- Güvenlik / genel ---
-SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-@dqu-@telwen(6x(q00gnsg_vk)()r&+atofj-6yyjqopy!s9+")
+SECRET_KEY = os.environ.get("SECRET_KEY", "")
 DEBUG = True   # local: 1, prod: 0
 
 ALLOWED_HOSTS = ["nomaya.co", "www.nomaya.co", "nomaya.onrender.com"]
@@ -23,6 +23,8 @@ SECURE_HSTS_SECONDS = 31536000
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 
+TELEGRAM_BOT_TOKEN = config("TELEGRAM_BOT_TOKEN", default="")
+TELEGRAM_CHAT_ID = config("TELEGRAM_CHAT_ID", default="")
 
 # --- Auth yönlendirmeleri ---
 LOGIN_URL = "sign_in"
