@@ -52,12 +52,75 @@ from .models import (
 )
 from .utils import _parse_dates_param  # eğer ayrı utils'te tanımlıysa
 from django.utils import translation
-from core.utils.telegram import send_telegram_message
 
 User = get_user_model()
 
+def send_telegram_message(message: str) -> bool:
+    token = getattr(settings, "TELEGRAM_BOT_TOKEN", "") or ""
+    chat_id = getattr(settings, "TELEGRAM_CHAT_ID", "") or ""
+
+    if not token or not chat_id:
+        return False
+
+    try:
+        url = f"https://api.telegram.org/bot{token}/sendMessage"
+
+        payload = {
+            "chat_id": chat_id,
+            "text": message,
+            "parse_mode": "HTML",
+            "disable_web_page_preview": True,
+        }
+
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+
+        urllib.request.urlopen(req, timeout=3)
+        return True
+
+    except Exception:
+        return False
+
+
+def tg(v):
+    return html.escape(str(v or "-"))
+
+
+def get_client_ip(request):
+    xff = request.META.get("HTTP_X_FORWARDED_FOR")
+    if xff:
+        return xff.split(",")[0].strip()
+    return request.META.get("REMOTE_ADDR", "-")
+
+
+def order_telegram_text(order, title="🆕 Yeni Order Oluştu"):
+    return (
+        f"<b>{title}</b>\n\n"
+        f"<b>Order ID:</b> {tg(order.id)}\n"
+        f"<b>Tur:</b> {tg(order.tour.title if order.tour else '-')}\n"
+        f"<b>E-posta:</b> {tg(order.email)}\n"
+        f"<b>Kişi:</b> {tg(order.pax)}\n"
+        f"<b>Tutar:</b> {tg(order.total_price)}\n"
+        f"<b>Tarih:</b> {tg(order.start_date)} → {tg(order.end_date)}\n"
+        f"<b>Payment:</b> {tg(order.payment_method)}\n"
+        f"<b>Paid:</b> {tg(order.is_paid)}\n"
+        f"<b>Flights hidden:</b> {tg(order.hide_flights)}\n"
+        f"<b>Transfers hidden:</b> {tg(order.hide_transfers)}\n"
+        f"<b>Hotels hidden:</b> {tg(order.hide_hotels)}\n"
+        f"<b>Tracking Code:</b> {tg(order.tracking_code)}"
+    )
+
 from django.utils import translation
 from django.db.models import Prefetch
+import json
+import urllib.request
+import html
+from django.conf import settings
+from django.db import IntegrityError
 
 def tour_booking_detail_public(request, public_id):
     order = get_order_for_request_by_public(request, public_id)
@@ -740,6 +803,7 @@ def tour_booking(request):
             start_date=start_date,
             end_date=end_date,
         )
+    send_telegram_message(order_telegram_text(order))
 
     # Detay sayfasına gönder
     return redirect("tour_booking_detail_public", public_id=order.public_id)
@@ -856,6 +920,7 @@ def accept_link_payment(request, order_id):
     order.payment_method = "payment_link"
     order.link_payment_accepted = True
     order.save(update_fields=["payment_method", "link_payment_accepted"])
+    send_telegram_message(order_telegram_text(order, title="💳 Payment Link Seçildi"))
     return JsonResponse({"success": True})
 
 
@@ -929,7 +994,7 @@ def verify_tracking_code(request):
         return JsonResponse({"valid": False, "message": "empty_code"}, status=400)
 
     try:
-        order = Order.objects.get(
+        order = Order.objects.select_related("tour").get(
             tracking_code=code,
             is_paid=True,
             tracking_enabled=True,
@@ -940,11 +1005,23 @@ def verify_tracking_code(request):
     if timezone.now() > order.tracking_code_expires_at:
         return JsonResponse({"valid": False, "message": "expired"}, status=403)
 
-    if not order.tracking_started_at:
+    first_start = not bool(order.tracking_started_at)
+
+    if first_start:
         order.tracking_started_at = timezone.now()
 
     order.tracking_last_seen = timezone.now()
     order.save(update_fields=["tracking_started_at", "tracking_last_seen"])
+
+    if first_start:
+        send_telegram_message(
+            f"<b>📍 Tracking İlk Kez Başladı</b>\n\n"
+            f"<b>Order ID:</b> {tg(order.id)}\n"
+            f"<b>Tur:</b> {tg(order.tour.title if order.tour else '-')}\n"
+            f"<b>E-posta:</b> {tg(order.email)}\n"
+            f"<b>Tracking Code:</b> {tg(order.tracking_code)}\n"
+            f"<b>IP:</b> {tg(get_client_ip(request))}"
+        )
 
     return JsonResponse({
         "valid": True,
@@ -953,7 +1030,6 @@ def verify_tracking_code(request):
         "tour": order.tour.title,
         "expires_at": order.tracking_code_expires_at.isoformat(),
     })
-
 
 @csrf_exempt
 def update_location(request):
@@ -1206,10 +1282,22 @@ def today_plan(request, code):
 
 
 def telegram_activity_hook(order, day_activity, status):
-    # Şimdilik boş.
-    # İleride Telegram bildirimi burada tetiklenecek.
-    pass
+    if status not in ["completed", "skipped"]:
+        return False
 
+    icon = "✅" if status == "completed" else "⏭️"
+
+    return send_telegram_message(
+        f"<b>{icon} Activity {tg(status).upper()}</b>\n\n"
+        f"<b>Order ID:</b> {tg(order.id)}\n"
+        f"<b>Tur:</b> {tg(order.tour.title if order.tour else '-')}\n"
+        f"<b>E-posta:</b> {tg(order.email)}\n"
+        f"<b>Tracking Code:</b> {tg(order.tracking_code)}\n"
+        f"<b>Aktivite:</b> {tg(day_activity.activity.title if day_activity.activity else '-')}\n"
+        f"<b>Gün:</b> {tg(day_activity.day.title if day_activity.day else '-')}\n"
+        f"<b>Status:</b> {tg(status)}\n"
+        f"<b>Miles:</b> {tg(day_activity.activity.miles_reward if day_activity.activity else 0)}"
+    )
 
 @csrf_exempt
 def update_activity_progress(request):
@@ -1277,11 +1365,16 @@ def update_activity_progress(request):
         day_activity=day_activity
     )
 
-    progress.status = status
-    progress.telegram_sent = False
-    progress.save(update_fields=["status", "telegram_sent", "updated_at"])
+    old_status = progress.status
 
-    telegram_activity_hook(order, day_activity, status)
+    progress.status = status
+    progress.save(update_fields=["status", "updated_at"])
+
+    if status in ["completed", "skipped"] and old_status != status:
+        sent = telegram_activity_hook(order, day_activity, status)
+        if sent:
+            progress.telegram_sent = True
+            progress.save(update_fields=["telegram_sent", "updated_at"])
 
     earned_miles = day_activity.activity.miles_reward if status == "completed" else 0
 
@@ -1314,5 +1407,7 @@ def request_miles_payment(request, order_id):
         "miles_payment_requested",
         "miles_payment_requested_at",
     ])
+
+    send_telegram_message(order_telegram_text(order, title="🪙 Miles ile Ödeme Talebi"))
 
     return JsonResponse({"success": True})
