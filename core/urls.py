@@ -26,6 +26,7 @@ urlpatterns = [
     path("api/activity-progress/", views.update_activity_progress, name="update_activity_progress"),
     path("tours/<slug:slug>/", views.tour_detail, name="tour_detail"),
     path("about/", views.about, name="about"),
+    path("nomayaasistan/", views.nomaya_asistan, name="nomaya_asistan"),
     path("services/", views.services, name="services"),
     path("faqs/", views.faqs, name="faqs"),
     path("booking-confirmation/", views.booking_confirmation, name="booking_confirmation"),

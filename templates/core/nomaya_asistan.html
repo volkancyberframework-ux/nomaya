@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nomaya Asistan</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0F1115;
+      color: white;
+    }
+
+    .wrap {
+      max-width: 520px;
+      margin: auto;
+      padding: 24px 18px 60px;
+    }
+
+    .logo {
+      width: 86px;
+      height: 86px;
+      border-radius: 50%;
+      background: white;
+      padding: 12px;
+      display: block;
+      margin: 18px auto 12px;
+      box-shadow: 0 12px 28px rgba(37, 99, 235, .35);
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 31px;
+      margin: 8px 0 4px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #aaa;
+      margin-bottom: 18px;
+    }
+
+    .card {
+      background: #181B22;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 22px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      background: #181B22;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 18px;
+      color: white;
+      padding: 17px;
+      text-align: center;
+      font-size: 22px;
+      letter-spacing: 2px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    button {
+      width: 100%;
+      border: 0;
+      border-radius: 16px;
+      padding: 15px;
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      margin-top: 9px;
+      cursor: pointer;
+    }
+
+    .primary { background: #2563EB; }
+    .green { background: #22C55E; }
+    .dark { background: transparent; border: 1px solid rgba(255,255,255,.22); }
+    .orange { background: #F59E0B; }
+
+    button:disabled {
+      background: #555;
+      cursor: not-allowed;
+    }
+
+    .status {
+      white-space: pre-line;
+      text-align: center;
+      line-height: 1.4;
+      color: #eee;
+    }
+
+    .activity {
+      background: #181B22;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .activity h3 {
+      margin: 0 0 6px;
+      font-size: 19px;
+    }
+
+    .muted {
+      color: #aaa;
+      font-size: 14px;
+    }
+
+    .blue {
+      color: #60A5FA;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 99px;
+      background: rgba(34,197,94,.12);
+      border: 1px solid #22C55E;
+      color: #22C55E;
+      font-weight: bold;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <img class="logo" src="/static/logo-icon-1024.png" alt="Nomaya">
+
+    <h1>Nomaya Asistan 🎧</h1>
+    <div class="subtitle">Explore. Listen. Live.</div>
+
+    <div class="card status" id="status">
+      Hazır
+    </div>
+
+    <input
+      id="code"
+      maxlength="12"
+      placeholder="12 HANELİ TUR KODU"
+      autocomplete="off"
+    />
+
+    <button class="primary" onclick="startTour()">Turu Başlat 🎧</button>
+    <button class="green" onclick="loadTodayPlan()">Bugünün Planı 🎧</button>
+    <button class="dark" onclick="stopTracking()">Turu Bitir</button>
+
+    <div id="tourBox"></div>
+    <div id="todayBox"></div>
+  </div>
+
+<script>
+let verified = false;
+let tracking = false;
+let watchId = null;
+let lastPosition = null;
+let currentCode = "";
+
+const verifyUrl = "/api/verify-code/";
+const locationUrl = "/api/update-location/";
+const todayPlanBaseUrl = "/api/today-plan/";
+const progressUrl = "/api/activity-progress/";
+
+function setStatus(text) {
+  document.getElementById("status").innerText = text;
+}
+
+function getCode() {
+  return document.getElementById("code").value.trim().toUpperCase();
+}
+
+async function verifyCode() {
+  const code = getCode();
+
+  if (code.length !== 12) {
+    setStatus("Lütfen 12 haneli tur kodunu gir.");
+    return false;
+  }
+
+  const res = await fetch(verifyUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json"
+    },
+    body: JSON.stringify({ code })
+  });
+
+  const data = await res.json();
+
+  if (res.ok && data.valid === true) {
+    verified = true;
+    currentCode = code;
+
+    document.getElementById("tourBox").innerHTML = `
+      <div class="card">
+        <strong>${data.tour || "Tur doğrulandı"}</strong>
+        <div class="muted">Kod doğrulandı.</div>
+      </div>
+    `;
+
+    setStatus("Kod doğrulandı.");
+    return true;
+  }
+
+  verified = false;
+  setStatus(data.message === "expired" ? "Bu tur kodunun süresi dolmuş." : "Geçersiz tur kodu.");
+  return false;
+}
+
+async function sendLocation(extra = {}) {
+  const code = currentCode || getCode();
+
+  if (!code || code.length !== 12) return;
+
+  if (!lastPosition) {
+    try {
+      await getSingleLocation();
+    } catch (e) {
+      setStatus("Konum alınamadı. Tarayıcı konum iznini kontrol et.");
+      return;
+    }
+  }
+
+  const p = lastPosition.coords;
+
+  const body = {
+    session_id: code,
+    latitude: p.latitude,
+    longitude: p.longitude,
+    accuracy: p.accuracy,
+    speed: p.speed || 0,
+    timestamp: new Date().toISOString(),
+    source: "web",
+    ...extra
+  };
+
+  try {
+    const res = await fetch(locationUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (res.ok) {
+      setStatus(
+        `Nomaya Asistan aktif:\n${p.latitude.toFixed(5)}, ${p.longitude.toFixed(5)}`
+      );
+    } else {
+      setStatus("Konum gönderilemedi: " + res.status);
+    }
+  } catch (e) {
+    setStatus("Konum gönderim hatası. Tekrar denenecek.");
+  }
+}
+
+function getSingleLocation() {
+  return new Promise((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        lastPosition = pos;
+        resolve(pos);
+      },
+      err => reject(err),
+      {
+        enableHighAccuracy: true,
+        timeout: 12000,
+        maximumAge: 0
+      }
+    );
+  });
+}
+
+async function startTour() {
+  setStatus("Tur kodu doğrulanıyor...");
+
+  const ok = await verifyCode();
+  if (!ok) return;
+
+  if (!navigator.geolocation) {
+    setStatus("Bu tarayıcı konum takibini desteklemiyor.");
+    return;
+  }
+
+  setStatus("Konum izni bekleniyor...");
+
+  try {
+    await getSingleLocation();
+    await sendLocation({ event: "tour_started" });
+  } catch (e) {
+    setStatus("Konum izni verilmedi veya konum alınamadı.");
+    return;
+  }
+
+  tracking = true;
+
+  if (watchId !== null) {
+    navigator.geolocation.clearWatch(watchId);
+  }
+
+  watchId = navigator.geolocation.watchPosition(
+    async pos => {
+      lastPosition = pos;
+      await sendLocation({ event: "location_watch" });
+    },
+    err => {
+      setStatus("Konum kısa süreli kesildi. Sayfa açık kaldıkça tekrar denenecek.");
+    },
+    {
+      enableHighAccuracy: true,
+      maximumAge: 0,
+      timeout: 15000
+    }
+  );
+
+  setStatus("Nomaya Asistan aktif.");
+}
+
+function stopTracking() {
+  tracking = false;
+
+  if (watchId !== null) {
+    navigator.geolocation.clearWatch(watchId);
+    watchId = null;
+  }
+
+  sendLocation({ event: "tour_stopped" });
+  setStatus("Nomaya Asistan durduruldu.");
+}
+
+async function loadTodayPlan() {
+  if (!verified) {
+    const ok = await verifyCode();
+    if (!ok) return;
+  }
+
+  await sendLocation({ event: "today_plan_opened" });
+
+  const res = await fetch(todayPlanBaseUrl + currentCode + "/", {
+    headers: {
+      "Accept": "application/json"
+    }
+  });
+
+  const data = await res.json();
+
+  if (!res.ok || data.valid !== true) {
+    setStatus(data.message || "Bugünün planı alınamadı.");
+    return;
+  }
+
+  renderTodayPlan(data);
+}
+
+function renderTodayPlan(data) {
+  const tour = data.tour || {};
+  const day = data.day || {};
+  const activities = data.activities || [];
+
+  let completed = activities.filter(a => a.status === "completed").length;
+
+  let html = `
+    <div class="card">
+      <div class="muted">${tour.title || "Nomaya"}</div>
+      <h2>${day.title || "Bugünün Planı"}</h2>
+      <div class="blue">${day.city || ""}</div>
+      <div class="badge">✅ ${completed}/${activities.length}</div>
+      ${day.description ? `<p class="muted">${day.description}</p>` : ""}
+    </div>
+  `;
+
+  activities.forEach((a, index) => {
+    const status = a.status || "pending";
+    const dayActivityId = a.day_activity_id;
+
+    let statusText = "Bekliyor";
+    if (status === "completed") statusText = "Tamamlandı ✅";
+    if (status === "skipped") statusText = "Atlandı ⏭️";
+
+    html += `
+      <div class="activity">
+        <h3>${a.title || ""}</h3>
+        ${a.location ? `<div class="blue">${a.location}</div>` : ""}
+        ${a.miles ? `<div class="muted">${a.miles} mil kazanılabilir</div>` : ""}
+        <p class="muted">${statusText}</p>
+
+        ${(a.points || []).map(p => `<div class="muted">• ${p}</div>`).join("")}
+
+        ${status === "pending" ? `
+          <button class="green" onclick="updateActivity(${dayActivityId}, 'completed')">
+            Tamamladım ✅
+          </button>
+
+          <button class="orange" onclick="updateActivity(${dayActivityId}, 'skipped')">
+            İstemiyorum, Sonrakine Geç ⏭️
+          </button>
+        ` : `
+          <button class="dark" onclick="updateActivity(${dayActivityId}, 'pending')">
+            Geri Al ↩️
+          </button>
+        `}
+      </div>
+    `;
+  });
+
+  document.getElementById("todayBox").innerHTML = html;
+}
+
+async function updateActivity(dayActivityId, status) {
+  await sendLocation({
+    event: "activity_button_clicked",
+    day_activity_id: dayActivityId,
+    activity_status: status
+  });
+
+  const res = await fetch(progressUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json"
+    },
+    body: JSON.stringify({
+      code: currentCode,
+      day_activity_id: dayActivityId,
+      status: status
+    })
+  });
+
+  const data = await res.json();
+
+  if (res.ok && data.valid === true) {
+    if (status === "completed") {
+      const miles = data.miles_awarded || data.miles || 0;
+      setStatus(miles ? `Aktivite tamamlandı ✅ ${miles} mil kazanıldı` : "Aktivite tamamlandı ✅");
+    } else if (status === "skipped") {
+      setStatus("Aktivite atlandı ⏭️");
+    } else {
+      setStatus("Geri alındı ↩️");
+    }
+
+    await loadTodayPlan();
+  } else {
+    setStatus(data.message || "Aktivite güncellenemedi.");
+  }
+}
+</script>
+</body>
+</html>

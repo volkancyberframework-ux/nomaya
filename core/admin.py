@@ -129,11 +129,13 @@ class TravelerAdmin(admin.ModelAdmin):
     )
     ordering = ("id",)
 
-
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = (
         "id", "tour", "pax", "email",
+        "earned_miles_display",
+        "total_possible_miles_display",
+        "progress_summary_display",
         "payment_method", "link_payment_status",
         "total_price", "is_paid",
         "tracking_enabled",
@@ -147,7 +149,7 @@ class OrderAdmin(admin.ModelAdmin):
 
     list_display_links = ("id", "tour")
     ordering = ("-created_at",)
-    inlines = [TravelerInline,ActivityProgressInline]
+    inlines = [TravelerInline, ActivityProgressInline]
 
     list_filter = (
         "is_paid",
@@ -175,6 +177,9 @@ class OrderAdmin(admin.ModelAdmin):
         "created_at",
         "tracking_started_at",
         "tracking_last_seen",
+        "earned_miles_display",
+        "total_possible_miles_display",
+        "progress_summary_display",
     )
 
     fieldsets = (
@@ -186,6 +191,13 @@ class OrderAdmin(admin.ModelAdmin):
         }),
         ("Tarihler", {
             "fields": ("start_date", "end_date")
+        }),
+        ("Mil / Aktivite Durumu", {
+            "fields": (
+                "earned_miles_display",
+                "total_possible_miles_display",
+                "progress_summary_display",
+            )
         }),
         ("Konum Takibi", {
             "fields": (
@@ -216,8 +228,31 @@ class OrderAdmin(admin.ModelAdmin):
             text = "Evet" if obj.link_payment_accepted else "Hayır"
             return format_html('<b style="color:{}">{}</b>', color, text)
         return "-"
-
     link_payment_status.short_description = "Link Ödemesi Onaylı mı?"
+
+    def earned_miles_display(self, obj):
+        return f"{obj.earned_miles} mil"
+    earned_miles_display.short_description = "Kazanılan Mil"
+
+    def total_possible_miles_display(self, obj):
+        if not obj.tour_id:
+            return "0 mil"
+        return f"{obj.tour.total_miles_reward} mil"
+    total_possible_miles_display.short_description = "Toplam Kazanılabilir Mil"
+
+    def progress_summary_display(self, obj):
+        total = ActivityProgress.objects.filter(order=obj).count()
+        completed = ActivityProgress.objects.filter(
+            order=obj,
+            status=ActivityProgress.Status.COMPLETED
+        ).count()
+        skipped = ActivityProgress.objects.filter(
+            order=obj,
+            status=ActivityProgress.Status.SKIPPED
+        ).count()
+
+        return f"{completed}/{total} tamamlandı, {skipped} atlandı"
+    progress_summary_display.short_description = "Aktivite Durumu"
 # ─────────────────────────────
 # Tour inlines
 # ─────────────────────────────
@@ -382,6 +417,9 @@ class TourAdmin(SortableAdminBase, admin.ModelAdmin):
     fields = (
         "id",
         "title", "slug", "is_published", "badge_text",
+
+        ("allow_flights", "allow_hotels", "allow_transfers"),
+
         ("start_date", "end_date"),
         "overview", "info",
         "places_covered",
@@ -694,6 +732,7 @@ class ActivityProgressAdmin(admin.ModelAdmin):
         "tour",
         "day_activity",
         "activity_title",
+        "activity_miles",
         "day_title",
         "status",
         "telegram_sent",
@@ -729,6 +768,7 @@ class ActivityProgressAdmin(admin.ModelAdmin):
         "tracking_code",
         "tour",
         "activity_title",
+        "activity_miles",
         "day_title",
     )
 
@@ -748,6 +788,7 @@ class ActivityProgressAdmin(admin.ModelAdmin):
                 "tour",
                 "day_activity",
                 "activity_title",
+                "activity_miles",
                 "day_title",
                 "status",
                 "note",
@@ -775,6 +816,12 @@ class ActivityProgressAdmin(admin.ModelAdmin):
             return obj.day_activity.activity.title
         return "-"
     activity_title.short_description = "Activity"
+
+    def activity_miles(self, obj):
+        if obj.day_activity_id and obj.day_activity.activity_id:
+            return obj.day_activity.activity.miles_reward or 0
+        return 0
+    activity_miles.short_description = "Mil"
 
     def day_title(self, obj):
         if obj.day_activity_id and obj.day_activity.day_id:

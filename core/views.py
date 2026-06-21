@@ -865,6 +865,13 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from .models import LiveLocation
 
+from django.shortcuts import render
+
+def nomaya_asistan(request):
+    if not request.session.session_key:
+        request.session.create()
+
+    return render(request, "core/nomaya_asistan.html")
 
 def geo(request):
     if not request.session.session_key:
