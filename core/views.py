@@ -961,7 +961,7 @@ def superuser_required(user):
 
 @user_passes_test(superuser_required, login_url="/admin/login/")
 def live_map(request):
-    return render(request, "live_map.html")
+    return render(request, "core/live_map.html")
 
 def live_locations_api(request):
     locations = LiveLocation.objects.all().order_by("-updated_at")
