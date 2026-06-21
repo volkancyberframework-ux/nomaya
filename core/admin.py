@@ -885,3 +885,57 @@ class ActivityProgressAdmin(admin.ModelAdmin):
             return obj.day_activity.day.title or str(obj.day_activity.day)
         return "-"
     day_title.short_description = "Day"
+
+from .models import ActivityProgressLocationLog
+
+
+@admin.register(ActivityProgressLocationLog)
+class ActivityProgressLocationLogAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "tracking_code",
+        "order",
+        "activity_title",
+        "action",
+        "latitude",
+        "longitude",
+        "accuracy",
+        "created_at",
+    )
+
+    list_filter = (
+        "action",
+        "created_at",
+    )
+
+    search_fields = (
+        "tracking_code",
+        "order__email",
+        "day_activity__activity__title",
+        "session_id",
+        "ip_address",
+    )
+
+    readonly_fields = (
+        "order",
+        "activity_progress",
+        "day_activity",
+        "tracking_code",
+        "action",
+        "latitude",
+        "longitude",
+        "accuracy",
+        "session_id",
+        "user_agent",
+        "ip_address",
+        "created_at",
+    )
+
+    ordering = ("-created_at",)
+    date_hierarchy = "created_at"
+
+    def activity_title(self, obj):
+        if obj.day_activity and obj.day_activity.activity:
+            return obj.day_activity.activity.title
+        return "-"
+    activity_title.short_description = "Activity"
