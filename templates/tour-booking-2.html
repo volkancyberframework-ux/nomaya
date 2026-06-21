@@ -8,6 +8,7 @@
   /* Sadece bu sayfa */
   #tb-stepper .bs-stepper .bs-stepper-content{ position:relative; }
 
+  /* Varsayılan: tüm content’ler yer kaplamasın */
   #tb-stepper .bs-stepper .bs-stepper-content > .content{
     position:absolute !important;
     inset:0;
@@ -18,6 +19,7 @@
     overflow:hidden;
   }
 
+  /* Sadece aktif panel görünür ve akışta */
   #tb-stepper .bs-stepper .bs-stepper-content > .content.dstepper-block{
     position:relative !important;
     opacity:1;
@@ -27,51 +29,32 @@
     overflow:visible;
   }
 
+  /* Ek garanti: açıkça gizli işaretlenmişler absolute kalsın */
   #tb-stepper .bs-stepper .bs-stepper-content > .content.dstepper-none{
     position:absolute !important;
   }
+</style>
 
+<style>
+  /* Step buton bloğu: biraz daha yukarı */
   #tb-stepper .step-actions{
-    margin-top: .75rem;
-    padding-top: .5rem;
+    margin-top: .75rem;        /* ↓ 1.25rem → .75rem */
+    padding-top: .5rem;        /* ↓ .75rem → .5rem  */
     border-top: 1px solid rgba(0,0,0,.08);
   }
-
   @media (min-width: 768px){
     #tb-stepper .step-actions{
-      margin-top: 1rem;
-      padding-top: .75rem;
+      margin-top: 1rem;        /* ↓ 1.75rem → 1rem */
+      padding-top: .75rem;     /* ↓ 1rem → .75rem  */
     }
   }
 
+  /* Son karttan sonra çok sarkmasın */
   #tb-stepper .content .card:last-of-type{
-    margin-bottom: .15rem;
-  }
-
-  .summary-row{
-    display:flex;
-    justify-content:space-between;
-    gap:1rem;
-    align-items:flex-start;
-  }
-
-  .summary-row strong{
-    text-align:right;
-    max-width:65%;
-  }
-
-  @media (max-width: 575.98px){
-    .summary-row{
-      flex-direction:column;
-      gap:.15rem;
-    }
-
-    .summary-row strong{
-      max-width:100%;
-      text-align:left;
-    }
+    margin-bottom: .15rem;     /* ↓ .25rem → .15rem */
   }
 </style>
+
 
 <main>
   <!-- Banner -->
@@ -142,18 +125,19 @@
           </div>
         </div>
 
+        <!-- CONTENT: .content panelleri DOĞRUDAN çocuk -->
         <div class="bs-stepper-content p-0 pt-4">
 
           <!-- STEP 1 -->
           <div id="step-1" role="tabpanel" class="content" aria-labelledby="steppertrigger1">
             <div class="row g-4">
-
               <!-- Main -->
               <div class="col-xl-8">
                 <div class="vstack gap-4">
                   <h4 class="mb-0">Tur Özeti</h4>
                   <hr class="my-0">
 
+                  <!-- Tour list START -->
                   <div class="card shadow rounded-2 overflow-hidden">
                     <div class="row g-0">
                       <div class="col-sm-6 col-md-4">
@@ -176,16 +160,16 @@
                                 <i class="far fa-calendar-alt me-2"></i>
                                 {% language 'tr' %}
                                   {% if order.end_date %}
-                                    {{ order.start_date|date:"d F Y" }} – {{ order.end_date|date:"d F Y" }}
+                                    {{ order.start_date|date:"d F Y, l" }} – {{ order.end_date|date:"d F Y, l" }}
                                   {% else %}
-                                    {{ order.start_date|date:"d F Y" }}
+                                    {{ order.start_date|date:"d F Y, l" }}
                                   {% endif %}
                                 {% endlanguage %}
                               </li>
                             {% endif %}
                             <li class="nav-item mb-1"><i class="bi bi-people-fill me-2"></i>{{ pax }} Kişi{{ pax|pluralize }}</li>
                             {% if order.pax == 2 and not order.hide_hotels %}
-                              <li class="nav-item mb-1"><i class="fa-solid fa-bed me-2"></i>{% if order.same_room %}1 Oda (paylaşımlı){% else %}2 Oda{% endif %}</li>
+                              <li class="nav-item mb-1"><i class="fa-solid fa-bed me-2"></i>{% if order.same_room %}1 Oda (shared){% else %}2 Oda{% endif %}</li>
                             {% endif %}
                             {% if tour.start_point %}
                               <li class="nav-item mb-1"><i class="bi bi-geo-alt-fill me-2"></i>{{ tour.start_point }}</li>
@@ -195,6 +179,7 @@
                       </div>
                     </div>
                   </div>
+                  <!-- Tour list END -->
 
                   {% if not order.hide_flights %}
                   <div class="card border">
@@ -212,6 +197,7 @@
                                 <h6 class="fw-normal mb-0">
                                   <span class="text-body">Kalkış:</span> {{ f.departure_time|time:"H:i" }}
                                   &nbsp;•&nbsp; <span class="text-body">Varış:</span> {{ f.arrival_time|time:"H:i" }}
+
                                 </h6>
                               </div>
 
@@ -247,7 +233,7 @@
                           {% endfor %}
                         {% endfor %}
                       {% else %}
-                        <p class="text-muted mb-0">Bu tura bağlı uçuş bulunmuyor.</p>
+                        <p class="text-muted mb-0">No flight segments attached to this tour.</p>
                       {% endif %}
                     </div>
                   </div>
@@ -258,7 +244,7 @@
                     <div class="card-header border-bottom d-flex justify-content-between">
                       <h5 class="mb-0">Otel Detayları</h5>
                       <span class="text-muted small">
-                        Fiyata Dahildir {% if order.pax == 2 %}{% if order.same_room %}1 Oda (paylaşımlı){% else %}2 Oda{% endif %}{% else %}1 Oda{% endif %}
+                        Fiyata Daildir {% if order.pax == 2 %}{% if order.same_room %}1 Oda (shared){% else %}2 Oda{% endif %}{% else %}1 Oda{% endif %}
                       </span>
                     </div>
                     <div class="card-body">
@@ -288,7 +274,7 @@
                           {% endfor %}
                         {% endfor %}
                       {% else %}
-                        <p class="text-muted mb-0">Bu tura bağlı otel bulunmuyor.</p>
+                        <p class="text-muted mb-0">No hotels attached to this tour.</p>
                       {% endif %}
                     </div>
                   </div>
@@ -334,7 +320,7 @@
                           {% endfor %}
                         {% endfor %}
                       {% else %}
-                        <p class="text-muted mb-0">Bu tura bağlı transfer bulunmuyor.</p>
+                        <p class="text-muted mb-0">No transfers attached to this tour.</p>
                       {% endif %}
                     </div>
                   </div>
@@ -385,6 +371,7 @@
                   </div>
                   {% endif %}
 
+                  <!-- İptal & Değişiklik -->
                   <div class="card border">
                     <div class="card-header border-bottom">
                       <h5 class="mb-0">İptal & Tarih Değişikliği</h5>
@@ -409,11 +396,12 @@
                       </ul>
 
                       <p class="mt-2 small text-muted">
-                        Not: İade/değişiklik uygunluğu tedarikçi kurallarına ve bilet/aktivite koşullarına göre değişebilir.
+                        Not: İade/değişiklik uygunluğu tedarikçi kurallarına ve bilet/aktivite koşullarına göre değişebilir.
                         Kesin tutarlar ödeme/işlem anında netleşir.
                       </p>
                     </div>
                   </div>
+
 
                   <div class="text-end">
                     <button class="btn btn-primary next-btn mb-0">Sonraki Sayfa</button>
@@ -448,7 +436,8 @@
 
                       <div class="d-flex justify-content-between align-items-center">
                         <span class="h6 mb-0">Ödenecek tutar (toplam)</span>
-                        <span class="h5 mb-0 payable-amount"
+                        <span class="h5 mb-0"
+                              id="payable"
                               data-amount="{{ total|floatformat:'2' }}"
                               data-currency="{{ tour.price_currency }}">
                           {{ tour.price_currency }} {{ total|floatformat:0 }}
@@ -461,22 +450,25 @@
                     </div>
                   </div>
 
+
                   <div class="card border">
                     <div class="card-header border-bottom">
                       <h5 class="card-title mb-0">Paket Özeti</h5>
                     </div>
 
                     <div class="card-body">
+                      <!-- Tur başlığı -->
                       <h6 class="mb-1">
                         <a href="{% url 'tour_detail' tour.slug %}" class="text-reset text-decoration-none">
                           {{ tour.title }}
                         </a>
                       </h6>
 
+                      <!-- Tarih & temel bilgiler -->
                       <ul class="list-unstyled small mb-3">
                         {% if order.start_date %}
-                          <li class="summary-row">
-                            <span>Tarihler</span>
+                          <li class="d-flex justify-content-between">
+                            <span>Tarihler </span>
                             <strong>
                               {% language 'tr' %}
                                 {% if order.end_date %}
@@ -489,13 +481,13 @@
                           </li>
                         {% endif %}
 
-                        <li class="summary-row">
+                        <li class="d-flex justify-content-between">
                           <span>Kişi sayısı</span>
                           <strong>{{ pax }}</strong>
                         </li>
 
                         {% if not order.hide_hotels %}
-                          <li class="summary-row">
+                          <li class="d-flex justify-content-between">
                             <span>Oda</span>
                             <strong>
                               {% if order.pax == 2 %}
@@ -508,16 +500,26 @@
                         {% endif %}
                       </ul>
 
+                      <!-- Dahil olanlar/dahil olmayanlar -->
                       <div class="mb-3">
                         <div class="small text-muted mb-1">Paket kapsamı</div>
                         <div class="d-flex flex-wrap gap-2">
-                          <span class="badge rounded-pill {% if not order.hide_flights %}bg-success-subtle text-success{% else %}bg-secondary-subtle text-secondary{% endif %}">Uçuş</span>
-                          <span class="badge rounded-pill {% if not order.hide_hotels %}bg-success-subtle text-success{% else %}bg-secondary-subtle text-secondary{% endif %}">Otel</span>
-                          <span class="badge rounded-pill {% if not order.hide_transfers %}bg-success-subtle text-success{% else %}bg-secondary-subtle text-secondary{% endif %}">Transfer</span>
-                          <span class="badge rounded-pill {% if has_activities %}bg-success-subtle text-success{% else %}bg-secondary-subtle text-secondary{% endif %}">Aktiviteler</span>
+                          <span class="badge rounded-pill {% if not order.hide_flights %}bg-success-subtle text-success{% else %}bg-secondary-subtle text-secondary{% endif %}">
+                            Uçuş
+                          </span>
+                          <span class="badge rounded-pill {% if not order.hide_hotels %}bg-success-subtle text-success{% else %}bg-secondary-subtle text-secondary{% endif %}">
+                            Otel
+                          </span>
+                          <span class="badge rounded-pill {% if not order.hide_transfers %}bg-success-subtle text-success{% else %}bg-secondary-subtle text-secondary{% endif %}">
+                            Transfer
+                          </span>
+                          <span class="badge rounded-pill {% if has_activities %}bg-success-subtle text-success{% else %}bg-secondary-subtle text-secondary{% endif %}">
+                            Aktiviteler
+                          </span>
                         </div>
                       </div>
 
+                      <!-- Fiyat özeti -->
                       <ul class="list-group list-group-borderless mb-3">
                         <li class="list-group-item d-flex justify-content-between align-items-center pt-0">
                           <span class="h6 fw-light mb-0">Kişi başı</span>
@@ -529,13 +531,10 @@
                         </li>
                       </ul>
 
-                      <p class="text-muted small mt-3 mb-3">
+                      <!-- Mini not -->
+                      <p class="text-muted small mt-3 mb-0">
                         Üye olduğunuzda rezervasyonunuzu kaydedip daha sonra devam edebilirsiniz.
                       </p>
-
-                      <button type="button" class="btn btn-primary w-100 next-btn mb-0">
-                        Bilgilerini Gir
-                      </button>
                     </div>
                   </div>
                 </div>
@@ -552,16 +551,9 @@
                   <h4 class="mb-0">Yolcu Bilgileri</h4>
                   <hr class="my-0">
 
-                  {% if not order.hide_flights or not order.hide_hotels %}
-                    <div class="alert alert-warning d-flex" role="alert">
-                      <span class="alert-heading h5 mb-0 me-2"><i class="bi bi-exclamation-octagon-fill"></i></span>
-                      Pasaport zorunludur. En az 2 boş sayfa ve 6 ay geçerlilik gerekir.
-                    </div>
-                  {% endif %}
-
-                  <div class="alert alert-info d-flex" role="alert">
-                    <span class="alert-heading h5 mb-0 me-2"><i class="bi bi-whatsapp"></i></span>
-                    Nomaya Asistan kullanımı için telefon numaranızda WhatsApp bulunması zorunludur.
+                  <div class="alert alert-warning d-flex" role="alert">
+                    <span class="alert-heading h5 mb-0 me-2"><i class="bi bi-exclamation-octagon-fill"></i></span>
+                    Pasaport zorunludur. En az 2 boş sayfa ve 6 ay geçerlilik gerekir.
                   </div>
 
                   <form method="post" action="{% url 'save_travelers_public' public_id=order.public_id %}">
@@ -575,16 +567,19 @@
 
                         <div class="card-body">
                           <div class="row g-4">
+                            <!-- Hitap -->
                             <div class="col-md-2">
                               <label class="form-label" for="trav-{{ i }}-title">Hitap</label>
                               <div class="form-control-bg-light">
                                 <select class="form-select form-select-sm border-0" id="trav-{{ i }}-title" name="traveler[{{ i }}][title]" required>
+                                  <!-- Değerleri backend aynı kalsın; görünen metin Türkçe -->
                                   <option value="Mr">Bay</option>
                                   <option value="Mrs">Bayan</option>
                                 </select>
                               </div>
                             </div>
 
+                            <!-- Ad -->
                             <div class="col-md-5">
                               <div class="form-control-bg-light">
                                 <label class="form-label" for="trav-{{ i }}-first">Ad</label>
@@ -592,6 +587,7 @@
                               </div>
                             </div>
 
+                            <!-- Soyad -->
                             <div class="col-md-5">
                               <div class="form-control-bg-light">
                                 <label class="form-label" for="trav-{{ i }}-last">Soyad</label>
@@ -599,6 +595,7 @@
                               </div>
                             </div>
 
+                            <!-- Doğum tarihi -->
                             <div class="col-md-6">
                               <div class="form-control-bg-light">
                                 <label class="form-label" for="trav-{{ i }}-dob">Doğum tarihi</label>
@@ -618,34 +615,32 @@
                               </div>
                             </div>
 
-                            {% if not order.hide_flights or not order.hide_hotels %}
-                              <div class="col-md-6">
-                                <div class="form-control-bg-light">
-                                  <label class="form-label" for="trav-{{ i }}-pp">Pasaport numarası</label>
-                                  <input type="text" class="form-control" id="trav-{{ i }}-pp" name="traveler[{{ i }}][passport_no]" required>
-                                </div>
+                            <!-- Pasaport -->
+                            <div class="col-md-6">
+                              <div class="form-control-bg-light">
+                                <label class="form-label" for="trav-{{ i }}-pp">Pasaport numarası</label>
+                                <input type="text" class="form-control" id="trav-{{ i }}-pp" name="traveler[{{ i }}][passport_no]" required>
                               </div>
-                            {% endif %}
+                            </div>
 
+                            <!-- Telefon -->
                             <div class="col-md-6">
                               <div class="form-control-bg-light">
                                 <label class="form-label" for="trav-{{ i }}-phone">Telefon numarası</label>
                                 <input
                                   type="tel"
-                                  class="form-control phone-global"
+                                  class="form-control phone-tr"
                                   id="trav-{{ i }}-phone"
                                   name="traveler[{{ i }}][phone]"
-                                  placeholder="+90 532 123 45 67"
-                                  inputmode="tel"
-                                  maxlength="25"
+                                  placeholder="05XX XXX XX XX"
+                                  inputmode="numeric"
+                                  maxlength="14"
                                   required
-                                  pattern="^\+?[0-9\s().-]{7,25}$"
-                                  title="Lütfen ülke kodu ile geçerli bir telefon numarası girin. Örn: +90 532 123 45 67"
+                                  pattern="^0?5\d{2}\s?\d{3}\s?\d{2}\s?\d{2}$"
+                                  title="Lütfen 05XX XXX XX XX biçiminde girin"
                                   autocomplete="tel"
                                 >
-                                <div class="form-text">
-                                  Ülke kodu ile yazınız. Örn: +90 532 123 45 67, +84 912 345 678. WhatsApp zorunludur.
-                                </div>
+                                <div class="form-text">Biçim: 05XX XXX XX XX (örn. 0532 123 45 67)</div>
                               </div>
                             </div>
 
@@ -661,10 +656,49 @@
                       <button type="submit" class="btn btn-primary mb-0">Ödemeye geç</button>
                     </div>
                   </form>
+
+                  <script>
+                  /* Telefonu 05XX XXX XX XX olacak şekilde otomatik biçimlendir */
+                  document.addEventListener('DOMContentLoaded', function(){
+                    document.querySelectorAll('.phone-tr').forEach(function(inp){
+                      inp.addEventListener('input', function(){
+                        let v = inp.value.replace(/\D/g, '').slice(0, 11); // sadece rakam, max 11 hane
+                        // 5 ile başlıyorsa başına 0 ekleyelim; 0 ile başlamıyorsa da 0 ekleyelim
+                        if (v.startsWith('5')) v = '0' + v;
+                        if (!v.startsWith('0') && v.length > 0) v = '0' + v;
+
+                        // 05XX XXX XX XX => 4-3-2-2 blok
+                        let out = v;
+                        if (v.length > 4) {
+                          out = v.slice(0,4) + ' ' + v.slice(4,7);
+                          if (v.length > 7) out += ' ' + v.slice(7,9);
+                          if (v.length > 9) out += ' ' + v.slice(9,11);
+                        }
+                        inp.value = out;
+                      });
+                    });
+
+                    // Doğum tarihi için GG/AA/YYYY maskesi (mevcut kodunuz yoksa)
+                    document.querySelectorAll('.dob-input').forEach(function(inp){
+                      const re = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
+                      inp.addEventListener('input', function(){
+                        let v = inp.value.replace(/[^\d]/g, '').slice(0, 8);
+                        if (v.length >= 5) v = v.slice(0,2) + '/' + v.slice(2,4) + '/' + v.slice(4);
+                        else if (v.length >= 3) v = v.slice(0,2) + '/' + v.slice(2);
+                        inp.value = v;
+                        inp.setCustomValidity(re.test(v) ? '' : 'Lütfen GG/AA/YYYY biçiminde girin');
+                      });
+                      inp.addEventListener('blur', function(){
+                        inp.setCustomValidity(re.test(inp.value) ? '' : 'Lütfen GG/AA/YYYY biçiminde girin');
+                      });
+                    });
+                  });
+                  </script>
+
                 </div>
               </div>
 
-              <!-- Sidebar -->
+              <!-- Sidebar (aynı) -->
               <aside class="col-xl-4">
                 <div class="vstack gap-4">
                   <div class="card border shadow-sm">
@@ -691,7 +725,8 @@
 
                       <div class="d-flex justify-content-between align-items-center">
                         <span class="h6 mb-0">Ödenecek tutar (toplam)</span>
-                        <span class="h5 mb-0 payable-amount"
+                        <span class="h5 mb-0"
+                              id="payable"
                               data-amount="{{ total|floatformat:'2' }}"
                               data-currency="{{ tour.price_currency }}">
                           {{ tour.price_currency }} {{ total|floatformat:0 }}
@@ -704,41 +739,43 @@
                     </div>
                   </div>
 
+
                   <div class="card border">
                     <div class="card-header border-bottom">
                       <h5 class="card-title mb-0">Paket Özeti</h5>
                     </div>
 
                     <div class="card-body">
+                      <!-- Tur başlığı -->
                       <h6 class="mb-1">
                         <a href="{% url 'tour_detail' tour.slug %}" class="text-reset text-decoration-none">
                           {{ tour.title }}
                         </a>
                       </h6>
 
+                      <!-- Tarih & temel bilgiler -->
                       <ul class="list-unstyled small mb-3">
                         {% if order.start_date %}
-                          <li class="summary-row">
+                          <li class="d-flex justify-content-between">
                             <span>Tarihler</span>
                             <strong>
                               {% language 'tr' %}
                                 {% if order.end_date %}
-                                  {{ order.start_date|date:"d F Y" }} – {{ order.end_date|date:"d F Y" }}
+                                  {{ order.start_date|date:"d F Y, l" }} – {{ order.end_date|date:"d F Y, l" }}
                                 {% else %}
-                                  {{ order.start_date|date:"d F Y" }}
+                                  {{ order.start_date|date:"d F Y, l" }}
                                 {% endif %}
                               {% endlanguage %}
                             </strong>
                           </li>
                         {% endif %}
-
-                        <li class="summary-row">
+                        <li class="d-flex justify-content-between">
                           <span>Kişi sayısı</span>
                           <strong>{{ pax }}</strong>
                         </li>
 
                         {% if not order.hide_hotels %}
-                          <li class="summary-row">
+                          <li class="d-flex justify-content-between">
                             <span>Oda</span>
                             <strong>
                               {% if order.pax == 2 %}
@@ -751,16 +788,26 @@
                         {% endif %}
                       </ul>
 
+                      <!-- Dahil olanlar/dahil olmayanlar -->
                       <div class="mb-3">
                         <div class="small text-muted mb-1">Paket kapsamı</div>
                         <div class="d-flex flex-wrap gap-2">
-                          <span class="badge rounded-pill {% if not order.hide_flights %}bg-success-subtle text-success{% else %}bg-secondary-subtle text-secondary{% endif %}">Uçuş</span>
-                          <span class="badge rounded-pill {% if not order.hide_hotels %}bg-success-subtle text-success{% else %}bg-secondary-subtle text-secondary{% endif %}">Otel</span>
-                          <span class="badge rounded-pill {% if not order.hide_transfers %}bg-success-subtle text-success{% else %}bg-secondary-subtle text-secondary{% endif %}">Transfer</span>
-                          <span class="badge rounded-pill {% if has_activities %}bg-success-subtle text-success{% else %}bg-secondary-subtle text-secondary{% endif %}">Aktiviteler</span>
+                          <span class="badge rounded-pill {% if not order.hide_flights %}bg-success-subtle text-success{% else %}bg-secondary-subtle text-secondary{% endif %}">
+                            Uçuş
+                          </span>
+                          <span class="badge rounded-pill {% if not order.hide_hotels %}bg-success-subtle text-success{% else %}bg-secondary-subtle text-secondary{% endif %}">
+                            Otel
+                          </span>
+                          <span class="badge rounded-pill {% if not order.hide_transfers %}bg-success-subtle text-success{% else %}bg-secondary-subtle text-secondary{% endif %}">
+                            Transfer
+                          </span>
+                          <span class="badge rounded-pill {% if has_activities %}bg-success-subtle text-success{% else %}bg-secondary-subtle text-secondary{% endif %}">
+                            Aktiviteler
+                          </span>
                         </div>
                       </div>
 
+                      <!-- Fiyat özeti -->
                       <ul class="list-group list-group-borderless mb-3">
                         <li class="list-group-item d-flex justify-content-between align-items-center pt-0">
                           <span class="h6 fw-light mb-0">Kişi başı</span>
@@ -772,11 +819,15 @@
                         </li>
                       </ul>
 
+
+
+                      <!-- Mini not -->
                       <p class="text-muted small mt-3 mb-0">
                         Üye olduğunuzda rezervasyonunuzu kaydedip daha sonra devam edebilirsiniz.
                       </p>
                     </div>
                   </div>
+
                 </div>
               </aside>
             </div>
@@ -793,13 +844,14 @@
 
                   <form id="paymentForm" method="post" action="">
                     {% csrf_token %}
-
                     <div class="card border">
                       <div class="card-header border-bottom">
                         <h5 class="mb-0">Ödeme yöntemi</h5>
                       </div>
 
                       <div class="card-body">
+
+                        <!-- Bilgilendirme notu -->
                         <div class="alert alert-secondary bg-opacity-25 border-0 d-flex align-items-start rounded-3 mb-3" role="alert">
                           <div class="me-2 fs-5" aria-hidden="true">🧭✨</div>
                           <div class="small">
@@ -809,6 +861,7 @@
                           </div>
                         </div>
 
+                        <!-- Ödeme seçeneği: Banka Havalesi -->
                         <div class="form-check p-3 rounded-3 border bg-light mb-3">
                           <input class="form-check-input" type="radio" name="payment_method" id="payBank" value="bank_transfer" checked>
                           <label class="form-check-label fw-semibold" for="payBank">
@@ -819,6 +872,7 @@
                           </div>
                         </div>
 
+                        <!-- Ödeme seçeneği: Link ile Öde -->
                         <div class="form-check p-3 rounded-3 border bg-light mb-3">
                           <input class="form-check-input" type="radio" name="payment_method" id="payLink" value="payment_link">
                           <label class="form-check-label fw-semibold" for="payLink">
@@ -829,28 +883,65 @@
                           </div>
                         </div>
 
-                        <div class="form-check p-3 rounded-3 border bg-light mb-3">
-                          <input class="form-check-input" type="radio" name="payment_method" id="payMiles" value="miles_payment">
-                          <label class="form-check-label fw-semibold" for="payMiles">
-                            🌿 Mil ile Öde <span class="text-muted fw-normal">(Nomaya Mil kullan)</span>
-                          </label>
-
-                          <div class="mt-2 small text-muted">
-                            Mil ile ödeme talebiniz <strong>5 dakika içinde onaylanacaktır.</strong>
-                          </div>
-
-                          <div class="mt-2 small">
-                            Lütfen aşağıdaki e-posta bağlantısına tıklayarak talebinizi bize iletin:
-                            <br>
-                            <a
-                              href="mailto:destek@nomaya.co?subject=Mil%20ile%20%C3%96deme%20Talebi%20-%20ORDER-{{ order.id }}&body=Merhaba%20Nomaya%20Ekibi,%0D%0A%0D%0AORDER-{{ order.id }}%20numaral%C4%B1%20sipari%C5%9Fimde%20mil%20d%C3%BC%C5%9F%C3%BCm%C3%BC%20ile%20paketi%20sat%C4%B1n%20almak%20istiyorum.%0D%0A%0D%0ATe%C5%9Fekk%C3%BCrler."
-                              class="fw-semibold"
-                            >
-                              destek@nomaya.co adresine e-posta gönder
-                            </a>
+                        <!-- Modal -->
+                        <div class="modal fade" id="linkPaymentModal" tabindex="-1" aria-labelledby="linkPaymentLabel" aria-hidden="true">
+                          <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content rounded-3">
+                              <div class="modal-header">
+                                <h5 class="modal-title">Link ile Ödeme Onayı</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                              </div>
+                              <div class="modal-body small text-muted">
+                                Onaylarsanız siparişiniz için “Link ile Ödeme” aktif edilecek.
+                                Size e-posta yoluyla güvenli ödeme linki gönderilecektir.
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">İptal</button>
+                                <button type="button" class="btn btn-primary" id="confirmLinkPaymentBtn">Tamam, e-posta gelsin</button>
+                              </div>
+                            </div>
                           </div>
                         </div>
 
+                        <script>
+                        document.addEventListener("DOMContentLoaded", () => {
+                          const payLink = document.getElementById("payLink");
+                          const confirmBtn = document.getElementById("confirmLinkPaymentBtn");
+                          const form = document.querySelector("form");
+
+                          // Form gönderimi
+                          form.addEventListener("submit", (e) => {
+                            if (payLink.checked) {
+                              e.preventDefault();
+                              const modal = new bootstrap.Modal(document.getElementById("linkPaymentModal"));
+                              modal.show();
+                            } else {
+                              // Bank transfer seçiliyse backend'e göndermeye gerek yok
+                              // normal form submit devam eder
+                            }
+                          });
+
+                          // Link ödeme onayı
+                          confirmBtn.addEventListener("click", () => {
+                            fetch("{% url 'accept_link_payment' order.id %}", {
+                              method: "POST",
+                              headers: { "X-CSRFToken": "{{ csrf_token }}" },
+                            })
+                              .then((res) => res.json())
+                              .then((data) => {
+                                if (data.success) {
+                                  alert("✅ Link ile ödeme aktif edildi. E-posta adresinize ödeme bağlantısı gönderilecek.");
+                                  window.location.reload();
+                                }
+                              })
+                              .catch(() => alert("Bir hata oluştu, lütfen tekrar deneyin."));
+                          });
+                        });
+                        </script>
+
+
+
+                        <!-- İpucu satırı (isteğe bağlı) -->
                         <ul class="small text-muted list-unstyled mt-3 mb-0">
                           <li class="d-flex">
                             <i class="bi bi-shield-lock me-2"></i>
@@ -858,13 +949,10 @@
                           </li>
                           <li class="d-flex mt-1">
                             <i class="bi bi-clock-history me-2"></i>
-                            Ödeme için ayrılan süre: <strong>&nbsp;24 saat</strong>.
-                          </li>
-                          <li class="d-flex mt-1">
-                            <i class="bi bi-envelope me-2"></i>
-                            Mil ile ödeme için destek@nomaya.co adresine e-posta gönderiniz. Talebiniz <strong>&nbsp;5 dakika içinde onaylanacaktır.</strong>
+                            Ödeme için ayrılan süre: <strong> 24 saat</strong>.
                           </li>
                         </ul>
+
                       </div>
                     </div>
 
@@ -891,7 +979,7 @@
                 </div>
               </div>
 
-              <!-- Sidebar -->
+              <!-- Sidebar (aynı) -->
               <aside class="col-xl-4">
                 <div class="vstack gap-4">
                   <div class="card border shadow-sm">
@@ -918,7 +1006,8 @@
 
                       <div class="d-flex justify-content-between align-items-center">
                         <span class="h6 mb-0">Ödenecek tutar (toplam)</span>
-                        <span class="h5 mb-0 payable-amount"
+                        <span class="h5 mb-0"
+                              id="payable"
                               data-amount="{{ total|floatformat:'2' }}"
                               data-currency="{{ tour.price_currency }}">
                           {{ tour.price_currency }} {{ total|floatformat:0 }}
@@ -930,42 +1019,43 @@
                       </p>
                     </div>
                   </div>
-
                   <div class="card border">
                     <div class="card-header border-bottom">
                       <h5 class="card-title mb-0">Paket Özeti</h5>
                     </div>
 
                     <div class="card-body">
+                      <!-- Tur başlığı -->
                       <h6 class="mb-1">
                         <a href="{% url 'tour_detail' tour.slug %}" class="text-reset text-decoration-none">
                           {{ tour.title }}
                         </a>
                       </h6>
 
+                      <!-- Tarih & temel bilgiler -->
                       <ul class="list-unstyled small mb-3">
                         {% if order.start_date %}
-                          <li class="summary-row">
+                          <li class="d-flex justify-content-between">
                             <span>Tarihler</span>
                             <strong>
                               {% language 'tr' %}
                                 {% if order.end_date %}
-                                  {{ order.start_date|date:"d F Y" }} – {{ order.end_date|date:"d F Y" }}
+                                  {{ order.start_date|date:"d F Y, l" }} – {{ order.end_date|date:"d F Y, l" }}
                                 {% else %}
-                                  {{ order.start_date|date:"d F Y" }}
+                                  {{ order.start_date|date:"d F Y, l" }}
                                 {% endif %}
                               {% endlanguage %}
                             </strong>
                           </li>
                         {% endif %}
 
-                        <li class="summary-row">
+                        <li class="d-flex justify-content-between">
                           <span>Kişi sayısı</span>
                           <strong>{{ pax }}</strong>
                         </li>
 
                         {% if not order.hide_hotels %}
-                          <li class="summary-row">
+                          <li class="d-flex justify-content-between">
                             <span>Oda</span>
                             <strong>
                               {% if order.pax == 2 %}
@@ -978,16 +1068,26 @@
                         {% endif %}
                       </ul>
 
+                      <!-- Dahil olanlar/dahil olmayanlar -->
                       <div class="mb-3">
                         <div class="small text-muted mb-1">Paket kapsamı</div>
                         <div class="d-flex flex-wrap gap-2">
-                          <span class="badge rounded-pill {% if not order.hide_flights %}bg-success-subtle text-success{% else %}bg-secondary-subtle text-secondary{% endif %}">Uçuş</span>
-                          <span class="badge rounded-pill {% if not order.hide_hotels %}bg-success-subtle text-success{% else %}bg-secondary-subtle text-secondary{% endif %}">Otel</span>
-                          <span class="badge rounded-pill {% if not order.hide_transfers %}bg-success-subtle text-success{% else %}bg-secondary-subtle text-secondary{% endif %}">Transfer</span>
-                          <span class="badge rounded-pill {% if has_activities %}bg-success-subtle text-success{% else %}bg-secondary-subtle text-secondary{% endif %}">Aktiviteler</span>
+                          <span class="badge rounded-pill {% if not order.hide_flights %}bg-success-subtle text-success{% else %}bg-secondary-subtle text-secondary{% endif %}">
+                            Uçuş
+                          </span>
+                          <span class="badge rounded-pill {% if not order.hide_hotels %}bg-success-subtle text-success{% else %}bg-secondary-subtle text-secondary{% endif %}">
+                            Otel
+                          </span>
+                          <span class="badge rounded-pill {% if not order.hide_transfers %}bg-success-subtle text-success{% else %}bg-secondary-subtle text-secondary{% endif %}">
+                            Transfer
+                          </span>
+                          <span class="badge rounded-pill {% if has_activities %}bg-success-subtle text-success{% else %}bg-secondary-subtle text-secondary{% endif %}">
+                            Aktiviteler
+                          </span>
                         </div>
                       </div>
 
+                      <!-- Fiyat özeti -->
                       <ul class="list-group list-group-borderless mb-3">
                         <li class="list-group-item d-flex justify-content-between align-items-center pt-0">
                           <span class="h6 fw-light mb-0">Kişi başı</span>
@@ -999,6 +1099,8 @@
                         </li>
                       </ul>
 
+
+                      <!-- Mini not -->
                       <p class="text-muted small mt-3 mb-0">
                         Üye olduğunuzda rezervasyonunuzu kaydedip daha sonra devam edebilirsiniz.
                       </p>
@@ -1011,60 +1113,28 @@
           <!-- /STEP 3 -->
 
         </div>
+        <!-- /bs-stepper-content -->
       </div>
     </div>
   </section>
 
-  <!-- Modal: Link ile Ödeme -->
-  <div class="modal fade" id="linkPayModal" tabindex="-1" aria-labelledby="linkPayModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content rounded-3">
-        <div class="modal-header">
-          <h5 class="modal-title" id="linkPayModalLabel">Link ile Ödeme Onayı</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
-        </div>
-        <div class="modal-body small text-muted">
-          Onaylarsanız siparişiniz için “Link ile Ödeme” aktif edilecek.
-          <br>Size e-posta yoluyla güvenli ödeme bağlantısı gönderilecektir.
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">İptal</button>
-          <button type="button" class="btn btn-primary" id="confirmLinkPayBtn">Tamam, e-posta gelsin</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Form helpers -->
+  <!-- DOB input helper -->
   <script>
-  document.addEventListener('DOMContentLoaded', function(){
-    const dobRe = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
-
-    document.querySelectorAll('.dob-input').forEach(function(inp){
-      inp.addEventListener('input', function(){
-        let v = inp.value.replace(/[^\d]/g, '').slice(0, 8);
-        if (v.length >= 5) v = v.slice(0,2) + '/' + v.slice(2,4) + '/' + v.slice(4);
-        else if (v.length >= 3) v = v.slice(0,2) + '/' + v.slice(2);
-        inp.value = v;
-        inp.setCustomValidity(dobRe.test(v) ? '' : 'Lütfen GG/AA/YYYY biçiminde girin');
+  (function(){
+    const re=/^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
+    document.querySelectorAll('.dob-input').forEach(inp=>{
+      inp.addEventListener('input',()=>{
+        let v=inp.value.replace(/[^\d]/g,'').slice(0,8);
+        if(v.length>=5)v=v.slice(0,2)+'/'+v.slice(2,4)+'/'+v.slice(4);
+        else if(v.length>=3)v=v.slice(0,2)+'/'+v.slice(2);
+        inp.value=v;
+        inp.setCustomValidity(re.test(v)?'':'Please enter as DD/MM/YYYY');
       });
-
-      inp.addEventListener('blur', function(){
-        inp.setCustomValidity(dobRe.test(inp.value) ? '' : 'Lütfen GG/AA/YYYY biçiminde girin');
-      });
+      inp.addEventListener('blur',()=>{inp.setCustomValidity(re.test(inp.value)?'':'Please enter as DD/MM/YYYY');});
     });
-
-    document.querySelectorAll('.phone-global').forEach(function(inp){
-      inp.addEventListener('input', function(){
-        let v = inp.value.replace(/[^\d+\s().-]/g, '');
-        v = v.replace(/(?!^)\+/g, '');
-        inp.value = v.slice(0, 25);
-      });
-    });
-  });
+  })();
   </script>
 
-  <!-- Banka havalesi modal -->
   <script>
   (function () {
     const IBAN = "TR35 0006 2000 6510 0006 6687 87";
@@ -1172,7 +1242,7 @@
     }
 
     function getAmountAndCurrency() {
-      const payable = document.querySelector("#step-3 .payable-amount") || document.querySelector(".payable-amount");
+      const payable = document.querySelector("#step-3 #payable") || document.getElementById("payable");
 
       if (payable) {
         return {
@@ -1257,19 +1327,29 @@
       }
     }
 
-    window.openBankTransferModal = function(){
-      if (!document.getElementById("bankModal")) {
-        document.body.insertAdjacentHTML("beforeend", modalHtml());
-      }
-
-      const modalEl = document.getElementById("bankModal");
-      const modal = new bootstrap.Modal(modalEl);
-
-      modal.show();
-      fillTryAmount(modalEl);
-    };
-
     document.addEventListener("DOMContentLoaded", function () {
+      const form = document.getElementById("paymentForm");
+      if (!form) return;
+
+      form.addEventListener("submit", function (ev) {
+        const selected = form.querySelector('input[name="payment_method"]:checked');
+        const method = selected ? selected.value : null;
+
+        if (method !== "bank_transfer") return;
+
+        ev.preventDefault();
+
+        if (!document.getElementById("bankModal")) {
+          document.body.insertAdjacentHTML("beforeend", modalHtml());
+        }
+
+        const modalEl = document.getElementById("bankModal");
+        const modal = new bootstrap.Modal(modalEl);
+
+        modal.show();
+        fillTryAmount(modalEl);
+      });
+
       document.body.addEventListener("click", function (e) {
         const btn = e.target.closest("#copyIbanBtn");
         if (!btn) return;
@@ -1288,6 +1368,7 @@
   })();
   </script>
 
+
   <!-- Stepper init -->
   <script>
   document.addEventListener('DOMContentLoaded', function () {
@@ -1296,100 +1377,74 @@
 
     var stepper = new window.Stepper(stepperEl, { linear:false, animation:true });
 
+    // İlk paneli göster
     stepper.to(1);
 
-    document.querySelectorAll('#tb-stepper .next-btn').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        stepper.next();
-      });
-    });
+    // Next / Prev
+    document.querySelectorAll('#tb-stepper .next-btn').forEach(btn=>btn.addEventListener('click',()=>stepper.next()));
+    document.querySelectorAll('#tb-stepper .prev-btn').forEach(btn=>btn.addEventListener('click',()=>stepper.previous()));
 
-    document.querySelectorAll('#tb-stepper .prev-btn').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        stepper.previous();
-      });
-    });
+    // ?step=N desteği
+    var sp=new URLSearchParams(window.location.search);
+    var s=parseInt(sp.get('step'),10);
+    if(!isNaN(s)&&s>=1){ setTimeout(()=>stepper.to(s),0); }
 
-    var sp = new URLSearchParams(window.location.search);
-    var s = parseInt(sp.get('step'), 10);
-    if (!isNaN(s) && s >= 1) {
-      setTimeout(function(){
-        stepper.to(s);
-      }, 0);
-    }
-
+    // Fade class’ı aktif panele uygula
     function applyFade(){
-      stepperEl.querySelectorAll('.bs-stepper-content > .content').forEach(function(p){
-        p.classList.remove('fade-show');
-      });
-
-      var active = stepperEl.querySelector('.bs-stepper-content > .content.dstepper-block');
-      if (active) active.classList.add('fade-show');
+      stepperEl.querySelectorAll('.bs-stepper-content > .content').forEach(p=>p.classList.remove('fade-show'));
+      var active=stepperEl.querySelector('.bs-stepper-content > .content.dstepper-block');
+      if(active) active.classList.add('fade-show');
     }
-
     applyFade();
     stepperEl.addEventListener('shown.bs-stepper', applyFade);
   });
   </script>
 
-  <!-- Payment actions -->
+
+
   <script>
   document.addEventListener("DOMContentLoaded", function () {
-    const paymentForm = document.getElementById("paymentForm");
     const payLink = document.getElementById("payLink");
-    const payMiles = document.getElementById("payMiles");
+    const payNowBtn = document.getElementById("payNowBtn");
+    const paymentForm = document.getElementById("paymentForm");
 
-    if (!paymentForm) return;
+    // Modal HTML (dinamik eklenir)
+    const linkModalHtml = `
+      <div class="modal fade" id="linkPayModal" tabindex="-1" aria-labelledby="linkPayModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content rounded-3">
+            <div class="modal-header">
+              <h5 class="modal-title">Link ile Ödeme Onayı</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body small text-muted">
+              Onaylarsanız siparişiniz için “Link ile Ödeme” aktif edilecek.
+              <br>Size e-posta yoluyla güvenli ödeme bağlantısı gönderilecektir.
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">İptal</button>
+              <button type="button" class="btn btn-primary" id="confirmLinkPayBtn">Tamam, e-posta gelsin</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
 
-    function milesMailtoUrl(){
-      return "mailto:destek@nomaya.co"
-        + "?subject=Mil%20ile%20%C3%96deme%20Talebi%20-%20ORDER-{{ order.id }}"
-        + "&body=Merhaba%20Nomaya%20Ekibi,%0D%0A%0D%0AORDER-{{ order.id }}%20numaral%C4%B1%20sipari%C5%9Fimde%20mil%20d%C3%BC%C5%9F%C3%BCm%C3%BC%20ile%20paketi%20sat%C4%B1n%20almak%20istiyorum.%0D%0A%0D%0ATe%C5%9Fekk%C3%BCrler.";
+    // Modal sayfada yoksa ekle
+    if (!document.getElementById("linkPayModal")) {
+      document.body.insertAdjacentHTML("beforeend", linkModalHtml);
     }
 
+    // Form submit olunca
     paymentForm.addEventListener("submit", function (e) {
-      const selected = paymentForm.querySelector('input[name="payment_method"]:checked');
-      const method = selected ? selected.value : null;
-
-      if (method === "bank_transfer") {
-        e.preventDefault();
-        window.openBankTransferModal();
-        return;
-      }
-
-      if (method === "payment_link" && payLink.checked) {
+      if (payLink.checked) {
         e.preventDefault();
         const modal = new bootstrap.Modal(document.getElementById("linkPayModal"));
         modal.show();
-        return;
-      }
-
-      if (method === "miles_payment" && payMiles.checked) {
-        e.preventDefault();
-
-        fetch("{% url 'request_miles_payment' order.id %}", {
-          method: "POST",
-          headers: {
-            "X-CSRFToken": "{{ csrf_token }}",
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ payment_method: "miles_payment" })
-        })
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) {
-            alert("✅ Mil ile ödeme talebiniz alındı. 5 dakika içinde onaylanacaktır.");
-            window.location.href = milesMailtoUrl();
-          } else {
-            alert("⚠️ Mil ile ödeme talebi oluşturulamadı.");
-          }
-        })
-        .catch(() => {
-          alert("Bir hata oluştu, lütfen tekrar deneyin.");
-        });
       }
     });
 
+    // Onay butonu
     document.body.addEventListener("click", async function (e) {
       const btn = e.target.closest("#confirmLinkPayBtn");
       if (!btn) return;
@@ -1408,7 +1463,6 @@
         });
 
         const data = await res.json();
-
         if (data.success) {
           alert("✅ Link ile ödeme aktif edildi. E-posta adresinize ödeme bağlantısı gönderilecek.");
           window.location.reload();
@@ -1424,6 +1478,7 @@
     });
   });
   </script>
+
 
 </main>
 

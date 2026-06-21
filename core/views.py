@@ -1293,3 +1293,26 @@ def update_activity_progress(request):
         "earned_miles": earned_miles,
         "order_total_miles": order.earned_miles,
     })
+
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+
+from .models import Order
+
+
+@require_POST
+def request_miles_payment(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+
+    order.payment_method = "miles_payment"
+    order.miles_payment_requested = True
+    order.miles_payment_requested_at = timezone.now()
+    order.save(update_fields=[
+        "payment_method",
+        "miles_payment_requested",
+        "miles_payment_requested_at",
+    ])
+
+    return JsonResponse({"success": True})

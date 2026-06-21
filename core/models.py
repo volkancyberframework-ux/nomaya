@@ -529,12 +529,16 @@ class Order(models.Model):
         choices=[
             ("bank_transfer", "Banka Havalesi"),
             ("payment_link", "Link ile Ödeme"),
+            ("miles_payment", "Mil ile Ödeme"),
         ],
         default="bank_transfer",
     )
 
     link_payment_accepted = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=timezone.now)
+
+    miles_payment_requested = models.BooleanField(default=False)
+    miles_payment_requested_at = models.DateTimeField(null=True, blank=True)
 
     @property
     def earned_miles(self):
