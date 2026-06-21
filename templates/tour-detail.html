@@ -426,7 +426,13 @@
 
                                             {% if a.miles_reward %}
                                               <span
-                                                class="badge rounded-pill bg-warning text-dark"
+                                                class="badge rounded-pill px-3 py-2"
+                                                style="
+                                                  background:#E8F8EE;
+                                                  color:#2E8B57;
+                                                  border:1px solid #D5F0DD;
+                                                  font-weight:500;
+                                                "
                                                 data-bs-toggle="tooltip"
                                                 data-bs-placement="top"
                                                 title="Bu milleri kazandıktan sonra ilerideki Nomaya alışverişlerinizde harcayabilirsiniz!"
@@ -437,9 +443,20 @@
                                           </h5>
 
                                           {% if a.location_text %}
-                                            <small class="mb-2">
+                                            <small class="mb-2 d-block">
                                               <i class="bi bi-geo-alt me-2"></i>{{ a.location_text }}
                                             </small>
+                                          {% endif %}
+
+                                          {% if a.points %}
+                                            <ul class="list-unstyled mb-0 mt-2">
+                                              {% for p in a.points %}
+                                                <li class="d-flex align-items-start mb-1 text-muted small">
+                                                  <i class="fa-solid fa-check-circle text-success me-2 mt-1"></i>
+                                                  <span>{{ p }}</span>
+                                                </li>
+                                              {% endfor %}
+                                            </ul>
                                           {% endif %}
                                       </div>
                                     </div>
