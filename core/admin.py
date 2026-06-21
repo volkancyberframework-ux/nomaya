@@ -187,6 +187,7 @@ class OrderAdmin(admin.ModelAdmin):
         "tracking_last_seen",
         "start_date", "end_date",
         "created_at",
+        "miles_payment_status",
     )
 
     list_display_links = ("id", "tour")
@@ -206,6 +207,7 @@ class OrderAdmin(admin.ModelAdmin):
         ("end_date", admin.DateFieldListFilter),
         ("created_at", admin.DateFieldListFilter),
         "tour",
+        "miles_payment_requested",
     )
 
     search_fields = (
@@ -257,12 +259,25 @@ class OrderAdmin(admin.ModelAdmin):
             "fields": (
                 "payment_method",
                 "link_payment_accepted",
+                "miles_payment_requested",
+                "miles_payment_requested_at",
                 "total_price",
                 "is_paid",
                 "created_at",
             )
         }),
     )
+    def miles_payment_status(self, obj):
+        requested = getattr(obj, "miles_payment_requested", False)
+
+        if obj.payment_method == "miles_payment" or requested:
+            if requested:
+                return format_html('<b style="color:green;">Talep edildi</b>')
+            return format_html('<b style="color:red;">Talep yok</b>')
+
+        return "-"
+
+    miles_payment_status.short_description = "Mil Ödeme Talebi"
 
     def link_payment_status(self, obj):
         if obj.payment_method == "payment_link":
