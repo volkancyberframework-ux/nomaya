@@ -1505,3 +1505,46 @@ def request_bank_transfer(request, order_id):
         pass
 
     return JsonResponse({"success": True})
+
+from django.http import FileResponse, HttpResponseForbidden, Http404
+
+def secure_audio_stream(request, tracking_code, day_activity_id, audio_type):
+    order = get_object_or_404(
+        Order,
+        tracking_code=tracking_code.upper(),
+        is_paid=True,
+        tracking_enabled=True,
+    )
+
+    if timezone.now() > order.tracking_code_expires_at:
+        return HttpResponseForbidden("Bu ses kaydının süresi dolmuş.")
+
+    day_activity = get_object_or_404(
+        DayActivity.objects.select_related("activity", "day"),
+        id=day_activity_id,
+    )
+
+    belongs_to_tour = TourDay.objects.filter(
+        tour=order.tour,
+        day=day_activity.day
+    ).exists()
+
+    if not belongs_to_tour:
+        return HttpResponseForbidden("Bu aktivite bu tura ait değil.")
+
+    activity = day_activity.activity
+
+    if audio_type == "on-the-way":
+        audio_file = activity.audio_on_the_way
+    elif audio_type == "at-location":
+        audio_file = activity.audio_at_location
+    else:
+        raise Http404("Ses tipi bulunamadı.")
+
+    if not audio_file:
+        raise Http404("Ses kaydı bulunamadı.")
+
+    return FileResponse(
+        audio_file.open("rb"),
+        content_type="audio/mpeg"
+    )

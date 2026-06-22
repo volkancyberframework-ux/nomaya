@@ -12,6 +12,11 @@ urlpatterns = [
 
     # 1) Modal POST -> Order create (değişmedi)
     path("tours/booking/", views.tour_booking, name="tour_booking"),
+    path(
+    "audio/<str:tracking_code>/<int:day_activity_id>/<str:audio_type>/",
+    views.secure_audio_stream,
+    name="secure_audio_stream"
+    ),
 
     # 2) GÜVENLİ (UUID) detay/flow
     path("tours/booking/p/<uuid:public_id>/", views.tour_booking_detail_public, name="tour_booking_detail_public"),
