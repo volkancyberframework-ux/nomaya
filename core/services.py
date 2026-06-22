@@ -1,8 +1,6 @@
 from django.utils import timezone
-from django.db import IntegrityError
 from .models import (
     Order,
-    Traveler,
     WhatsAppMessageTemplate,
     WhatsAppMessageQueue,
     TourDay,
@@ -15,15 +13,20 @@ def get_order_phone(order):
     traveler = order.travelers.exclude(phone="").first()
     if traveler and traveler.phone:
         return traveler.phone
+
     return ""
 
 
 def get_order_full_name(order):
     traveler = order.travelers.first()
     if traveler:
-        return f"{traveler.first_name} {traveler.last_name}".strip()
+        full_name = f"{traveler.first_name} {traveler.last_name}".strip()
+        if full_name:
+            return full_name
+
     if order.email:
         return order.email.split("@")[0]
+
     return "Nomaya gezgini"
 
 
@@ -44,19 +47,30 @@ def create_whatsapp_message(order, key, context=None, day_activity=None, dedupe_
 
     message = template.render(context)
 
-    dedupe_key = f"{order.id}:{key}:{dedupe_suffix or day_activity.id if day_activity else ''}"
+    if dedupe_suffix:
+        dedupe_part = str(dedupe_suffix)
+    elif day_activity:
+        dedupe_part = str(day_activity.id)
+    else:
+        dedupe_part = "general"
 
-    try:
-        return WhatsAppMessageQueue.objects.create(
-            order=order,
-            day_activity=day_activity,
-            template=template,
-            phone=phone,
-            message=message,
-            dedupe_key=dedupe_key,
-        )
-    except IntegrityError:
-        return None
+    dedupe_key = f"{order.id}:{key}:{dedupe_part}"
+
+    existing = WhatsAppMessageQueue.objects.filter(
+        dedupe_key=dedupe_key
+    ).first()
+
+    if existing:
+        return existing
+
+    return WhatsAppMessageQueue.objects.create(
+        order=order,
+        day_activity=day_activity,
+        template=template,
+        phone=phone,
+        message=message,
+        dedupe_key=dedupe_key,
+    )
 
 
 def enqueue_paid_order_message(order):
@@ -100,6 +114,7 @@ def get_today_first_pending_activity(order):
             order=order,
             day_activity=da
         )
+
         if progress.status == ActivityProgress.Status.PENDING:
             return da
 
@@ -118,6 +133,12 @@ def get_audio_link(order, day_activity, field_name):
 def enqueue_activity_message(order, day_activity, key="tour_started_first_activity"):
     activity = day_activity.activity
 
+    points = activity.points or []
+    if isinstance(points, list):
+        activity_points = "\n".join(str(p) for p in points)
+    else:
+        activity_points = str(points)
+
     return create_whatsapp_message(
         order=order,
         key=key,
@@ -128,7 +149,7 @@ def enqueue_activity_message(order, day_activity, key="tour_started_first_activi
             "activity_title": activity.title,
             "activity_location": activity.location_text or "",
             "activity_duration": activity.duration_hours or "",
-            "activity_points": "\n".join(activity.points or []),
+            "activity_points": activity_points,
             "tracking_code": order.tracking_code,
             "audio_on_the_way_url": get_audio_link(order, day_activity, "on-the-way"),
             "audio_at_location_url": get_audio_link(order, day_activity, "at-location"),
