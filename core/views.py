@@ -1065,7 +1065,7 @@ def update_location(request):
 
     order.tracking_last_seen = timezone.now()
     order.save(update_fields=["tracking_last_seen"])
-    
+
     first_location = not LiveLocation.objects.filter(session_id=code).exists()
 
     LiveLocation.objects.update_or_create(
@@ -1365,7 +1365,6 @@ def update_activity_progress(request):
             "message": "Aktivite bulunamadı"
         }, status=404)
 
-    # Güvenlik: bu aktivite gerçekten bu turun içinde mi?
     belongs_to_tour = TourDay.objects.filter(
         tour=order.tour,
         day=day_activity.day
@@ -1415,6 +1414,35 @@ def update_activity_progress(request):
             progress.telegram_sent = True
             progress.save(update_fields=["telegram_sent", "updated_at"])
 
+        if status == "skipped":
+            from .services import enqueue_next_activity_after_skip
+            enqueue_next_activity_after_skip(order, day_activity)
+
+        if status == "completed":
+            from .services import enqueue_activity_message, create_whatsapp_message
+
+            next_activity = DayActivity.objects.filter(
+                day=day_activity.day,
+                order__gt=day_activity.order,
+            ).select_related("activity", "day").order_by("order", "id").first()
+
+            if next_activity:
+                enqueue_activity_message(
+                    order=order,
+                    day_activity=next_activity,
+                    key="next_activity"
+                )
+            else:
+                create_whatsapp_message(
+                    order=order,
+                    key="tour_no_next_activity",
+                    context={
+                        "name": order.travelers.first().first_name if order.travelers.exists() else "Nomaya gezgini",
+                        "tour_title": order.tour.title if order.tour else "",
+                    },
+                    dedupe_suffix=f"completed-no-next-after-{day_activity.id}",
+                )
+
     earned_miles = day_activity.activity.miles_reward if status == "completed" else 0
 
     return JsonResponse({
@@ -1425,7 +1453,6 @@ def update_activity_progress(request):
         "earned_miles": earned_miles,
         "order_total_miles": order.earned_miles,
     })
-
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.shortcuts import get_object_or_404
