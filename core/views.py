@@ -1063,6 +1063,26 @@ def update_location(request):
     if timezone.now() > order.tracking_code_expires_at:
         return JsonResponse({"success": False, "message": "expired"}, status=403)
 
+    today = timezone.localdate()
+
+    if order.start_date and today < order.start_date:
+        return JsonResponse({
+            "success": False,
+            "message": "travel_not_started",
+            "detail": "Seyahat günü gelmedi.",
+            "start_date": str(order.start_date),
+            "today": str(today),
+        }, status=403)
+
+    if order.end_date and today > order.end_date:
+        return JsonResponse({
+            "success": False,
+            "message": "travel_finished",
+            "detail": "Seyahat günü sona erdi.",
+            "end_date": str(order.end_date),
+            "today": str(today),
+        }, status=403)
+
     order.tracking_last_seen = timezone.now()
     order.save(update_fields=["tracking_last_seen"])
 
@@ -1087,8 +1107,13 @@ def update_location(request):
         from .services import enqueue_tour_started_message_if_needed
         enqueue_tour_started_message_if_needed(order)
 
-    return JsonResponse({"success": True})
-
+    return JsonResponse({
+        "success": True,
+        "first_location": first_location,
+        "today": str(today),
+        "start_date": str(order.start_date) if order.start_date else None,
+        "end_date": str(order.end_date) if order.end_date else None,
+    })
 from django.http import JsonResponse
 from django.utils import timezone
 from .models import Order, TourDay
