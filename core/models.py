@@ -554,6 +554,8 @@ class Order(models.Model):
         return total
 
     def mark_paid(self):
+        was_paid = self.is_paid
+
         self.is_paid = True
 
         if self.end_date:
@@ -565,6 +567,10 @@ class Order(models.Model):
             )
 
         self.save(update_fields=["is_paid", "tracking_code_expires_at"])
+
+        if not was_paid:
+            from .services import enqueue_paid_order_message
+            enqueue_paid_order_message(self)
 
     def compute_total(self):
         t = self.tour
@@ -1051,3 +1057,12 @@ def _dayactivity_changed(sender, instance, **kwargs):
 def _recalc_when_activity_price_changes(sender, instance, **kwargs):
     qs = DayActivity.objects.filter(activity=instance)
     _recompute_days_for_qs(qs)
+
+@receiver(post_save, sender=Order)
+def _order_paid_whatsapp_queue(sender, instance, created, **kwargs):
+    if created:
+        return
+
+    if instance.is_paid:
+        from .services import enqueue_paid_order_message
+        enqueue_paid_order_message(instance)

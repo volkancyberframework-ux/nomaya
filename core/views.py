@@ -1065,7 +1065,8 @@ def update_location(request):
 
     order.tracking_last_seen = timezone.now()
     order.save(update_fields=["tracking_last_seen"])
-
+    
+    first_location = not LiveLocation.objects.filter(session_id=code).exists()
 
     LiveLocation.objects.update_or_create(
         session_id=code,
@@ -1074,9 +1075,17 @@ def update_location(request):
             "latitude": data.get("latitude"),
             "longitude": data.get("longitude"),
             "accuracy": data.get("accuracy"),
+            "user_agent": request.META.get("HTTP_USER_AGENT", ""),
+            "ip_address": request.META.get("HTTP_CF_CONNECTING_IP")
+            or request.META.get("HTTP_TRUE_CLIENT_IP")
+            or request.META.get("REMOTE_ADDR"),
             "updated_at": timezone.now(),
         }
     )
+
+    if first_location:
+        from .services import enqueue_tour_started_message_if_needed
+        enqueue_tour_started_message_if_needed(order)
 
     return JsonResponse({"success": True})
 
