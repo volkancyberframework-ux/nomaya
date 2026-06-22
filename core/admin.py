@@ -20,6 +20,8 @@ from django.contrib.auth.admin import UserAdmin as DefaultUserAdmin
 
 from .models import UserProfile
 
+from .models import WhatsAppMessageTemplate, WhatsAppMessageQueue
+
 User = get_user_model()
 
 
@@ -939,3 +941,27 @@ class ActivityProgressLocationLogAdmin(admin.ModelAdmin):
             return obj.day_activity.activity.title
         return "-"
     activity_title.short_description = "Activity"
+
+
+@admin.register(WhatsAppMessageTemplate)
+class WhatsAppMessageTemplateAdmin(admin.ModelAdmin):
+    list_display = ("key", "title", "is_active", "updated_at")
+    search_fields = ("key", "title", "body")
+    list_filter = ("is_active",)
+
+
+@admin.register(WhatsAppMessageQueue)
+class WhatsAppMessageQueueAdmin(admin.ModelAdmin):
+    list_display = (
+        "id", "phone", "status", "order", "day_activity",
+        "sent_at", "failed_at", "created_at",
+    )
+    list_filter = ("status", "created_at", "sent_at")
+    search_fields = (
+        "phone", "chat_id", "message",
+        "order__tracking_code", "order__email",
+    )
+    readonly_fields = (
+        "chat_id", "waha_response", "error_message",
+        "locked_at", "sent_at", "failed_at", "created_at",
+    )

@@ -666,6 +666,20 @@ class Activity(models.Model):
         help_text="Bu aktivitenin uygun olduğu gezgin/tur profilleri"
     )
 
+    audio_on_the_way = models.FileField(
+        upload_to="activities/audio/",
+        blank=True,
+        null=True,
+        help_text="Bu konuma giderken dinlenecek ses kaydı"
+    )
+
+    audio_at_location = models.FileField(
+        upload_to="activities/audio/",
+        blank=True,
+        null=True,
+        help_text="Aktivite yerine varınca dinlenecek ses kaydı"
+    )
+
     class Meta:
         ordering = ["title"]
 
@@ -837,6 +851,95 @@ class ActivityProgressLocationLog(models.Model):
 
         if old_ids:
             cls.objects.filter(id__in=old_ids).delete()
+
+class WhatsAppMessageTemplate(models.Model):
+    key = models.CharField(max_length=100, unique=True)
+    title = models.CharField(max_length=200)
+    body = models.TextField()
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def render(self, context: dict):
+        text = self.body
+        for k, v in context.items():
+            text = text.replace("{{ " + k + " }}", str(v or ""))
+            text = text.replace("{{" + k + "}}", str(v or ""))
+        return text
+
+    def __str__(self):
+        return self.title
+
+
+class WhatsAppMessageQueue(models.Model):
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pending"
+        PROCESSING = "processing", "Processing"
+        SENT = "sent", "Sent"
+        FAILED = "failed", "Failed"
+        CANCELLED = "cancelled", "Cancelled"
+
+    order = models.ForeignKey(
+        "Order",
+        on_delete=models.CASCADE,
+        related_name="whatsapp_messages",
+        null=True,
+        blank=True,
+    )
+    day_activity = models.ForeignKey(
+        "DayActivity",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="whatsapp_messages",
+    )
+
+    template = models.ForeignKey(
+        WhatsAppMessageTemplate,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+
+    phone = models.CharField(max_length=40)
+    chat_id = models.CharField(max_length=80, blank=True)
+    message = models.TextField()
+
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PENDING,
+        db_index=True,
+    )
+
+    waha_response = models.TextField(blank=True)
+    error_message = models.TextField(blank=True)
+
+    locked_at = models.DateTimeField(null=True, blank=True)
+    sent_at = models.DateTimeField(null=True, blank=True)
+    failed_at = models.DateTimeField(null=True, blank=True)
+
+    dedupe_key = models.CharField(max_length=160, unique=True, null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def save(self, *args, **kwargs):
+        digits = str(self.phone or "")
+        for ch in ["+", " ", "-", "(", ")"]:
+            digits = digits.replace(ch, "")
+        if digits.startswith("00"):
+            digits = digits[2:]
+        self.phone = digits
+        self.chat_id = f"{digits}@c.us"
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.phone} - {self.status}"
+
 # --- Day içindeki through kayıtları değişince Day fiyatını yeniden hesapla
 @receiver(post_save, sender=DayFlight)
 @receiver(post_delete, sender=DayFlight)
