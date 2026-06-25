@@ -84,6 +84,11 @@ urlpatterns = [
     views.force_password_change,
     name="force_password_change"
     ),
+    path(
+    "update-forced-password/",
+    views.update_forced_password,
+    name="update_forced_password"
+    ),
 ]
 
 if settings.DEBUG:

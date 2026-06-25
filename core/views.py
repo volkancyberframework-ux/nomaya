@@ -305,7 +305,11 @@ def sign_in(request):
             profile = getattr(auth_user, "nomaya_profile", None)
 
             if profile and profile.force_password_change:
-                return redirect("force_password_change")
+                request.session["force_password_user_id"] = auth_user.id
+                return render(request, "sign-in.html", {
+                    "next": next_url,
+                    "show_password_modal": True,
+                })
 
             return redirect(next_url or "home")
         else:
@@ -1915,3 +1919,39 @@ def force_password_change(request):
         request,
         "force-password-change.html"
     )
+
+@login_required
+@require_http_methods(["POST"])
+def update_forced_password(request):
+    profile = request.user.nomaya_profile
+
+    if not profile.force_password_change:
+        return redirect("home")
+
+    password1 = request.POST.get("password1", "")
+    password2 = request.POST.get("password2", "")
+
+    if password1 != password2:
+        messages.error(request, "Parolalar eşleşmiyor.")
+        return render(request, "sign-in.html", {
+            "show_password_modal": True,
+        })
+
+    if len(password1) < 8:
+        messages.error(request, "Parola en az 8 karakter olmalıdır.")
+        return render(request, "sign-in.html", {
+            "show_password_modal": True,
+        })
+
+    request.user.set_password(password1)
+    request.user.save()
+
+    profile.force_password_change = False
+    profile.password_changed_at = timezone.now()
+    profile.save(update_fields=["force_password_change", "password_changed_at"])
+
+    login(request, request.user)
+
+    messages.success(request, "Giriş başarılı. Parolanız güncellendi.")
+
+    return redirect("home")

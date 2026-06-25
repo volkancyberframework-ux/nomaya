@@ -69,6 +69,56 @@
 
 <body>
 
+	{% if show_password_modal %}
+	<div class="modal fade" id="forcePasswordModal" tabindex="-1" aria-labelledby="forcePasswordModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content border-0 shadow rounded-4">
+				<div class="modal-header border-0 pb-0">
+					<div>
+						<h5 class="modal-title" id="forcePasswordModalLabel">Parolanızı güncelleyin</h5>
+						<p class="mb-0 text-muted small">Güvenliğiniz için devam etmeden önce yeni parola belirleyin.</p>
+					</div>
+				</div>
+
+				<form method="post" action="{% url 'update_forced_password' %}">
+					{% csrf_token %}
+
+					<div class="modal-body pt-3">
+						<div class="mb-3">
+							<label class="form-label">Yeni parola</label>
+							<input type="password" name="password1" class="form-control" placeholder="En az 8 karakter" required>
+						</div>
+
+						<div class="mb-3">
+							<label class="form-label">Yeni parola tekrar</label>
+							<input type="password" name="password2" class="form-control" placeholder="Yeni parolanızı tekrar girin" required>
+						</div>
+
+						<div class="alert alert-info small mb-0">
+							<i class="bi bi-shield-lock me-1"></i>
+							Bu işlemden sonra Nomaya hesabınıza yeni parolanızla giriş yapacaksınız.
+						</div>
+
+						{% if messages %}
+							<div class="mt-3">
+								{% for message in messages %}
+									<div class="alert alert-{{ message.tags }} mb-2" role="alert">{{ message }}</div>
+								{% endfor %}
+							</div>
+						{% endif %}
+					</div>
+
+					<div class="modal-footer border-0 pt-0">
+						<button type="submit" class="btn btn-primary w-100">
+							Parolayı Güncelle ve Devam Et
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	{% endif %}
+
 <!-- **************** MAIN CONTENT START **************** -->
 <main>
 
@@ -175,6 +225,18 @@ Main Content END -->
 
 <!-- ThemeFunctions -->
 <script src="{% static 'assets/js/functions.js' %}"></script>
+
+{% if show_password_modal %}
+<script>
+	document.addEventListener("DOMContentLoaded", function () {
+		const modalEl = document.getElementById("forcePasswordModal");
+		if (modalEl) {
+			const modal = new bootstrap.Modal(modalEl);
+			modal.show();
+		}
+	});
+</script>
+{% endif %}
 
 </body>
 </html>
