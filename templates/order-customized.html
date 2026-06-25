@@ -1,3 +1,8 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
 <style>
   .nomaya-hero {
     min-height: 92vh;
@@ -12,6 +17,16 @@
     border: 1px solid rgba(255,255,255,.35);
     border-radius: 28px;
     box-shadow: 0 30px 90px rgba(0,0,0,.25);
+    color: #111827;
+  }
+
+  .nomaya-card h2,
+  .nomaya-card .fw-bold {
+    color: #111827;
+  }
+
+  .nomaya-card .text-muted {
+    color: #6b7280 !important;
   }
 
   .nomaya-input {
@@ -24,10 +39,15 @@
     color: #111827;
   }
 
+  .nomaya-input::placeholder {
+    color: #9ca3af;
+  }
+
   .nomaya-input:focus {
     background: #fff;
     border-color: #2563eb;
     box-shadow: 0 0 0 .25rem rgba(37,99,235,.12);
+    color: #111827;
   }
 
   .nomaya-label {
@@ -60,6 +80,10 @@
     padding: 18px;
   }
 
+  .price-box .fw-bold {
+    color: #111827;
+  }
+
   .hint-pill {
     display: inline-flex;
     align-items: center;
@@ -72,72 +96,270 @@
     font-size: 14px;
   }
 
-  /* ========================= */
-  /* DARK MODE */
-  /* ========================= */
-
+  /* DARK MODE FIX */
   [data-bs-theme="dark"] .nomaya-card,
   html.dark .nomaya-card,
-  body.dark .nomaya-card {
-    background: #111827;
-    border: 1px solid #374151;
+  body.dark .nomaya-card,
+  .dark-mode .nomaya-card,
+  .theme-dark .nomaya-card {
+    background: #111827 !important;
+    border-color: #374151 !important;
+    color: #f9fafb !important;
+  }
+
+  [data-bs-theme="dark"] .nomaya-card h2,
+  [data-bs-theme="dark"] .nomaya-card .fw-bold,
+  html.dark .nomaya-card h2,
+  html.dark .nomaya-card .fw-bold,
+  body.dark .nomaya-card h2,
+  body.dark .nomaya-card .fw-bold,
+  .dark-mode .nomaya-card h2,
+  .dark-mode .nomaya-card .fw-bold,
+  .theme-dark .nomaya-card h2,
+  .theme-dark .nomaya-card .fw-bold {
+    color: #f9fafb !important;
+  }
+
+  [data-bs-theme="dark"] .nomaya-card .text-muted,
+  html.dark .nomaya-card .text-muted,
+  body.dark .nomaya-card .text-muted,
+  .dark-mode .nomaya-card .text-muted,
+  .theme-dark .nomaya-card .text-muted {
+    color: #9ca3af !important;
   }
 
   [data-bs-theme="dark"] .nomaya-label,
   html.dark .nomaya-label,
-  body.dark .nomaya-label {
-    color: #f9fafb;
-  }
-
-  [data-bs-theme="dark"] h2,
-  html.dark h2,
-  body.dark h2 {
-    color: #fff;
-  }
-
-  [data-bs-theme="dark"] .text-muted,
-  html.dark .text-muted,
-  body.dark .text-muted {
-    color: #9ca3af !important;
+  body.dark .nomaya-label,
+  .dark-mode .nomaya-label,
+  .theme-dark .nomaya-label {
+    color: #f9fafb !important;
   }
 
   [data-bs-theme="dark"] .nomaya-input,
   html.dark .nomaya-input,
-  body.dark .nomaya-input {
-    background: #1f2937;
-    border-color: #374151;
-    color: #fff;
+  body.dark .nomaya-input,
+  .dark-mode .nomaya-input,
+  .theme-dark .nomaya-input {
+    background: #1f2937 !important;
+    border-color: #374151 !important;
+    color: #ffffff !important;
   }
 
   [data-bs-theme="dark"] .nomaya-input::placeholder,
   html.dark .nomaya-input::placeholder,
-  body.dark .nomaya-input::placeholder {
-    color: #9ca3af;
+  body.dark .nomaya-input::placeholder,
+  .dark-mode .nomaya-input::placeholder,
+  .theme-dark .nomaya-input::placeholder {
+    color: #9ca3af !important;
   }
 
   [data-bs-theme="dark"] .nomaya-input:focus,
   html.dark .nomaya-input:focus,
-  body.dark .nomaya-input:focus {
-    background: #1f2937;
-    color: #fff;
+  body.dark .nomaya-input:focus,
+  .dark-mode .nomaya-input:focus,
+  .theme-dark .nomaya-input:focus {
+    background: #111827 !important;
+    border-color: #60a5fa !important;
+    box-shadow: 0 0 0 .25rem rgba(96,165,250,.18) !important;
+    color: #fff !important;
   }
 
   [data-bs-theme="dark"] .price-box,
   html.dark .price-box,
-  body.dark .price-box {
-    background: #1f2937;
-    border-color: #374151;
-  }
-
-  [data-bs-theme="dark"] #totalPrice,
-  html.dark #totalPrice,
-  body.dark #totalPrice {
-    color: #60a5fa !important;
+  body.dark .price-box,
+  .dark-mode .price-box,
+  .theme-dark .price-box {
+    background: #1f2937 !important;
+    border-color: #374151 !important;
   }
 
   [data-bs-theme="dark"] .price-box .fw-bold,
   html.dark .price-box .fw-bold,
-  body.dark .price-box .fw-bold {
-    color: #fff;
+  body.dark .price-box .fw-bold,
+  .dark-mode .price-box .fw-bold,
+  .theme-dark .price-box .fw-bold {
+    color: #f9fafb !important;
+  }
+
+  [data-bs-theme="dark"] #totalPrice,
+  html.dark #totalPrice,
+  body.dark #totalPrice,
+  .dark-mode #totalPrice,
+  .theme-dark #totalPrice {
+    color: #60a5fa !important;
   }
 </style>
+
+<main class="page-fade is-visible">
+  <section class="nomaya-hero d-flex align-items-center py-6 py-xl-9">
+    <div class="container">
+      <div class="row align-items-center g-5">
+
+        <div class="col-lg-5 text-white">
+          <div class="hint-pill mb-4">✨ Kişiye özel rota + sesli Nomaya deneyimi</div>
+
+          <h1 class="display-4 fw-bold mb-4">
+            Seyahatini yaz, Nomaya sana özel deneyimi hazırlasın.
+          </h1>
+
+          <p class="lead text-white-50 mb-4">
+            Konum, tarih ve seyahat tarzını seç. Nomaya sana özel rota, öneriler ve kişiselleştirilmiş içerikler oluştursun.
+          </p>
+
+          <div class="d-flex flex-column gap-3 text-white-50">
+            <div>✓ Sana özel rota planı</div>
+            <div>✓ Kişiselleştirilmiş deneyim</div>
+            <div>✓ E-posta ve telefon ile güvenli takip</div>
+          </div>
+        </div>
+
+        <div class="col-lg-7">
+          <form method="post" id="customTravelForm" class="nomaya-card p-4 p-md-5">
+            {% csrf_token %}
+
+            <div class="mb-4">
+              <h2 class="fw-bold mb-1">Nomaya Deneyimini Başlat</h2>
+              <p class="text-muted mb-0">Bilgilerini doldur, sonraki aşamada ödeme ve rota hazırlığına geç.</p>
+            </div>
+
+            <div class="row g-4">
+
+              <div class="col-md-6">
+                <label class="nomaya-label">Nereye gidiyorsun?</label>
+                <input type="text" name="location" class="form-control nomaya-input"
+                       placeholder="Örn: Bangkok, Kapadokya, Roma" required>
+              </div>
+
+              <div class="col-md-6">
+                <label class="nomaya-label">Tarih aralığı</label>
+                <input type="text" name="dates" class="form-control nomaya-input flatpickr"
+                       placeholder="Başlangıç - Bitiş" required>
+              </div>
+
+              <div class="col-12">
+                <label class="nomaya-label">Seyahat tarzın</label>
+                <input type="text" name="travel_style" class="form-control nomaya-input"
+                       placeholder="Romantik, gurme, macera, aile, kültür..." required>
+              </div>
+
+              {% if not request.user.is_authenticated %}
+                <div class="col-md-6">
+                  <label class="nomaya-label">E-posta</label>
+                  <input type="email" name="email" class="form-control nomaya-input"
+                         required value="{{ prefill.email|default:'' }}"
+                         placeholder="ornek@email.com">
+                </div>
+              {% else %}
+                <div class="col-md-6">
+                  <label class="nomaya-label">E-posta</label>
+                  <input type="email" class="form-control nomaya-input"
+                         value="{{ request.user.email }}" readonly required>
+                </div>
+              {% endif %}
+
+              <div class="col-md-6">
+                <label class="nomaya-label">Telefon</label>
+                <input type="tel" name="phone" class="form-control nomaya-input"
+                       required value="{{ prefill.phone|default:'' }}"
+                       placeholder="+90 5xx xxx xx xx">
+              </div>
+
+              <div class="col-12">
+                <div class="price-box d-flex align-items-center justify-content-between flex-wrap gap-3">
+                  <div>
+                    <div class="fw-bold">Tahmini toplam</div>
+                    <div class="text-muted small">Tarih aralığına göre otomatik hesaplanır.</div>
+                  </div>
+                  <div class="fs-3 fw-bold text-primary" id="totalPrice">$9.99</div>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="mt-4 d-grid">
+              <button class="btn nomaya-btn btn-lg" type="submit">
+                Nomaya Deneyimimi Hazırla →
+              </button>
+            </div>
+
+            <p class="text-muted small text-center mt-3 mb-0">
+              E-posta ve telefon bilgisi olmadan sonraki aşamaya geçilemez.
+            </p>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+(function () {
+  const PRICE_PER_DAY = 9.99;
+  const RANGE_SEP = ' - ';
+
+  function calcDays(value) {
+    const dates = (value || '').match(/\d{4}-\d{2}-\d{2}/g) || [];
+    if (dates.length < 2) return 1;
+
+    const start = new Date(dates[0] + 'T00:00:00');
+    const end = new Date(dates[1] + 'T00:00:00');
+
+    if (isNaN(start) || isNaN(end) || end < start) return 1;
+
+    return Math.max(1, Math.round((end - start) / 86400000) + 1);
+  }
+
+  function updatePrice(value) {
+    const days = calcDays(value);
+    const totalPriceEl = document.getElementById('totalPrice');
+    if (totalPriceEl) {
+      totalPriceEl.innerText = '$' + (days * PRICE_PER_DAY).toFixed(2);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('customTravelForm');
+    const el = document.querySelector('input.flatpickr[name="dates"]');
+
+    if (form) {
+      form.addEventListener('submit', function (e) {
+        const emailInput = form.querySelector('input[name="email"], input[type="email"]');
+        const phoneInput = form.querySelector('input[name="phone"]');
+
+        if (!emailInput || !emailInput.value.trim() || !phoneInput || !phoneInput.value.trim()) {
+          e.preventDefault();
+          alert('Devam etmek için e-posta ve telefon numarası zorunludur.');
+          return false;
+        }
+      });
+    }
+
+    if (!el || !window.flatpickr) return;
+
+    if (flatpickr.l10ns && flatpickr.l10ns.tr) {
+      flatpickr.localize(flatpickr.l10ns.tr);
+    }
+
+    flatpickr(el, {
+      mode: 'range',
+      dateFormat: 'Y-m-d',
+      altInput: true,
+      altFormat: 'd F Y',
+      locale: Object.assign({}, flatpickr.l10ns?.tr || {}, {
+        rangeSeparator: RANGE_SEP
+      }),
+      minDate: new Date().fp_incr(2),
+      onChange: function(selectedDates, dateStr) {
+        updatePrice(dateStr);
+      },
+      onClose: function(selectedDates, dateStr) {
+        updatePrice(dateStr);
+      }
+    });
+  });
+})();
+</script>
+
+{% endblock %}
