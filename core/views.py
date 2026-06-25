@@ -235,7 +235,7 @@ def save_travelers_public(request, public_id):
 
         dob = datetime.strptime(dob_str, "%d/%m/%Y").date()
 
-        Traveler.objects.create(
+        traveler = Traveler.objects.create(
             order=order,
             title=title,
             first_name=first_name,
@@ -244,6 +244,10 @@ def save_travelers_public(request, public_id):
             phone=phone,
             dob=dob,
         )
+
+        if i == 1:
+            from .services import create_order_intro_audios_for_name
+            create_order_intro_audios_for_name(order, first_name)
         created.append(i)
 
     messages.success(request, f"{len(created)} traveler saved.")

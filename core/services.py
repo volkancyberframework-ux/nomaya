@@ -212,3 +212,59 @@ def enqueue_next_activity_after_skip(order, skipped_day_activity):
         day_activity=next_activity,
         key="next_activity",
     )
+
+import os
+import shutil
+from django.core.files import File
+from django.conf import settings
+
+from .models import IntroAudioLibrary, OrderIntroAudio
+
+
+def normalize_name(name):
+    return (name or "").strip().lower()
+
+
+def create_order_intro_audios_for_name(order, first_name):
+    name = normalize_name(first_name)
+
+    if not name:
+        return 0
+
+    if order.intro_audios.exists():
+        return 0
+
+    library_items = IntroAudioLibrary.objects.filter(
+        name=name,
+        is_active=True
+    )
+
+    created_count = 0
+
+    if library_items.exists():
+        for item in library_items:
+            with item.audio.open("rb") as f:
+                intro = OrderIntroAudio(
+                    order=order,
+                    title=item.title or f"{first_name} intro",
+                    source_name=name,
+                    generated=False,
+                )
+
+                filename = os.path.basename(item.audio.name)
+                intro.audio.save(filename, File(f), save=True)
+                created_count += 1
+
+        return created_count
+
+    # Burada ses yoksa fallback placeholder.
+    # Gerçek TTS entegrasyonunu sonra buraya bağlayacağız.
+    return generate_intro_audio_for_order(order, first_name)
+
+
+def generate_intro_audio_for_order(order, first_name):
+    """
+    Buraya sonra ElevenLabs / OpenAI TTS / başka servis bağlanır.
+    Şimdilik ses yoksa 0 döndürür.
+    """
+    return 0

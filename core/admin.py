@@ -9,7 +9,7 @@ from .models import (
     Tour, TourDay, TourPhoto, Bullet, TourBullet,
     Day, DayImage, Hotel, AirportTransfer,
     Activity, DayFlight, DayTransfer, DayHotel, DayActivity,
-    Order, Traveler, TourType, ActivityProgress
+    Order, Traveler, TourType, ActivityProgress,IntroAudioLibrary, OrderIntroAudio
 )
 
 from .models import LiveLocation
@@ -24,6 +24,13 @@ from .models import WhatsAppMessageTemplate, WhatsAppMessageQueue
 
 User = get_user_model()
 
+
+
+class OrderIntroAudioInline(admin.TabularInline):
+    model = OrderIntroAudio
+    extra = 1
+    fields = ("title", "audio", "source_name", "generated", "created_at")
+    readonly_fields = ("created_at",)
 
 class UserProfileInline(admin.StackedInline):
     model = UserProfile
@@ -61,7 +68,7 @@ class UserAdmin(DefaultUserAdmin):
     def nomaya_miles(self, obj):
         profile, _ = UserProfile.objects.get_or_create(user=obj)
         return profile.miles
-        
+
     @admin.display(description="Parola Değiştirsin mi?")
     def force_password_change_status(self, obj):
         profile, _ = UserProfile.objects.get_or_create(user=obj)
@@ -206,7 +213,11 @@ class OrderAdmin(admin.ModelAdmin):
 
     list_display_links = ("id", "tour")
     ordering = ("-created_at",)
-    inlines = [TravelerInline, ActivityProgressInline]
+    inlines = [
+    TravelerInline,
+    ActivityProgressInline,
+    OrderIntroAudioInline,
+    ]
 
     list_filter = (
         "is_paid",
@@ -1018,3 +1029,16 @@ class CustomizedTravelRequestAdmin(admin.ModelAdmin):
         "is_paid",
         "payment_clicked",
     )
+
+@admin.register(IntroAudioLibrary)
+class IntroAudioLibraryAdmin(admin.ModelAdmin):
+    list_display = ("id", "name", "title", "audio", "is_active", "created_at")
+    list_filter = ("is_active", "name")
+    search_fields = ("name", "title")
+
+
+@admin.register(OrderIntroAudio)
+class OrderIntroAudioAdmin(admin.ModelAdmin):
+    list_display = ("id", "order", "title", "source_name", "generated", "created_at")
+    search_fields = ("order__id", "order__email", "source_name", "title")
+    list_filter = ("generated", "source_name", "created_at")

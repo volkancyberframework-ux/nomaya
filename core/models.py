@@ -1010,6 +1010,48 @@ class CustomizedTravelRequest(models.Model):
     def __str__(self):
         return f"{self.location} - {self.email}"
 
+class IntroAudioLibrary(models.Model):
+    name = models.CharField(max_length=80, db_index=True)
+    title = models.CharField(max_length=120, blank=True)
+
+    audio = models.FileField(
+        upload_to="intro_library/"
+    )
+
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["name", "id"]
+
+    def save(self, *args, **kwargs):
+        self.name = (self.name or "").strip().lower()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.name} - {self.title or self.id}"
+
+class OrderIntroAudio(models.Model):
+    order = models.ForeignKey(
+        "Order",
+        on_delete=models.CASCADE,
+        related_name="intro_audios"
+    )
+
+    title = models.CharField(max_length=120, blank=True)
+
+    audio = models.FileField(
+        upload_to="orders/custom_intro/"
+    )
+
+    source_name = models.CharField(max_length=80, blank=True)
+    generated = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Order #{self.order_id} - {self.title or self.id}"
+
 # --- Day içindeki through kayıtları değişince Day fiyatını yeniden hesapla
 @receiver(post_save, sender=DayFlight)
 @receiver(post_delete, sender=DayFlight)
