@@ -233,12 +233,21 @@ class OrderAdmin(admin.ModelAdmin):
         ("Bağlantı", {
             "fields": ("id", "tour", "public_id", "session_key")
         }),
+
         ("Müşteri", {
             "fields": ("email", "pax", "same_room")
         }),
+
+        ("Kişisel Ses", {
+            "fields": (
+                "custom_intro_audio",
+            )
+        }),
+
         ("Tarihler", {
             "fields": ("start_date", "end_date")
         }),
+
         ("Mil / Aktivite Durumu", {
             "fields": (
                 "earned_miles_display",
@@ -246,6 +255,7 @@ class OrderAdmin(admin.ModelAdmin):
                 "progress_summary_display",
             )
         }),
+
         ("Konum Takibi", {
             "fields": (
                 "tracking_enabled",
@@ -255,9 +265,11 @@ class OrderAdmin(admin.ModelAdmin):
                 "tracking_last_seen",
             )
         }),
+
         ("Görünürlük / Dahiller", {
             "fields": ("hide_flights", "hide_transfers", "hide_hotels")
         }),
+
         ("Ödeme", {
             "fields": (
                 "payment_method",
