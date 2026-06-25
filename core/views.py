@@ -1757,3 +1757,50 @@ def order_customized_pay(request, public_id):
     )
 
     return redirect(checkout_session.url)
+
+import stripe
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
+def stripe_checkout_order(request, public_id):
+    order = get_object_or_404(
+        Order,
+        public_id=public_id
+    )
+
+    amount_cents = int(order.total_price * 100)
+
+    session = stripe.checkout.Session.create(
+        mode="payment",
+
+        customer_email=order.email,
+
+        line_items=[
+            {
+                "price_data": {
+                    "currency": "usd",
+                    "unit_amount": amount_cents,
+                    "product_data": {
+                        "name": order.tour.title,
+                    },
+                },
+                "quantity": 1,
+            }
+        ],
+
+        success_url=request.build_absolute_uri(
+            reverse(
+                "order_success_public",
+                kwargs={"public_id": order.public_id}
+            )
+        ),
+
+        cancel_url=request.build_absolute_uri(
+            reverse(
+                "tour_booking_detail_public",
+                kwargs={"public_id": order.public_id}
+            )
+        ),
+    )
+
+    return redirect(session.url)

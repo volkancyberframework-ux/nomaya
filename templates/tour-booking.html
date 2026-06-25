@@ -820,12 +820,18 @@
                         </div>
 
                         <div class="form-check p-3 rounded-3 border bg-light mb-3">
-                          <input class="form-check-input" type="radio" name="payment_method" id="payLink" value="payment_link">
-                          <label class="form-check-label fw-semibold" for="payLink">
-                            💳 Link ile Öde <span class="text-muted fw-normal">(Visa / Mastercard / Amex)</span>
+                          <input class="form-check-input"
+                                 type="radio"
+                                 name="payment_method"
+                                 id="payStripe"
+                                 value="stripe_checkout">
+
+                          <label class="form-check-label fw-semibold" for="payStripe">
+                            💳 Kredi Kartı ile Güvenli Ödeme
                           </label>
+
                           <div class="mt-2 small text-muted">
-                            “Öde”ye bastığınızda küçük bir onay penceresi açılacak. Onayladığınızda sistemde “Link ile ödeme” aktif hale gelecek.
+                            Visa, Mastercard, American Express ile güvenli ödeme.
                           </div>
                         </div>
 
@@ -1335,6 +1341,15 @@
       const selected = paymentForm.querySelector('input[name="payment_method"]:checked');
       const method = selected ? selected.value : null;
 
+      if (method === "stripe_checkout") {
+          e.preventDefault();
+
+          window.location.href =
+            "{% url 'stripe_checkout_order' public_id=order.public_id %}";
+
+          return;
+      }
+
       if (method === "bank_transfer") {
         e.preventDefault();
 
@@ -1411,6 +1426,7 @@
     });
   });
   </script>
+
 
 </main>
 

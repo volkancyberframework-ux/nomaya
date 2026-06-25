@@ -57,6 +57,12 @@ urlpatterns = [
     path("api/live-locations/", views.live_locations_api, name="live_locations_api"),
 
     path(
+        "orders/<uuid:public_id>/stripe/",
+        views.stripe_checkout_order,
+        name="stripe_checkout_order"
+    ),
+
+    path(
         "order-customized/",
         views.order_customized,
         name="order_customized"
