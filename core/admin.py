@@ -965,3 +965,32 @@ class WhatsAppMessageQueueAdmin(admin.ModelAdmin):
         "chat_id", "waha_response", "error_message",
         "locked_at", "sent_at", "failed_at", "created_at",
     )
+
+from .models import CustomizedTravelRequest, CustomizedTravelSettings
+
+@admin.register(CustomizedTravelSettings)
+class CustomizedTravelSettingsAdmin(admin.ModelAdmin):
+    list_display = ("id", "stripe_payment_link", "is_active")
+
+
+@admin.register(CustomizedTravelRequest)
+class CustomizedTravelRequestAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "email",
+        "location",
+        "days",
+        "total_price",
+        "payment_clicked",
+        "is_paid",
+        "created_at",
+    )
+
+    list_editable = (
+        "is_paid",
+    )
+
+    list_filter = (
+        "is_paid",
+        "payment_clicked",
+    )

@@ -12,7 +12,6 @@ from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.text import slugify
-
 # ---- JSON uyumluluğu
 try:
     from django.db.models import JSONField as BaseJSONField
@@ -945,6 +944,51 @@ class WhatsAppMessageQueue(models.Model):
 
     def __str__(self):
         return f"{self.phone} - {self.status}"
+
+class CustomizedTravelSettings(models.Model):
+    stripe_payment_link = models.URLField()
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return "Customized Travel Stripe Link"
+
+
+class CustomizedTravelRequest(models.Model):
+    email = models.EmailField()
+
+    location = models.CharField(max_length=200)
+    dates = models.CharField(max_length=100)
+    travel_style = models.CharField(max_length=200)
+    notes = models.TextField(blank=True)
+
+    days = models.PositiveIntegerField(default=1)
+
+    price_per_day = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        default=Decimal("9.99")
+    )
+
+    total_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal("9.99")
+    )
+
+    stripe_payment_link = models.URLField(blank=True)
+
+    payment_clicked = models.BooleanField(default=False)
+
+    is_paid = models.BooleanField(default=False)
+    paid_at = models.DateTimeField(null=True, blank=True)
+
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
+    user_agent = models.TextField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.location} - {self.email}"
 
 # --- Day içindeki through kayıtları değişince Day fiyatını yeniden hesapla
 @receiver(post_save, sender=DayFlight)

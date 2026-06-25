@@ -1573,3 +1573,101 @@ def secure_audio_stream(request, tracking_code, day_activity_id, audio_type):
         audio_file.open("rb"),
         content_type="audio/mpeg"
     )
+
+from decimal import Decimal, ROUND_HALF_UP
+from django.views.decorators.http import require_http_methods
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
+from django.utils.dateparse import parse_date
+import re
+
+from .models import CustomizedTravelRequest, CustomizedTravelSettings
+
+
+def _custom_days_from_dates(dates_str):
+    """
+    2026-07-01 - 2026-07-03 => 3 gün
+    """
+    if not dates_str:
+        return None, None, 1
+
+    parts = re.split(r"\s(?:to|–|—|-)\s", dates_str.strip(), maxsplit=1, flags=re.IGNORECASE)
+    if len(parts) != 2:
+        return None, None, 1
+
+    start = parse_date(parts[0].strip())
+    end = parse_date(parts[1].strip())
+
+    if not start or not end or end < start:
+        return None, None, 1
+
+    days = (end - start).days + 1
+    return start, end, max(days, 1)
+
+
+@require_http_methods(["GET", "POST"])
+def order_customized(request):
+    price_per_day = Decimal("9.99")
+
+    if request.method == "POST":
+        location = (request.POST.get("location") or "").strip()
+        dates = (request.POST.get("dates") or "").strip()
+        travel_style = (request.POST.get("travel_style") or "").strip()
+        notes = (request.POST.get("notes") or "").strip()
+
+        start, end, days = _custom_days_from_dates(dates)
+        total_price = (price_per_day * Decimal(days)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+        settings_obj = CustomizedTravelSettings.objects.filter(is_active=True).order_by("-id").first()
+        stripe_link = settings_obj.stripe_payment_link if settings_obj else ""
+
+        obj = CustomizedTravelRequest.objects.create(
+            location=location,
+            dates=dates,
+            travel_style=travel_style,
+            notes=notes,
+            days=days,
+            price_per_day=price_per_day,
+            total_price=total_price,
+            stripe_payment_link=stripe_link,
+            ip_address=get_client_ip(request),
+            user_agent=request.META.get("HTTP_USER_AGENT", ""),
+        )
+
+        send_telegram_message(
+            f"<b>🧭 Yeni Kişiye Özel Nomaya Talebi</b>\n\n"
+            f"<b>ID:</b> {tg(obj.id)}\n"
+            f"<b>Konum:</b> {tg(obj.location)}\n"
+            f"<b>Tarih:</b> {tg(obj.dates)}\n"
+            f"<b>Gün:</b> {tg(obj.days)}\n"
+            f"<b>Tarz:</b> {tg(obj.travel_style)}\n"
+            f"<b>Tutar:</b> ${tg(obj.total_price)}\n"
+            f"<b>Not:</b> {tg(obj.notes)}"
+        )
+
+        return redirect("order_customized_detail", pk=obj.pk)
+
+    return render(request, "order-customized.html", {
+        "price_per_day": price_per_day,
+    })
+
+
+def order_customized_detail(request, pk):
+    obj = get_object_or_404(CustomizedTravelRequest, pk=pk)
+    return render(request, "order-customized-detail.html", {"obj": obj})
+
+
+@require_http_methods(["POST"])
+def order_customized_pay(request, pk):
+    obj = get_object_or_404(CustomizedTravelRequest, pk=pk)
+    obj.payment_clicked = True
+    obj.save(update_fields=["payment_clicked"])
+
+    send_telegram_message(
+        f"<b>💳 Kişiye Özel Nomaya Ödeme Butonu Tıklandı</b>\n\n"
+        f"<b>ID:</b> {tg(obj.id)}\n"
+        f"<b>Konum:</b> {tg(obj.location)}\n"
+        f"<b>Tutar:</b> ${tg(obj.total_price)}"
+    )
+
+    return redirect(obj.stripe_payment_link or "home")

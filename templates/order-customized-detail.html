@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<main class="py-6">
+  <div class="container">
+    <div class="col-lg-7 mx-auto">
+      <div class="card shadow rounded-4">
+        <div class="card-body p-4 p-md-5 text-center">
+          <h1 class="h3 mb-3">Nomaya deneyimin hazırlandı ✨</h1>
+
+          <p class="mb-1"><strong>Konum:</strong> {{ obj.location }}</p>
+          <p class="mb-1"><strong>Tarih:</strong> {{ obj.dates }}</p>
+          <p class="mb-1"><strong>Tarz:</strong> {{ obj.travel_style }}</p>
+          <p class="mb-4"><strong>Toplam:</strong> ${{ obj.total_price }}</p>
+
+          <form method="post" action="{% url 'order_customized_pay' obj.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5">
+              Öde
+            </button>
+          </form>
+
+          <p class="small text-muted mt-3 mb-0">
+            Ödeme Stripe güvenli ödeme sayfasında tamamlanır.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+{% endblock %}
