@@ -956,7 +956,7 @@ class CustomizedTravelSettings(models.Model):
 class CustomizedTravelRequest(models.Model):
     email = models.EmailField(blank=True)
     phone = models.CharField(max_length=40, blank=True)
-    
+
     location = models.CharField(max_length=200)
     dates = models.CharField(max_length=100)
     travel_style = models.CharField(max_length=200)
@@ -987,6 +987,12 @@ class CustomizedTravelRequest(models.Model):
     user_agent = models.TextField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
+
+    public_id = models.UUIDField(
+        default=uuid.uuid4,
+        unique=True,
+        editable=False
+    )
 
     def __str__(self):
         return f"{self.location} - {self.email}"

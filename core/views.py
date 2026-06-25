@@ -1669,16 +1669,26 @@ def order_customized(request):
             f"<b>Not:</b> {tg(obj.notes)}"
         )
 
-        return redirect("order_customized_detail", pk=obj.pk)
+        return redirect(
+                "order_customized_detail",
+                public_id=obj.public_id
+            )
 
     return render(request, "order-customized.html", {
         "price_per_day": price_per_day,
     })
 
-def order_customized_detail(request, pk):
-    obj = get_object_or_404(CustomizedTravelRequest, pk=pk)
-    return render(request, "order-customized-detail.html", {"obj": obj})
+def order_customized_detail(request, public_id):
+    obj = get_object_or_404(
+        CustomizedTravelRequest,
+        public_id=public_id
+    )
 
+    return render(
+        request,
+        "order-customized-detail.html",
+        {"obj": obj}
+    )
 
 @require_http_methods(["POST"])
 def order_customized_pay(request, pk):

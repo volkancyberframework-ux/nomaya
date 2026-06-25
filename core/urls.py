@@ -56,10 +56,23 @@ urlpatterns = [
     path("live-map/", views.live_map, name="live_map"),
     path("api/live-locations/", views.live_locations_api, name="live_locations_api"),
 
-    path("order-customized/", views.order_customized, name="order_customized"),
-    path("order-customized/<int:pk>/", views.order_customized_detail, name="order_customized_detail"),
-    path("order-customized/<int:pk>/pay/", views.order_customized_pay, name="order_customized_pay"),
+    path(
+        "order-customized/",
+        views.order_customized,
+        name="order_customized"
+    ),
 
+    path(
+        "order-customized/<uuid:public_id>/",
+        views.order_customized_detail,
+        name="order_customized_detail"
+    ),
+
+    path(
+        "order-customized/<uuid:public_id>/pay/",
+        views.order_customized_pay,
+        name="order_customized_pay"
+    ),
 ]
 
 if settings.DEBUG:
