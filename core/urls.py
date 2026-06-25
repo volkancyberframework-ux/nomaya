@@ -79,6 +79,11 @@ urlpatterns = [
         views.order_customized_pay,
         name="order_customized_pay"
     ),
+    path(
+    "change-password/",
+    views.force_password_change,
+    name="force_password_change"
+    ),
 ]
 
 if settings.DEBUG:

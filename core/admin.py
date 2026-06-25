@@ -29,9 +29,12 @@ class UserProfileInline(admin.StackedInline):
     model = UserProfile
     can_delete = False
     extra = 0
-    fields = ("miles",)
-
-
+    fields = (
+        "miles",
+        "force_password_change",
+        "password_changed_at",
+    )
+    readonly_fields = ("password_changed_at",)
 try:
     admin.site.unregister(User)
 except admin.sites.NotRegistered:
@@ -49,6 +52,7 @@ class UserAdmin(DefaultUserAdmin):
         "first_name",
         "last_name",
         "nomaya_miles",
+        "force_password_change_status",
         "is_staff",
         "is_active",
     )
@@ -57,6 +61,13 @@ class UserAdmin(DefaultUserAdmin):
     def nomaya_miles(self, obj):
         profile, _ = UserProfile.objects.get_or_create(user=obj)
         return profile.miles
+        
+    @admin.display(description="Parola Değiştirsin mi?")
+    def force_password_change_status(self, obj):
+        profile, _ = UserProfile.objects.get_or_create(user=obj)
+        return profile.force_password_change
+
+    force_password_change_status.boolean = True
 
 @admin.register(LiveLocation)
 class LiveLocationAdmin(admin.ModelAdmin):

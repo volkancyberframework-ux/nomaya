@@ -16,6 +16,8 @@ from .forms import OrderForm
 from decimal import Decimal
 from django.db.models import Sum
 from .models import LiveLocation, ActivityProgressLocationLog
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
 import re
 from datetime import datetime
 from django.core.paginator import Paginator
@@ -297,10 +299,13 @@ def sign_in(request):
         if auth_user is not None:
             login(request, auth_user)
 
-            # "Beni hatırla": işaretli değilse tarayıcı kapanınca oturum düşsün
             if not remember:
-                request.session.set_expiry(0)  # browser close
-            # işaretliyse varsayılan SESSION_COOKIE_AGE geçerli olur
+                request.session.set_expiry(0)
+
+            profile = getattr(auth_user, "nomaya_profile", None)
+
+            if profile and profile.force_password_change:
+                return redirect("force_password_change")
 
             return redirect(next_url or "home")
         else:
@@ -1860,3 +1865,53 @@ def build_combined_audio(order, day_activity, audio_type, main_audio_file):
     )
 
     return open(output_path, "rb")
+
+@login_required
+def force_password_change(request):
+
+    profile = request.user.nomaya_profile
+
+    if not profile.force_password_change:
+        return redirect("home")
+
+    if request.method == "POST":
+        password1 = request.POST.get("password1")
+        password2 = request.POST.get("password2")
+
+        if password1 != password2:
+            messages.error(request, "Parolalar eşleşmiyor.")
+            return render(
+                request,
+                "force-password-change.html"
+            )
+
+        if len(password1) < 8:
+            messages.error(
+                request,
+                "Parola en az 8 karakter olmalıdır."
+            )
+            return render(
+                request,
+                "force-password-change.html"
+            )
+
+        request.user.set_password(password1)
+        request.user.save()
+
+        profile.force_password_change = False
+        profile.password_changed_at = timezone.now()
+        profile.save()
+
+        login(request, request.user)
+
+        messages.success(
+            request,
+            "Parolanız güncellendi."
+        )
+
+        return redirect("home")
+
+    return render(
+        request,
+        "force-password-change.html"
+    )
