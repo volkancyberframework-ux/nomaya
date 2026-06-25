@@ -1,33 +1,74 @@
-{% extends "base.html" %}
+<div class="card-body p-4 p-md-5 text-center">
 
-{% block content %}
+  <div class="mb-4">
+    <span class="badge bg-primary px-3 py-2 rounded-pill">
+      ✨ Kişiye Özel Nomaya Deneyimi
+    </span>
+  </div>
 
-<main class="py-6">
-  <div class="container">
-    <div class="col-lg-7 mx-auto">
-      <div class="card shadow rounded-4">
-        <div class="card-body p-4 p-md-5 text-center">
-          <h1 class="h3 mb-3">Nomaya deneyimin hazırlandı ✨</h1>
+  <h1 class="display-6 fw-bold mb-3">
+    Sana en uygun deneyimi hazırlıyoruz
+  </h1>
 
-          <p class="mb-1"><strong>Konum:</strong> {{ obj.location }}</p>
-          <p class="mb-1"><strong>Tarih:</strong> {{ obj.dates }}</p>
-          <p class="mb-1"><strong>Tarz:</strong> {{ obj.travel_style }}</p>
-          <p class="mb-4"><strong>Toplam:</strong> ${{ obj.total_price }}</p>
+  <p class="lead text-muted mb-4">
+    Nomaya, verdiğin bilgilere göre tamamen sana özel bir seyahat deneyimi oluşturacak.
+  </p>
 
-          <form method="post" action="{% url 'order_customized_pay' obj.pk %}">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5">
-              Öde
-            </button>
-          </form>
+  <div class="bg-light rounded-4 p-4 text-start mb-4">
 
-          <p class="small text-muted mt-3 mb-0">
-            Ödeme Stripe güvenli ödeme sayfasında tamamlanır.
-          </p>
-        </div>
-      </div>
+```
+<div class="mb-2">
+  <strong>📍 Konum:</strong> {{ obj.location }}
+</div>
+
+<div class="mb-2">
+  <strong>📅 Tarih:</strong> {{ obj.dates }}
+</div>
+
+<div class="mb-2">
+  <strong>🎯 Seyahat Tarzı:</strong> {{ obj.travel_style }}
+</div>
+```
+
+  </div>
+
+  <div class="bg-primary bg-opacity-10 rounded-4 p-4 mb-4">
+
+```
+<h5 class="mb-3">Ödeme sonrasında seni neler bekliyor?</h5>
+
+<div class="text-start mx-auto" style="max-width:500px;">
+  <p class="mb-2">✅ Sana özel oluşturulmuş rota</p>
+  <p class="mb-2">✅ Adım adım gezi planı</p>
+  <p class="mb-2">✅ Sesli Nomaya rehberliği</p>
+  <p class="mb-2">✅ Öneriler, ipuçları ve sürpriz duraklar</p>
+  <p class="mb-0">✅ Mobil uygulama üzerinden tam deneyim</p>
+</div>
+```
+
+  </div>
+
+  <div class="mb-4">
+    <div class="text-muted small mb-2">Toplam Tutar</div>
+    <div class="display-4 fw-bold text-primary">
+      ${{ obj.total_price }}
     </div>
   </div>
-</main>
 
-{% endblock %}
+  <p class="fs-5 fw-semibold mb-4">
+    Sen ve kulaklığın yeter. 🎧
+  </p>
+
+  <form method="post" action="{% url 'order_customized_pay' obj.pk %}">
+    {% csrf_token %}
+    <button type="submit"
+            class="btn btn-primary btn-lg rounded-pill px-5 py-3">
+      Ödemeye Geç →
+    </button>
+  </form>
+
+  <p class="small text-muted mt-4 mb-0">
+    Ödeme tamamlandıktan sonra deneyimin hazırlanacak ve tüm detaylara erişebileceksin.
+  </p>
+
+</div>
