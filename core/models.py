@@ -954,8 +954,9 @@ class CustomizedTravelSettings(models.Model):
 
 
 class CustomizedTravelRequest(models.Model):
-    email = models.EmailField()
-
+    email = models.EmailField(blank=True)
+    phone = models.CharField(max_length=40, blank=True)
+    
     location = models.CharField(max_length=200)
     dates = models.CharField(max_length=100)
     travel_style = models.CharField(max_length=200)

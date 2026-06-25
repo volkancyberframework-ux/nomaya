@@ -1615,13 +1615,35 @@ def order_customized(request):
         travel_style = (request.POST.get("travel_style") or "").strip()
         notes = (request.POST.get("notes") or "").strip()
 
-        start, end, days = _custom_days_from_dates(dates)
-        total_price = (price_per_day * Decimal(days)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        if request.user.is_authenticated:
+            email = (request.user.email or "").strip()
+            phone = (request.POST.get("phone") or "").strip()
+        else:
+            email = (request.POST.get("email") or "").strip()
+            phone = (request.POST.get("phone") or "").strip()
 
-        settings_obj = CustomizedTravelSettings.objects.filter(is_active=True).order_by("-id").first()
+            if not email or not phone:
+                messages.error(request, "Ödeme öncesi e-posta ve telefon zorunludur.")
+                return render(request, "order-customized.html", {
+                    "price_per_day": price_per_day,
+                    "prefill": request.POST,
+                })
+
+        start, end, days = _custom_days_from_dates(dates)
+        total_price = (price_per_day * Decimal(days)).quantize(
+            Decimal("0.01"),
+            rounding=ROUND_HALF_UP
+        )
+
+        settings_obj = CustomizedTravelSettings.objects.filter(
+            is_active=True
+        ).order_by("-id").first()
+
         stripe_link = settings_obj.stripe_payment_link if settings_obj else ""
 
         obj = CustomizedTravelRequest.objects.create(
+            email=email,
+            phone=phone,
             location=location,
             dates=dates,
             travel_style=travel_style,
@@ -1637,6 +1659,8 @@ def order_customized(request):
         send_telegram_message(
             f"<b>🧭 Yeni Kişiye Özel Nomaya Talebi</b>\n\n"
             f"<b>ID:</b> {tg(obj.id)}\n"
+            f"<b>E-posta:</b> {tg(obj.email)}\n"
+            f"<b>Telefon:</b> {tg(obj.phone)}\n"
             f"<b>Konum:</b> {tg(obj.location)}\n"
             f"<b>Tarih:</b> {tg(obj.dates)}\n"
             f"<b>Gün:</b> {tg(obj.days)}\n"
@@ -1650,7 +1674,6 @@ def order_customized(request):
     return render(request, "order-customized.html", {
         "price_per_day": price_per_day,
     })
-
 
 def order_customized_detail(request, pk):
     obj = get_object_or_404(CustomizedTravelRequest, pk=pk)
