@@ -1,5 +1,6 @@
 from django.shortcuts import redirect
 
+
 class ForcePasswordChangeMiddleware:
 
     def __init__(self, get_response):
@@ -16,17 +17,18 @@ class ForcePasswordChangeMiddleware:
         ):
 
             allowed = [
-                "/change-password/",
+                "/sign-in/",
+                "/update-forced-password/",
                 "/logout/",
                 "/admin/logout/",
+                "/static/",
+                "/media/",
             ]
 
             if not any(
                 request.path.startswith(x)
                 for x in allowed
             ):
-                return redirect(
-                    "force_password_change"
-                )
+                return redirect("sign_in")
 
         return self.get_response(request)

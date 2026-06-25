@@ -278,7 +278,13 @@ def tour_list(request):
 @require_http_methods(["GET", "POST"])
 def sign_in(request):
     if request.user.is_authenticated:
-        # Zaten giriş yaptıysa home'a
+        profile = getattr(request.user, "nomaya_profile", None)
+
+        if profile and profile.force_password_change:
+            return render(request, "sign-in.html", {
+                "show_password_modal": True,
+            })
+
         return redirect("home")
 
     next_url = request.GET.get("next") or request.POST.get("next") or ""
@@ -305,7 +311,6 @@ def sign_in(request):
             profile = getattr(auth_user, "nomaya_profile", None)
 
             if profile and profile.force_password_change:
-                request.session["force_password_user_id"] = auth_user.id
                 return render(request, "sign-in.html", {
                     "next": next_url,
                     "show_password_modal": True,
@@ -1869,56 +1874,7 @@ def build_combined_audio(order, day_activity, audio_type, main_audio_file):
     )
 
     return open(output_path, "rb")
-
-@login_required
-def force_password_change(request):
-
-    profile = request.user.nomaya_profile
-
-    if not profile.force_password_change:
-        return redirect("home")
-
-    if request.method == "POST":
-        password1 = request.POST.get("password1")
-        password2 = request.POST.get("password2")
-
-        if password1 != password2:
-            messages.error(request, "Parolalar eşleşmiyor.")
-            return render(
-                request,
-                "force-password-change.html"
-            )
-
-        if len(password1) < 8:
-            messages.error(
-                request,
-                "Parola en az 8 karakter olmalıdır."
-            )
-            return render(
-                request,
-                "force-password-change.html"
-            )
-
-        request.user.set_password(password1)
-        request.user.save()
-
-        profile.force_password_change = False
-        profile.password_changed_at = timezone.now()
-        profile.save()
-
-        login(request, request.user)
-
-        messages.success(
-            request,
-            "Parolanız güncellendi."
-        )
-
-        return redirect("home")
-
-    return render(
-        request,
-        "force-password-change.html"
-    )
+from django.contrib.auth import update_session_auth_hash
 
 @login_required
 @require_http_methods(["POST"])
@@ -1945,12 +1901,12 @@ def update_forced_password(request):
 
     request.user.set_password(password1)
     request.user.save()
+    update_session_auth_hash(request, request.user)
 
     profile.force_password_change = False
     profile.password_changed_at = timezone.now()
     profile.save(update_fields=["force_password_change", "password_changed_at"])
 
-    login(request, request.user)
 
     messages.success(request, "Giriş başarılı. Parolanız güncellendi.")
 

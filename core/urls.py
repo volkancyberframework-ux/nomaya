@@ -63,26 +63,21 @@ urlpatterns = [
     ),
 
     path(
-        "order-customized/",
+        "sen-gez-diye/",
         views.order_customized,
         name="order_customized"
     ),
 
     path(
-        "order-customized/<uuid:public_id>/",
+        "sen-gez-diye/<uuid:public_id>/",
         views.order_customized_detail,
         name="order_customized_detail"
     ),
 
     path(
-        "order-customized/<uuid:public_id>/pay/",
+        "sen-gez-diye/<uuid:public_id>/pay/",
         views.order_customized_pay,
         name="order_customized_pay"
-    ),
-    path(
-    "change-password/",
-    views.force_password_change,
-    name="force_password_change"
     ),
     path(
     "update-forced-password/",
