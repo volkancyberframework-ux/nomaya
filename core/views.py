@@ -20,6 +20,9 @@ import re
 from datetime import datetime
 from django.core.paginator import Paginator
 from django.shortcuts import render
+import stripe
+from django.conf import settings
+from django.urls import reverse
 # core/views.py
 from urllib.parse import urlencode
 from django.core.paginator import Paginator
@@ -1689,18 +1692,68 @@ def order_customized_detail(request, public_id):
         "order-customized-detail.html",
         {"obj": obj}
     )
-
 @require_http_methods(["POST"])
-def order_customized_pay(request, pk):
-    obj = get_object_or_404(CustomizedTravelRequest, pk=pk)
+def order_customized_pay(request, public_id):
+    obj = get_object_or_404(
+        CustomizedTravelRequest,
+        public_id=public_id,
+    )
+
     obj.payment_clicked = True
     obj.save(update_fields=["payment_clicked"])
 
-    send_telegram_message(
-        f"<b>💳 Kişiye Özel Nomaya Ödeme Butonu Tıklandı</b>\n\n"
-        f"<b>ID:</b> {tg(obj.id)}\n"
-        f"<b>Konum:</b> {tg(obj.location)}\n"
-        f"<b>Tutar:</b> ${tg(obj.total_price)}"
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+
+    amount_cents = int(obj.total_price * 100)
+
+    success_url = (
+        request.build_absolute_uri(
+            reverse("order_customized_detail", kwargs={"public_id": obj.public_id})
+        )
+        + "?payment=success&session_id={CHECKOUT_SESSION_ID}"
     )
 
-    return redirect(obj.stripe_payment_link or "home")
+    cancel_url = (
+        request.build_absolute_uri(
+            reverse("order_customized_detail", kwargs={"public_id": obj.public_id})
+        )
+        + "?payment=cancel"
+    )
+
+    checkout_session = stripe.checkout.Session.create(
+        mode="payment",
+        customer_email=obj.email,
+        client_reference_id=str(obj.public_id),
+        metadata={
+            "customized_request_id": str(obj.id),
+            "public_id": str(obj.public_id),
+            "location": obj.location,
+            "dates": obj.dates,
+            "travel_style": obj.travel_style,
+        },
+        line_items=[
+            {
+                "price_data": {
+                    "currency": "usd",
+                    "unit_amount": amount_cents,
+                    "product_data": {
+                        "name": "Kişiye Özel Nomaya Deneyimi",
+                        "description": f"{obj.location} • {obj.dates} • {obj.travel_style}",
+                    },
+                },
+                "quantity": 1,
+            }
+        ],
+        success_url=success_url,
+        cancel_url=cancel_url,
+    )
+
+    send_telegram_message(
+        f"<b>💳 Stripe Checkout Oluşturuldu</b>\n\n"
+        f"<b>ID:</b> {tg(obj.id)}\n"
+        f"<b>Konum:</b> {tg(obj.location)}\n"
+        f"<b>Tutar:</b> ${tg(obj.total_price)}\n"
+        f"<b>Checkout:</b> {tg(checkout_session.id)}"
+    )
+
+    return redirect(checkout_session.url)

@@ -26,6 +26,7 @@ SECURE_HSTS_PRELOAD = True
 
 TELEGRAM_BOT_TOKEN = config("TELEGRAM_BOT_TOKEN", default="")
 TELEGRAM_CHAT_ID = config("TELEGRAM_CHAT_ID", default="")
+STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY", default="")
 
 # --- Auth yönlendirmeleri ---
 LOGIN_URL = "sign_in"
