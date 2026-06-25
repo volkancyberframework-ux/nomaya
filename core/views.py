@@ -1837,25 +1837,34 @@ def stripe_checkout_order(request, public_id):
 
     return redirect(session.url)
 
+import random
+
 def build_combined_audio(order, day_activity, audio_type, main_audio_file):
     """
     Order intro + activity audio birleşik MP3 üretir.
     Cache mantığı: aynı dosya varsa yeniden üretmez.
     """
 
-    if not order.custom_intro_audio:
+    intro_obj = order.intro_audios.order_by("?").first()
+
+    if intro_obj and intro_obj.audio:
+        intro_audio = intro_obj.audio
+    elif order.custom_intro_audio:
+        intro_audio = order.custom_intro_audio
+    else:
         return main_audio_file
 
     combined_dir = os.path.join(settings.MEDIA_ROOT, "orders", "combined_audio")
     os.makedirs(combined_dir, exist_ok=True)
 
-    output_name = f"order_{order.id}_activity_{day_activity.id}_{audio_type}.mp3"
+    intro_id = intro_obj.id if intro_obj else "legacy"
+    output_name = f"order_{order.id}_intro_{intro_id}_activity_{day_activity.id}_{audio_type}.mp3"
     output_path = os.path.join(combined_dir, output_name)
 
     if os.path.exists(output_path):
         return open(output_path, "rb")
 
-    intro_path = order.custom_intro_audio.path
+    intro_path = intro_audio.path
     main_path = main_audio_file.path
 
     list_path = os.path.join(combined_dir, f"concat_{order.id}_{day_activity.id}_{audio_type}.txt")
