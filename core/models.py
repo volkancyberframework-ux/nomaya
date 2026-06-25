@@ -539,6 +539,13 @@ class Order(models.Model):
     miles_payment_requested = models.BooleanField(default=False)
     miles_payment_requested_at = models.DateTimeField(null=True, blank=True)
 
+    custom_intro_audio = models.FileField(
+    upload_to="orders/custom_intro/",
+    blank=True,
+    null=True,
+    help_text="Bu order için aktivite seslerinin başına eklenecek kişisel ses"
+    )
+
     @property
     def earned_miles(self):
         total = 0

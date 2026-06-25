@@ -190,6 +190,7 @@ class OrderAdmin(admin.ModelAdmin):
         "start_date", "end_date",
         "created_at",
         "miles_payment_status",
+        "custom_intro_audio",
     )
 
     list_display_links = ("id", "tour")

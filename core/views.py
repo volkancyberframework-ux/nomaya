@@ -58,6 +58,10 @@ from .models import (
 from .utils import _parse_dates_param  # eğer ayrı utils'te tanımlıysa
 from django.utils import translation
 from .models import ActivityProgressLocationLog
+import os
+import subprocess
+from django.core.files.base import ContentFile
+from django.conf import settings
 
 User = get_user_model()
 
@@ -1572,8 +1576,18 @@ def secure_audio_stream(request, tracking_code, day_activity_id, audio_type):
     if not audio_file:
         raise Http404("Ses kaydı bulunamadı.")
 
+    try:
+        final_audio = build_combined_audio(
+            order=order,
+            day_activity=day_activity,
+            audio_type=audio_type,
+            main_audio_file=audio_file,
+        )
+    except Exception:
+        final_audio = audio_file.open("rb")
+
     return FileResponse(
-        audio_file.open("rb"),
+        final_audio,
         content_type="audio/mpeg"
     )
 
@@ -1804,3 +1818,45 @@ def stripe_checkout_order(request, public_id):
     )
 
     return redirect(session.url)
+
+def build_combined_audio(order, day_activity, audio_type, main_audio_file):
+    """
+    Order intro + activity audio birleşik MP3 üretir.
+    Cache mantığı: aynı dosya varsa yeniden üretmez.
+    """
+
+    if not order.custom_intro_audio:
+        return main_audio_file
+
+    combined_dir = os.path.join(settings.MEDIA_ROOT, "orders", "combined_audio")
+    os.makedirs(combined_dir, exist_ok=True)
+
+    output_name = f"order_{order.id}_activity_{day_activity.id}_{audio_type}.mp3"
+    output_path = os.path.join(combined_dir, output_name)
+
+    if os.path.exists(output_path):
+        return open(output_path, "rb")
+
+    intro_path = order.custom_intro_audio.path
+    main_path = main_audio_file.path
+
+    list_path = os.path.join(combined_dir, f"concat_{order.id}_{day_activity.id}_{audio_type}.txt")
+
+    with open(list_path, "w") as f:
+        f.write(f"file '{intro_path}'\n")
+        f.write(f"file '{main_path}'\n")
+
+    subprocess.run(
+        [
+            "ffmpeg",
+            "-y",
+            "-f", "concat",
+            "-safe", "0",
+            "-i", list_path,
+            "-c", "copy",
+            output_path,
+        ],
+        check=True,
+    )
+
+    return open(output_path, "rb")
