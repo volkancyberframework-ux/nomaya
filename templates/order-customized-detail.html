@@ -244,7 +244,7 @@
             <div class="text-white-50">Sen ve kulaklığın yeter. 🎧</div>
           </div>
 
-          <form method="post" action="{% url 'order_customized_pay' obj.pk %}" class="d-grid">
+          <form method="post" action="{% url 'order_customized_pay' obj.public_id %}" class="d-grid">
             {% csrf_token %}
             <button type="submit" class="btn pay-btn btn-lg">
               Güvenli Ödemeye Geç →
