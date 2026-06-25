@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<main class="page-fade is-visible">
+  <section class="position-relative py-xl-9 py-6" style="background-image:url({% static 'assets/images/bg/10.jpg' %}); background-position:center; background-size:cover;">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-10 m-auto text-center">
+          <h1 class="display-5 text-white mb-3">Kişiye Özel Nomaya Deneyimi</h1>
+          <p class="text-white mb-5">Konumunu, tarihlerini ve seyahat tarzını yaz. Nomaya sana özel bir rota hazırlasın.</p>
+
+          <form method="post" class="bg-white rounded-4 shadow p-4 p-md-5 text-start">
+            {% csrf_token %}
+
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label">Nerede?</label>
+                <input type="text" name="location" class="form-control" placeholder="Örn: Bangkok, Kapadokya, Roma" required>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">Tarih aralığı</label>
+                <input type="text" name="dates" class="form-control flatpickr" placeholder="Başlangıç - Bitiş" required>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">Seyahat tarzı</label>
+                <input type="text" name="travel_style" class="form-control" placeholder="Romantik, gurme, macera, aile..." required>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label">Ek not</label>
+                <textarea name="notes" class="form-control" rows="3" placeholder="Bana göre olsun: bütçe, tempo, ilgi alanı, çocuk var mı, yürüyüş sever misin?"></textarea>
+              </div>
+            </div>
+
+            <div class="alert alert-success mt-4 mb-0">
+              Gün başı ücret: <strong>$9.99</strong><br>
+              Tahmini toplam: <strong id="totalPrice">$9.99</strong>
+            </div>
+
+            <div class="text-center mt-4">
+              <button class="btn btn-primary btn-lg rounded-pill px-5" type="submit">
+                Nomaya Deneyimimi Hazırla
+              </button>
+            </div>
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+(function () {
+  const PRICE_PER_DAY = 9.99;
+  const RANGE_SEP = ' - ';
+
+  function calcDays(value) {
+    const dates = (value || '').match(/\d{4}-\d{2}-\d{2}/g) || [];
+    if (dates.length < 2) return 1;
+
+    const start = new Date(dates[0] + 'T00:00:00');
+    const end = new Date(dates[1] + 'T00:00:00');
+
+    if (isNaN(start) || isNaN(end) || end < start) return 1;
+
+    return Math.max(1, Math.round((end - start) / 86400000) + 1);
+  }
+
+  function updatePrice(value) {
+    const days = calcDays(value);
+    document.getElementById('totalPrice').innerText = '$' + (days * PRICE_PER_DAY).toFixed(2);
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const el = document.querySelector('input.flatpickr[name="dates"]');
+    if (!el || !window.flatpickr) return;
+
+    if (flatpickr.l10ns && flatpickr.l10ns.tr) flatpickr.localize(flatpickr.l10ns.tr);
+
+    flatpickr(el, {
+      mode: 'range',
+      dateFormat: 'Y-m-d',
+      altInput: true,
+      altFormat: 'd F Y',
+      locale: Object.assign({}, flatpickr.l10ns?.tr || {}, { rangeSeparator: RANGE_SEP }),
+      minDate: new Date().fp_incr(2),
+      onChange: function(selectedDates, dateStr) {
+        updatePrice(dateStr);
+      },
+      onClose: function(selectedDates, dateStr) {
+        updatePrice(dateStr);
+      }
+    });
+  });
+})();
+</script>
+
+{% endblock %}
