@@ -576,6 +576,290 @@
     color:#cbd5e1 !important;
 }
 
+
+.live-users-pill{
+    display:inline-flex;
+    align-items:center;
+    gap:14px;
+
+    padding:14px 24px;
+
+    border-radius:999px;
+
+    background:rgba(255,255,255,.15);
+
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+
+    border:1px solid rgba(255,255,255,.18);
+
+    color:#fff;
+
+    font-weight:700;
+
+    box-shadow:
+        0 12px 35px rgba(0,0,0,.18);
+}
+
+.live-dot{
+    width:14px;
+    height:14px;
+    border-radius:50%;
+    background:#22c55e;
+    position:relative;
+    flex-shrink:0;
+}
+
+.live-dot:before{
+    content:"";
+    position:absolute;
+    inset:-7px;
+    border-radius:50%;
+    background:rgba(34,197,94,.35);
+    animation:pulse 1.8s infinite;
+}
+
+@keyframes pulse{
+
+0%{
+transform:scale(.7);
+opacity:1;
+}
+
+100%{
+transform:scale(2.2);
+opacity:0;
+}
+
+}
+
+.live-emoji{
+    font-size:22px;
+}
+
+.live-number{
+
+    font-size:28px;
+    font-weight:900;
+    line-height:1;
+
+    color:#fff;
+}
+
+.live-text{
+
+    font-size:15px;
+    color:rgba(255,255,255,.92);
+
+}
+
+[data-bs-theme="dark"] .live-users-pill{
+
+    background:rgba(17,24,39,.60);
+
+    border-color:rgba(255,255,255,.08);
+
+}
+
+@media(max-width:768px){
+
+.live-users-pill{
+
+padding:11px 18px;
+
+gap:10px;
+
+}
+
+.live-number{
+
+font-size:22px;
+
+}
+
+.live-text{
+
+font-size:13px;
+
+}
+
+}
+
+/* ===== TIMELINE ===== */
+
+.nomaya-step-label{
+    color:#2563eb;
+    font-size:12px;
+    font-weight:900;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    margin-bottom:6px;
+}
+
+.nomaya-timeline-item::before{
+    background:linear-gradient(
+        to bottom,
+        #60a5fa,
+        #bfdbfe
+    );
+}
+
+.nomaya-bubble{
+    width:52px;
+    height:52px;
+    display:grid;
+    place-items:center;
+
+    border-radius:999px;
+
+    background:linear-gradient(135deg,#eff6ff,#ffffff);
+
+    border:2px solid #93c5fd;
+
+    font-size:22px;
+
+    box-shadow:
+        0 10px 25px rgba(37,99,235,.12);
+}
+
+.nomaya-step-copy strong{
+    color:#0f172a;
+}
+
+
+/* ===== FOUNDER ===== */
+
+.founder-pill{
+
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+
+    padding:9px 18px;
+
+    border-radius:999px;
+
+    background:#eff6ff;
+
+    color:#2563eb;
+
+    font-size:13px;
+
+    font-weight:800;
+}
+
+.nomaya-founder-card{
+
+    max-width:820px;
+
+    margin:34px auto 0;
+
+    padding:36px;
+
+    background:#ffffff;
+
+    border:1px solid #e2e8f0;
+
+    border-radius:28px;
+
+    box-shadow:
+        0 20px 55px rgba(15,23,42,.06);
+}
+
+.founder-text{
+
+    color:#475569;
+
+    font-size:17px;
+
+    line-height:1.85;
+}
+
+.founder-text strong{
+
+    color:#0f172a;
+}
+
+
+/* ===== DARK MODE ===== */
+
+[data-bs-theme="dark"] .nomaya-bubble{
+
+    background:#1e293b !important;
+
+    border-color:#3b82f6 !important;
+
+    box-shadow:none;
+}
+
+[data-bs-theme="dark"] .nomaya-step-label{
+
+    color:#60a5fa !important;
+}
+
+[data-bs-theme="dark"] .nomaya-timeline-item::before{
+
+    background:linear-gradient(
+        to bottom,
+        #60a5fa,
+        #1d4ed8
+    ) !important;
+}
+
+[data-bs-theme="dark"] .founder-pill{
+
+    background:#1e3a8a !important;
+
+    color:#dbeafe !important;
+}
+
+[data-bs-theme="dark"] .nomaya-founder-card{
+
+    background:#111827 !important;
+
+    border-color:#334155 !important;
+
+    box-shadow:none;
+}
+
+[data-bs-theme="dark"] .founder-text{
+
+    color:#cbd5e1 !important;
+}
+
+[data-bs-theme="dark"] .founder-text strong{
+
+    color:#ffffff !important;
+}
+
+
+/* ===== MOBILE ===== */
+
+@media(max-width:768px){
+
+    .nomaya-founder-card{
+
+        padding:24px 18px;
+
+    }
+
+    .founder-text{
+
+        font-size:15px;
+
+        line-height:1.75;
+
+    }
+
+    .nomaya-bubble{
+
+        width:46px;
+        height:46px;
+        font-size:19px;
+
+    }
+
+}
 </style>
 
 <main class="nomaya-page page-fade is-visible">
@@ -585,9 +869,18 @@
       <div class="row align-items-center g-4">
 
         <div class="col-lg-5 text-white">
-          <div class="hint-pill mb-4 live-users-pill">
+          <div class="live-users-pill mb-4">
               <span class="live-dot"></span>
-              🧭 <strong>{{ total_orders }}</strong> aktif Nomaya gezgini
+
+              <span class="live-emoji">🧭</span>
+
+              <span class="live-number">
+                  {{ total_orders }}
+              </span>
+
+              <span class="live-text">
+                  aktif Nomaya gezgini
+              </span>
           </div>
 
           <h1 class="display-4 fw-bold mb-4">
@@ -829,21 +1122,31 @@
         <div class="founder-pill">❤️ Volkan'dan kısa not</div>
 
         <div class="founder-text">
+
           <p>
-            Ben <strong>Volkan</strong>. Türkiye'den çıkan gençlerin dünyaya açılırken tereddüt ettiğini gördüm.
-            Çünkü yurtdışına çıkmak hâlâ birçok kişi için pahalı, belirsiz ve yalnız hissettiren bir şey.
+            Ben <strong>Volkan</strong>. Uzun yıllar Avrupa'da siber güvenlik alanında çalıştım. Güçlü bir beyaz yakalı kariyerim, güvenli bir hayatım ve birçok kişinin hayalini kurduğu bir düzenim vardı.
           </p>
 
           <p>
-            Klasik turlar çoğu zaman <strong>pahalı ve genel</strong>. Herkese aynı liste, aynı duraklar,
-            aynı deneyim. Oysa bir genç ülkeden çıkarken yanında gerçekten biri varmış gibi hissetmeli.
+            Fakat dünyanın farklı yerlerini gezerken Türkiye'den çıkan insanların ortak bir sorun yaşadığını fark ettim. Yurt dışına çıkmak hâlâ birçok kişi için pahalı, belirsiz ve stresli bir süreçti. İnsanlar saatlerce araştırma yapıyor, güvenilir bilgi bulmakta zorlanıyor ve çoğu zaman gerçekten yaşayabilecekleri deneyimleri kaçırıyordu.
           </p>
 
           <p>
-            Bu yüzden Nomaya'yı kurdum. İstedim ki o genç ülkeden çıksın, maliyet etkin şekilde keşfetsin,
-            uygulama onu doğru zamanda doğru yere yönlendirsin ve bir ihtiyacı olursa
-            <strong>anında gerçek bir insana ulaşabilsin.</strong>
+            Klasik turlar ise bu sorunu çözmüyordu. Çoğu zaman pahalıydılar ve herkese aynı rotayı sunuyorlardı. Oysa herkes farklı bir deneyim arıyor. Bir genç ilk kez yurt dışına çıkarken, yanında gerçekten yol gösteren biri varmış gibi hissetmeli.
           </p>
+
+          <p>
+            Bu fikir benim için zamanla bir hayale dönüştü. <strong>Avrupa'daki kariyerimden ayrıldım ve tüm zamanımı Nomaya'yı geliştirmeye adadım.</strong> Çünkü insanların seyahat ederken yalnız hissetmediği, güvenle keşfedebildiği ve doğru zamanda doğru yere yönlendirildiği bir deneyim oluşturmak istedim.
+          </p>
+
+          <p>
+            Bugün Nomaya'yı sadece rota hazırlayan bir uygulama olarak görmüyoruz. Amacımız; yol boyunca sana eşlik eden, gerektiğinde destek olabilen ve seyahatini gerçekten kişiselleştiren dijital bir yol arkadaşı oluşturmak.
+          </p>
+
+          <p>
+            Eğer Nomaya sayesinde bir kişi bile ilk yurt dışı yolculuğuna daha cesur çıkabiliyor, daha bilinçli keşfediyor ve yolculuğunun sonunda <strong>"İyi ki Nomaya yanımdaydı."</strong> diyorsa, bu proje tam da hayal ettiğimiz amaca ulaşmış demektir.
+          </p>
+
         </div>
       </div>
     </div>

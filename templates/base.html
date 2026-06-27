@@ -238,12 +238,6 @@
                 ❓ <span class="ms-1">SSS</span>
               </a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link"
-                   href="{% url 'order_customized' %}">
-                   ✨ Bana Özel Rota
-                </a>
-            </li>
           {% endwith %}
         </ul>
       </div>
@@ -449,20 +443,59 @@
 
 <!-- =======================
 Footer START -->
-<footer class="bg-dark pt-5">
+<footer class="nomaya-footer bg-dark pt-5">
   <div class="container">
+
+    <!-- Trust strip START -->
+    <div class="row g-3 mb-5">
+      <div class="col-6 col-lg-3">
+        <div class="nomaya-trust-card h-100">
+          <div class="nomaya-trust-icon">🔒</div>
+          <div>
+            <div class="fw-bold text-white">SSL Güvenliği</div>
+            <div class="small text-body-secondary">Şifreli ve güvenli bağlantı</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="nomaya-trust-card h-100">
+          <div class="nomaya-trust-icon">💳</div>
+          <div>
+            <div class="fw-bold text-white">Stripe Ödeme</div>
+            <div class="small text-body-secondary">Visa, Mastercard, Amex</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="nomaya-trust-card h-100">
+          <div class="nomaya-trust-icon">💬</div>
+          <div>
+            <div class="fw-bold text-white">WhatsApp Asistan</div>
+            <div class="small text-body-secondary">Seyahat boyunca yanında</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="nomaya-trust-card h-100">
+          <div class="nomaya-trust-icon">🌍</div>
+          <div>
+            <div class="fw-bold text-white">Global Rotalar</div>
+            <div class="small text-body-secondary">Asya’dan Avrupa’ya</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Trust strip END -->
+
     <div class="row g-4">
-      <!-- Widget 1 -->
-      <div class="col-lg-3">
-        <a href="{% url 'home' %}" class="d-inline-flex align-items-center">
-          <!-- Sabit ikon (tema bağımsız) -->
+      <!-- Brand -->
+      <div class="col-lg-4">
+        <a href="{% url 'home' %}" class="d-inline-flex align-items-center text-decoration-none">
           <img src="{% static 'assets/images/logo-icon.svg' %}"
                class="logo-icon me-2"
                alt=""
                aria-hidden="true"
                width="70" />
-
-          <!-- Wordmark: 90px genişlik -->
           <img src="{% static 'assets/images/logo-light.svg' %}"
                class="logo-wordmark"
                alt="Nomaya logo"
@@ -470,11 +503,22 @@ Footer START -->
         </a>
 
         <p class="my-3 text-body-secondary">
-          Nomaya, niş rotalar ve samimi rehberlik sunar. Her şeyinizi planlarız — siz sadece yaşayın!
+          Nomaya; kişiye özel rotalar, sesli yönlendirmeler, WhatsApp asistan ve güvenli ödeme altyapısıyla seyahati daha sade, daha erişilebilir ve daha insani hale getirir.
         </p>
+
+        <div class="d-flex flex-wrap gap-2 mb-4">
+          <a href="{% url 'tour_grid' %}" class="btn btn-primary rounded-pill px-4">
+            ✨ Rotaları Keşfet
+          </a>
+          <a href="{% url 'order_customized' %}" class="btn btn-outline-light rounded-pill px-4">
+            Bana Özel Rota
+          </a>
+        </div>
+
         <p class="mb-2">
-          <a href="tel:+905349604109" class="text-body-secondary text-primary-hover">
-            <i class="bi bi-telephone me-2"></i>+90 534 960 41 09
+          <a href="https://wa.me/32476073171?text={{ 'Merhaba Nomaya! Seyahat planım için destek almak istiyorum.'|urlencode }}"
+             target="_blank" rel="noopener" class="text-body-secondary text-primary-hover">
+            <i class="bi bi-whatsapp me-2"></i>WhatsApp Destek
           </a>
         </p>
         <p class="mb-0">
@@ -484,153 +528,114 @@ Footer START -->
         </p>
       </div>
 
-      <!-- Widget 2 -->
+      <!-- Links -->
       <div class="col-lg-8 ms-auto">
         <div class="row g-4">
-          <!-- Sayfalar -->
           <div class="col-6 col-md-3">
-            <h5 class="text-white mb-2 mb-md-4">Sayfalar</h5>
+            <h5 class="text-white mb-2 mb-md-4">Nomaya</h5>
             <ul class="nav flex-column text-primary-hover">
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'about' %}">Hakkımızda</a></li>
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'about' %}">İletişim</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'about' %}">Hikayemiz</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'services' %}">Neden Nomaya?</a></li>
               <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'faqs' %}">SSS</a></li>
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'about' %}">Ekibimiz</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="#" data-bs-toggle="modal" data-bs-target="#supportModal">Destek</a></li>
             </ul>
           </div>
-          <!-- Bağlantılar -->
+
           <div class="col-6 col-md-3">
-            <h5 class="text-white mb-2 mb-md-4">Bağlantılar</h5>
+            <h5 class="text-white mb-2 mb-md-4">Seyahat</h5>
+            <ul class="nav flex-column text-primary-hover">
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}"><i class="fa-solid fa-globe-americas me-2"></i>Turlar</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'order_customized' %}"><i class="bi bi-stars me-2"></i>Bana Özel Rota</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}"><i class="fa-solid fa-car me-2"></i>Transfer</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}"><i class="fa-solid fa-hotel me-2"></i>Konaklama</a></li>
+            </ul>
+          </div>
+
+          <div class="col-6 col-md-3">
+            <h5 class="text-white mb-2 mb-md-4">Destinasyonlar</h5>
+            <ul class="nav flex-column text-primary-hover">
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}">🇻🇳 Vietnam</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}">🇯🇵 Japonya</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}">🇰🇷 Güney Kore</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}">🇹🇭 Tayland</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}">🇮🇩 Endonezya</a></li>
+            </ul>
+          </div>
+
+          <div class="col-6 col-md-3">
+            <h5 class="text-white mb-2 mb-md-4">Hesap</h5>
             <ul class="nav flex-column text-primary-hover">
               <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'sign_up' %}">Kayıt Ol</a></li>
               <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'sign_in' %}">Giriş Yap</a></li>
               <li class="nav-item"><a class="nav-link text-body-secondary" href="#" data-bs-toggle="modal" data-bs-target="#privacyModal">Gizlilik Politikası</a></li>
               <li class="nav-item"><a class="nav-link text-body-secondary" href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Şartlar ve Koşullar</a></li>
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="#" data-bs-toggle="modal" data-bs-target="#cookieModal">Çerez Politikası</a></li>
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="#" data-bs-toggle="modal" data-bs-target="#supportModal">Destek</a></li>
-            </ul>
-          </div>
-          <!-- Destinasyonlar -->
-          <div class="col-6 col-md-3">
-            <h5 class="text-white mb-2 mb-md-4">Destinasyonlar</h5>
-            <ul class="nav flex-column text-primary-hover">
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}">Vietnam</a></li>
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}">Japonya</a></li>
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}">Güney Kore</a></li>
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}">Kamboçya</a></li>
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}">Endonezya</a></li>
-            </ul>
-          </div>
-          <!-- Nomaya -->
-          <div class="col-6 col-md-3">
-            <h5 class="text-white mb-2 mb-md-4">Nomaya</h5>
-            <ul class="nav flex-column text-primary-hover">
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}"><i class="fa-solid fa-hotel me-2"></i>Otel</a></li>
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}"><i class="fa-solid fa-plane me-2"></i>Uçuş</a></li>
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}"><i class="fa-solid fa-globe-americas me-2"></i>Tur</a></li>
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}"><i class="fa-solid fa-car me-2"></i>Transfer</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="#" data-bs-toggle="modal" data-bs-target="#refundModal">İade Politikası</a></li>
             </ul>
           </div>
         </div>
       </div>
-    </div><!-- Row END -->
-
-    <!-- Top Links -->
-    <div class="row mt-5">
-      <h5 class="mb-2 text-white">Popüler Bağlantılar</h5>
-      <ul class="list-inline text-primary-hover lh-lg">
-        <li class="list-inline-item"><a href="{% url 'tour_grid' %}" class="text-body-secondary">Uçuşlar</a></li>
-        <li class="list-inline-item"><a href="{% url 'tour_grid' %}" class="text-body-secondary">Oteller</a></li>
-        <li class="list-inline-item"><a href="{% url 'tour_grid' %}" class="text-body-secondary">Turlar</a></li>
-        <li class="list-inline-item"><a href="{% url 'tour_grid' %}" class="text-body-secondary">Transfer</a></li>
-        <li class="list-inline-item"><a href="{% url 'about' %}" class="text-body-secondary">Hakkımızda</a></li>
-        <li class="list-inline-item"><a href="{% url 'about' %}" class="text-body-secondary">İletişim</a></li>
-        <li class="list-inline-item"><a href="{% url 'faqs' %}" class="text-body-secondary">SSS</a></li>
-        <li class="list-inline-item"><a href="{% url 'tour_grid' %}" class="text-body-secondary">Paketler</a></li>
-        <li class="list-inline-item"><a href="{% url 'tour_grid' %}" class="text-body-secondary">Destinasyonlar</a></li>
-      </ul>
     </div>
 
-    <!-- Payment & Social -->
-    <div class="row g-4 justify-content-between mt-0 mt-md-2">
-      <div class="col-sm-7 col-md-6 col-lg-4">
-        <h5 class="text-white mb-2">
-          Ödeme & Güvenlik
-          <span class="badge bg-warning text-dark ms-2 align-middle">Yakında</span>
-        </h5>
+    <hr class="my-5">
 
-        <p class="text-body-secondary mb-2">
-          128-bit SSL şifreleme ve güvenli ödeme altyapıları
-          <span class="text-body-tertiary">(entegrasyon aşamasında)</span>.
+    <!-- Payment & Social -->
+    <div class="row g-4 justify-content-between align-items-start">
+      <div class="col-md-7 col-lg-6">
+        <h5 class="text-white mb-2">🔒 Güvenli Ödeme</h5>
+        <p class="text-body-secondary mb-3">
+          Stripe altyapısı ile Visa, Mastercard ve American Express kartlarınızla güvenle ödeme yapabilirsiniz. Kart bilgileriniz Nomaya sunucularında tutulmaz.
         </p>
 
-        <ul class="list-inline mb-0 mt-3 payment-soon" aria-label="Ödeme yöntemleri yakında aktif olacak">
-          <li class="list-inline-item">
-            <a href="#" aria-disabled="true" tabindex="-1" data-bs-toggle="tooltip" data-bs-title="Yakında">
-              <img src="{% static 'assets/images/element/paypal.svg' %}" class="h-30px" alt="PayPal (yakında)">
-            </a>
+        <ul class="list-inline mb-3" aria-label="Desteklenen ödeme yöntemleri">
+          <li class="list-inline-item me-2">
+            <img src="{% static 'assets/images/element/visa.svg' %}" class="h-30px" alt="Visa">
           </li>
-          <li class="list-inline-item">
-            <a href="#" aria-disabled="true" tabindex="-1" data-bs-toggle="tooltip" data-bs-title="Yakında">
-              <img src="{% static 'assets/images/element/visa.svg' %}" class="h-30px" alt="Visa (yakında)">
-            </a>
+          <li class="list-inline-item me-2">
+            <img src="{% static 'assets/images/element/mastercard.svg' %}" class="h-30px" alt="Mastercard">
           </li>
-          <li class="list-inline-item">
-            <a href="#" aria-disabled="true" tabindex="-1" data-bs-toggle="tooltip" data-bs-title="Yakında">
-              <img src="{% static 'assets/images/element/mastercard.svg' %}" class="h-30px" alt="Mastercard (yakında)">
-            </a>
+          <li class="list-inline-item me-2">
+            <img src="{% static 'assets/images/element/expresscard.svg' %}" class="h-30px" alt="American Express">
           </li>
-          <li class="list-inline-item">
-            <a href="#" aria-disabled="true" tabindex="-1" data-bs-toggle="tooltip" data-bs-title="Yakında">
-              <img src="{% static 'assets/images/element/expresscard.svg' %}" class="h-30px" alt="American Express (yakında)">
-            </a>
+          <li class="list-inline-item me-2">
+            <img src="{% static 'assets/images/element/paypal.svg' %}" class="h-30px opacity-50" alt="PayPal">
           </li>
         </ul>
+
+        <div class="row g-2 small">
+          <div class="col-sm-6"><span class="nomaya-check">✓</span> Stripe Secure Checkout</div>
+          <div class="col-sm-6"><span class="nomaya-check">✓</span> SSL şifreli işlem</div>
+          <div class="col-sm-6"><span class="nomaya-check">✓</span> Kredi kartı aktif</div>
+          <div class="col-sm-6"><span class="nomaya-check">✓</span> Uluslararası kart desteği</div>
+        </div>
       </div>
 
-      <div class="col-sm-5 col-md-6 col-lg-3 text-sm-end">
-        <h5 class="text-white mb-2">
-          Bizi takip edin
-          <br>
-          <small class="text-body-secondary ms-2">Diğerleri yakında</small>
-        </h5>
+      <div class="col-md-5 col-lg-4 text-md-end">
+        <h5 class="text-white mb-2">Bizi takip edin</h5>
+        <p class="text-body-secondary mb-3">
+          Seyahat hikayeleri, yeni rotalar ve Nomaya güncellemeleri için bizi takip edin.
+        </p>
 
-        <ul class="list-inline mb-0 mt-3">
-          <!-- Pasif (yakında) -->
+        <ul class="list-inline mb-0">
           <li class="list-inline-item">
-            <a class="btn btn-sm px-2 bg-facebook mb-0 pe-none opacity-50 disabled"
-               href="#" tabindex="-1" aria-disabled="true">
-              <i class="fab fa-fw fa-facebook-f"></i>
+            <a class="btn btn-sm shadow px-2 bg-youtube mb-0"
+               href="https://www.youtube.com/@volkangulernguyen" target="_blank" rel="noopener" aria-label="YouTube">
+              <i class="fab fa-fw fa-youtube"></i>
             </a>
           </li>
           <li class="list-inline-item">
-            <a class="btn btn-sm shadow px-2 bg-instagram mb-0 pe-none opacity-50 disabled"
-               href="#" tabindex="-1" aria-disabled="true">
+            <a class="btn btn-sm shadow px-2 bg-instagram mb-0 opacity-75"
+               href="#" aria-label="Instagram">
               <i class="fab fa-fw fa-instagram"></i>
             </a>
           </li>
           <li class="list-inline-item">
-            <a class="btn btn-sm shadow px-2 bg-twitter mb-0 pe-none opacity-50 disabled"
-               href="#" tabindex="-1" aria-disabled="true">
-              <i class="fab fa-fw fa-twitter"></i>
-            </a>
-          </li>
-          <li class="list-inline-item">
-            <a class="btn btn-sm shadow px-2 bg-linkedin mb-0 pe-none opacity-50 disabled"
-               href="#" tabindex="-1" aria-disabled="true">
+            <a class="btn btn-sm shadow px-2 bg-linkedin mb-0 opacity-75"
+               href="#" aria-label="LinkedIn">
               <i class="fab fa-fw fa-linkedin-in"></i>
-            </a>
-          </li>
-
-          <!-- Aktif (YouTube) -->
-          <li class="list-inline-item">
-            <a class="btn btn-sm shadow px-2 bg-youtube mb-0"
-               href="https://www.youtube.com/@volkangulernguyen" target="_blank" rel="noopener">
-              <i class="fab fa-fw fa-youtube"></i>
             </a>
           </li>
         </ul>
       </div>
-
     </div>
 
     <hr class="mt-4 mb-0">
@@ -639,7 +644,9 @@ Footer START -->
     <div class="row">
       <div class="container">
         <div class="d-lg-flex justify-content-between align-items-center py-3 text-center text-lg-start">
-          <div class="text-body-secondary text-primary-hover">© {% now "Y" %} Nomaya. Tüm hakları saklıdır.</div>
+          <div class="text-body-secondary text-primary-hover">
+            © {% now "Y" %} Nomaya. Tüm hakları saklıdır. <span class="d-none d-sm-inline">Explore differently.</span>
+          </div>
           <div class="nav mt-2 mt-lg-0">
             <ul class="list-inline text-primary-hover mx-auto mb-0">
               <li class="list-inline-item me-0"><a class="nav-link text-body-secondary py-1" href="#" data-bs-toggle="modal" data-bs-target="#privacyModal">Gizlilik Politikası</a></li>
@@ -653,6 +660,74 @@ Footer START -->
   </div>
 </footer>
 <!-- Footer END -->
+
+<style>
+  .nomaya-footer{
+    position: relative;
+    overflow: hidden;
+  }
+  .nomaya-footer:before{
+    content:"";
+    position:absolute;
+    inset:0 0 auto 0;
+    height:220px;
+    background: radial-gradient(circle at 20% 0%, rgba(112,71,255,.28), transparent 40%),
+                radial-gradient(circle at 85% 10%, rgba(25,135,84,.18), transparent 35%);
+    pointer-events:none;
+  }
+  .nomaya-footer > .container{ position:relative; z-index:1; }
+  .nomaya-trust-card{
+    display:flex;
+    align-items:center;
+    gap: .85rem;
+    padding: 1rem;
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: 1rem;
+    background: rgba(255,255,255,.045);
+    backdrop-filter: blur(8px);
+  }
+  .nomaya-trust-icon{
+    width: 42px;
+    height: 42px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius: 999px;
+    background: rgba(255,255,255,.10);
+    font-size: 1.25rem;
+    flex: 0 0 auto;
+  }
+  .nomaya-check{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width: 20px;
+    height: 20px;
+    margin-right: .35rem;
+    border-radius: 999px;
+    background: rgba(25,135,84,.16);
+    color: #22c55e;
+    font-weight: 800;
+  }
+  .nomaya-footer .nav-link{
+    padding-left:0;
+    transition: .2s ease;
+  }
+  .nomaya-footer .nav-link:hover{
+    transform: translateX(3px);
+  }
+  @media (max-width: 576px){
+    .nomaya-trust-card{
+      align-items:flex-start;
+      padding:.85rem;
+    }
+    .nomaya-trust-icon{
+      width:36px;
+      height:36px;
+      font-size:1rem;
+    }
+  }
+</style>
 
 <!-- Global Modals -->
 <div class="modal fade" id="privacyModal" tabindex="-1" aria-hidden="true">
@@ -685,7 +760,7 @@ Footer START -->
       <div class="modal-body small">
         <p>Nomaya bir seyahat planlama platformudur. Uçuş, otel, transfer ve aktiviteler tedarikçiler tarafından sağlanır; Nomaya aracı konumundadır.</p>
         <ul>
-          <li>Rezervasyon ve iptal/değişiklik kuralları tedarikçi şartlarına tabidir.</li>
+          <li>Rezervasyon ve iptal/değişiklik kuralları tedarikçi şartlarına tabidir.</li>
           <li>Fiyatlar anlık değişebilir; kesin tutar ödeme anında belirlenir.</li>
           <li>Kullanıcı, doğru iletişim bilgisi ve seyahat belgelerini temin etmekle yükümlüdür.</li>
           <li>Nomaya, öngörülemeyen tedarikçi değişikliklerinde kullanıcıyı bilgilendirir ve alternatif sunmak için makul efor gösterir.</li>
