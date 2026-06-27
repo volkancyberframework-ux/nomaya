@@ -440,8 +440,7 @@
 <!-- Header END -->
 
 {% block content %}{% endblock %}
-<!-- =======================
-<!-- Footer START -->
+
 <footer class="nomaya-footer bg-dark pt-5">
   <div class="container">
 
@@ -450,18 +449,18 @@
         <div class="nomaya-trust-card h-100">
           <div class="nomaya-trust-icon">🔒</div>
           <div>
-            <div class="fw-bold text-white">Güvenli Ödeme</div>
-            <div class="small text-body-secondary">Kart bilgileriniz korunur</div>
+            <div class="fw-bold text-white">Güvenli Deneyim</div>
+            <div class="small text-body-secondary">Seyahatin boyunca yanında</div>
           </div>
         </div>
       </div>
 
       <div class="col-6 col-lg-3">
         <div class="nomaya-trust-card h-100">
-          <div class="nomaya-trust-icon">💳</div>
+          <div class="nomaya-trust-icon">🧭</div>
           <div>
-            <div class="fw-bold text-white">Kartla Ödeme</div>
-            <div class="small text-body-secondary">Visa, Mastercard, Amex</div>
+            <div class="fw-bold text-white">Kişisel Rota</div>
+            <div class="small text-body-secondary">Tarzına göre hazırlanır</div>
           </div>
         </div>
       </div>
@@ -471,7 +470,7 @@
           <div class="nomaya-trust-icon">💬</div>
           <div>
             <div class="fw-bold text-white">WhatsApp Asistan</div>
-            <div class="small text-body-secondary">Seyahat boyunca yanında</div>
+            <div class="small text-body-secondary">Yolda gerçek destek</div>
           </div>
         </div>
       </div>
@@ -480,30 +479,31 @@
         <div class="nomaya-trust-card h-100">
           <div class="nomaya-trust-icon">🎧</div>
           <div>
-            <div class="fw-bold text-white">Sesli Rehber</div>
-            <div class="small text-body-secondary">Sana özel yol arkadaşı</div>
+            <div class="fw-bold text-white">Sesli Yol Arkadaşı</div>
+            <div class="small text-body-secondary">Keşfi daha canlı yapar</div>
           </div>
         </div>
       </div>
     </div>
 
     <div class="row g-4">
-      <div class="col-lg-4">
+      <div class="col-lg-5">
         <a href="{% url 'home' %}" class="d-inline-flex align-items-center text-decoration-none">
-          <img src="{% static 'assets/images/logo-icon.svg' %}" class="logo-icon me-2" alt="" aria-hidden="true" width="70">
-          <img src="{% static 'assets/images/logo-light.svg' %}" class="logo-wordmark" alt="Nomaya logo" width="190">
+          <img src="{% static 'assets/images/logo-icon.svg' %}" class="logo-icon me-2" alt="" aria-hidden="true" width="64">
+          <img src="{% static 'assets/images/logo-light.svg' %}" class="logo-wordmark" alt="Nomaya logo" width="180">
         </a>
 
         <p class="my-3 text-body-secondary">
-          Nomaya; kişiye özel rotalar, sesli yönlendirmeler ve WhatsApp asistan desteğiyle seyahati daha sade, daha erişilebilir ve daha insani hale getirir.
+          Nomaya; kişiye özel seyahat akışları, sesli yönlendirmeler ve WhatsApp asistan desteğiyle
+          yolculuğunu daha sade, daha güvenli ve daha kişisel hale getirir.
         </p>
 
         <div class="d-flex flex-wrap gap-2 mb-4">
-          <a href="{% url 'order_customized' %}" class="btn btn-primary rounded-pill px-4">
-            ✨ Kendi Seyahatini Oluştur
+          <a href="{% url 'home' %}" class="btn btn-primary rounded-pill px-4">
+            Nomaya.co’ya Git
           </a>
 
-          <a href="https://wa.me/32476073171?text={{ 'Merhaba Nomaya! Bana özel seyahat planı oluşturmak istiyorum.'|urlencode }}"
+          <a href="https://wa.me/32476073171?text={{ 'Merhaba Nomaya! Seyahatim için bilgi almak istiyorum.'|urlencode }}"
              target="_blank" rel="noopener" class="btn btn-outline-light rounded-pill px-4">
             WhatsApp Destek
           </a>
@@ -516,43 +516,32 @@
         </p>
       </div>
 
-      <div class="col-lg-8 ms-auto">
+      <div class="col-lg-7 ms-auto">
         <div class="row g-4">
-          <div class="col-6 col-md-3">
+          <div class="col-6 col-md-4">
             <h5 class="text-white mb-2 mb-md-4">Nomaya</h5>
             <ul class="nav flex-column text-primary-hover">
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'home' %}">Ana Sayfa</a></li>
               <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'about' %}">Hikayemiz</a></li>
               <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'services' %}">Neden Nomaya?</a></li>
               <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'faqs' %}">SSS</a></li>
+            </ul>
+          </div>
+
+          <div class="col-6 col-md-4">
+            <h5 class="text-white mb-2 mb-md-4">Deneyim</h5>
+            <ul class="nav flex-column text-primary-hover">
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'home' %}"><i class="bi bi-map me-2"></i>Kişisel Rota</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'home' %}"><i class="bi bi-headphones me-2"></i>Sesli Rehber</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'home' %}"><i class="bi bi-whatsapp me-2"></i>WhatsApp Asistan</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'home' %}"><i class="bi bi-stars me-2"></i>Özel Seyahat Akışı</a></li>
+            </ul>
+          </div>
+
+          <div class="col-12 col-md-4">
+            <h5 class="text-white mb-2 mb-md-4">Yasal</h5>
+            <ul class="nav flex-column text-primary-hover">
               <li class="nav-item"><a class="nav-link text-body-secondary" href="#" data-bs-toggle="modal" data-bs-target="#supportModal">Destek</a></li>
-            </ul>
-          </div>
-
-          <div class="col-6 col-md-3">
-            <h5 class="text-white mb-2 mb-md-4">Seyahatini Kur</h5>
-            <ul class="nav flex-column text-primary-hover">
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'order_customized' %}"><i class="bi bi-stars me-2"></i>Bana Özel Rota</a></li>
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'order_customized' %}"><i class="bi bi-map me-2"></i>Kişisel Plan</a></li>
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'order_customized' %}"><i class="bi bi-headphones me-2"></i>Sesli Rehber</a></li>
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'order_customized' %}"><i class="bi bi-whatsapp me-2"></i>WhatsApp Asistan</a></li>
-            </ul>
-          </div>
-
-          <div class="col-6 col-md-3">
-            <h5 class="text-white mb-2 mb-md-4">Popüler İstekler</h5>
-            <ul class="nav flex-column text-primary-hover">
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'order_customized' %}">🇻🇳 Vietnam rotası</a></li>
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'order_customized' %}">🍜 Yerel lezzetler</a></li>
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'order_customized' %}">📍 Gizli noktalar</a></li>
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'order_customized' %}">🌴 Hafta sonu kaçamağı</a></li>
-            </ul>
-          </div>
-
-          <div class="col-6 col-md-3">
-            <h5 class="text-white mb-2 mb-md-4">Hesap</h5>
-            <ul class="nav flex-column text-primary-hover">
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'sign_up' %}">Kayıt Ol</a></li>
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'sign_in' %}">Giriş Yap</a></li>
               <li class="nav-item"><a class="nav-link text-body-secondary" href="#" data-bs-toggle="modal" data-bs-target="#privacyModal">Gizlilik Politikası</a></li>
               <li class="nav-item"><a class="nav-link text-body-secondary" href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Şartlar ve Koşullar</a></li>
               <li class="nav-item"><a class="nav-link text-body-secondary" href="#" data-bs-toggle="modal" data-bs-target="#refundModal">İade Politikası</a></li>
@@ -566,30 +555,22 @@
 
     <div class="row g-4 align-items-center">
       <div class="col-lg-4">
-        <div class="small text-body-secondary mb-2">Güvenli ödeme yöntemleri</div>
-        <ul class="list-inline mb-0">
-          <li class="list-inline-item me-2">
-            <img src="{% static 'assets/images/element/visa.svg' %}" class="h-30px" alt="Visa">
-          </li>
-          <li class="list-inline-item me-2">
-            <img src="{% static 'assets/images/element/mastercard.svg' %}" class="h-30px" alt="Mastercard">
-          </li>
-          <li class="list-inline-item">
-            <img src="{% static 'assets/images/element/expresscard.svg' %}" class="h-30px" alt="American Express">
-          </li>
-        </ul>
-      </div>
-
-      <div class="col-lg-4 text-lg-center">
         <div class="small text-body-secondary mb-2">Nomaya uygulamasını indir</div>
-        <div class="d-flex flex-wrap gap-2 justify-content-lg-center">
-          <a href="#" class="d-inline-flex" aria-label="App Store'dan indir">
+        <div class="d-flex flex-wrap gap-2">
+          <a href="{% url 'home' %}" class="d-inline-flex" aria-label="App Store'dan indir">
             <img src="{% static 'assets/images/element/app-store.svg' %}" alt="App Store'dan indir" style="height:42px; width:auto; display:block;">
           </a>
-          <a href="#" class="d-inline-flex" aria-label="Google Play'den indir">
+          <a href="{% url 'home' %}" class="d-inline-flex" aria-label="Google Play'den indir">
             <img src="{% static 'assets/images/element/google-play.svg' %}" alt="Google Play'den indir" style="height:42px; width:auto; display:block;">
           </a>
         </div>
+      </div>
+
+      <div class="col-lg-4 text-lg-center">
+        <div class="small text-body-secondary mb-2">İletişim</div>
+        <a href="mailto:destek@nomaya.co" class="text-body-secondary text-primary-hover">
+          destek@nomaya.co
+        </a>
       </div>
 
       <div class="col-lg-4 text-lg-end">
@@ -602,12 +583,12 @@
             </a>
           </li>
           <li class="list-inline-item">
-            <a class="btn btn-sm shadow px-2 bg-instagram mb-0 opacity-75" href="#" aria-label="Instagram">
+            <a class="btn btn-sm shadow px-2 bg-instagram mb-0 opacity-75" href="{% url 'home' %}" aria-label="Instagram">
               <i class="fab fa-fw fa-instagram"></i>
             </a>
           </li>
           <li class="list-inline-item">
-            <a class="btn btn-sm shadow px-2 bg-linkedin mb-0 opacity-75" href="#" aria-label="LinkedIn">
+            <a class="btn btn-sm shadow px-2 bg-linkedin mb-0 opacity-75" href="{% url 'home' %}" aria-label="LinkedIn">
               <i class="fab fa-fw fa-linkedin-in"></i>
             </a>
           </li>
@@ -624,13 +605,13 @@
 
       <ul class="list-inline text-primary-hover mx-auto mx-lg-0 mb-0 mt-2 mt-lg-0">
         <li class="list-inline-item me-0">
-          <a class="nav-link text-body-secondary py-1" href="#" data-bs-toggle="modal" data-bs-target="#privacyModal">Gizlilik Politikası</a>
+          <a class="nav-link text-body-secondary py-1" href="#" data-bs-toggle="modal" data-bs-target="#privacyModal">Gizlilik</a>
         </li>
         <li class="list-inline-item me-0">
-          <a class="nav-link text-body-secondary py-1" href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Şartlar ve Koşullar</a>
+          <a class="nav-link text-body-secondary py-1" href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Şartlar</a>
         </li>
         <li class="list-inline-item me-0">
-          <a class="nav-link text-body-secondary py-1 pe-0" href="#" data-bs-toggle="modal" data-bs-target="#refundModal">İade Politikası</a>
+          <a class="nav-link text-body-secondary py-1 pe-0" href="#" data-bs-toggle="modal" data-bs-target="#refundModal">İade</a>
         </li>
       </ul>
     </div>

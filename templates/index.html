@@ -1,4 +1,3 @@
-```django
 {% extends "base.html" %}
 {% load static %}
 
@@ -285,35 +284,47 @@
     padding-bottom: 0;
   }
 
-  .nomaya-timeline-item::before {
-    content: "";
-    position: absolute;
-    left: calc((var(--bubble-size) - var(--line-width)) / 2);
-    top: calc(var(--bubble-size) + 4px);
-    bottom: -4px;
-    width: var(--line-width);
-    border-radius: 999px;
-    background: linear-gradient(180deg, var(--line-color), #60a5fa);
+  .nomaya-timeline-item::before{
+      content:"";
+      position:absolute;
+
+      left:calc(var(--bubble-size)/2 - 2px);
+
+      top:56px;
+      bottom:-18px;
+
+      width:4px;
+
+      background:#79aefc;
+      border-radius:999px;
   }
 
   .nomaya-timeline-item:last-child::before {
     display: none;
   }
 
-  .nomaya-bubble {
-    position: relative;
-    z-index: 1;
-    width: var(--bubble-size);
-    height: var(--bubble-size);
-    display: grid;
-    place-items: center;
-    border-radius: 50%;
-    border: 6px solid var(--line-color);
-    background: #111827;
-    color: #fff;
-    font-size: 31px;
-    line-height: 1;
-    box-shadow: 0 14px 30px rgba(37, 99, 235, .18);
+  .nomaya-bubble{
+      position:relative;
+      z-index:2;
+
+      width:60px;
+      height:60px;
+
+      display:flex;
+      align-items:center;
+      justify-content:center;
+
+      border-radius:50%;
+
+      background:#f8fbff;
+      border:5px solid #4f8cff;
+
+      color:#2563eb;
+      font-size:26px;
+
+      box-shadow:
+          0 10px 30px rgba(37,99,235,.12),
+          0 0 0 6px rgba(79,140,255,.08);
   }
 
   .nomaya-step-label {
@@ -699,108 +710,136 @@
 
   <section class="nomaya-section">
     <div class="container">
-      <h2 class="nomaya-section-title">Satın aldıktan sonra günün böyle ilerler</h2>
+
+      <h2 class="nomaya-section-title">
+        Satın aldıktan sonra seni neler bekliyor?
+      </h2>
+
       <p class="nomaya-section-subtitle">
-        Kısa formu doldurursun, biz akışı hazırlarız. Seyahat günü uygulama ve WhatsApp asistan yanında olur.
+        Yaklaşık 2 dakika içinde başvurunu tamamlar, gerisini Nomaya hazırlar.
       </p>
 
-      <div class="nomaya-timeline">
-        <div class="nomaya-timeline-item">
-          <div class="nomaya-bubble">🧭</div>
+      <div class="nomaya-timeline" style="max-width:760px;margin-top:34px;">
+
+        <div class="nomaya-timeline-item" style="min-height:92px;padding-bottom:18px;">
+          <div class="nomaya-bubble" style="width:54px;height:54px;font-size:22px;border-width:4px;">📝</div>
           <div>
-            <div class="nomaya-step-label">önce</div>
-            <p class="nomaya-step-copy">
-              <strong>İstediğin tarzda deneyimi seçersin.</strong> Nereye gideceğini, tarihlerine nasıl bir ritim istediğini ve yolculuktan ne beklediğini kısa formda anlatırsın.
+            <div class="nomaya-step-label" style="font-size:11px;">1. FORM</div>
+            <p class="nomaya-step-copy" style="font-size:16px;">
+              <strong>Gitmek istediğin yeri</strong> ve beklentilerini yazarsın.
             </p>
           </div>
         </div>
 
-        <div class="nomaya-timeline-item">
-          <div class="nomaya-bubble">✍️</div>
+        <div class="nomaya-timeline-item" style="min-height:92px;padding-bottom:18px;">
+          <div class="nomaya-bubble" style="width:54px;height:54px;font-size:22px;border-width:4px;">🧠</div>
           <div>
-            <div class="nomaya-step-label">hazırlık</div>
-            <p class="nomaya-step-copy">
-              <strong>Biz senin için tasarlarız:</strong> rota, duraklar, saat aralıkları, yemek molaları, fotoğraf noktaları ve küçük sürprizler tek akışta hazırlanır.
+            <div class="nomaya-step-label" style="font-size:11px;">2. HAZIRLIK</div>
+            <p class="nomaya-step-copy" style="font-size:16px;">
+              <strong>Nomaya sana özel rotayı</strong>, önerileri ve deneyimi oluşturur.
             </p>
           </div>
         </div>
 
-        <div class="nomaya-timeline-item">
-          <div class="nomaya-bubble">💬</div>
+        <div class="nomaya-timeline-item" style="min-height:92px;padding-bottom:18px;">
+          <div class="nomaya-bubble" style="width:54px;height:54px;font-size:22px;border-width:4px;">💬</div>
           <div>
-            <div class="nomaya-step-label">seyahat öncesi</div>
-            <p class="nomaya-step-copy">
-              <strong>Sana özel WhatsApp asistan atanır.</strong> Yola çıkmadan önce aklındaki detayları sorabilir, değişiklik istersen hızlıca yönlendirme alabilirsin.
+            <div class="nomaya-step-label" style="font-size:11px;">3. DESTEK</div>
+            <p class="nomaya-step-copy" style="font-size:16px;">
+              <strong>Sana özel WhatsApp asistanın</strong> atanır ve yolculuk boyunca yanında olur.
             </p>
           </div>
         </div>
 
-        <div class="nomaya-timeline-item">
-          <div class="nomaya-bubble">🔐</div>
+        <div class="nomaya-timeline-item" style="min-height:92px;padding-bottom:18px;">
+          <div class="nomaya-bubble" style="width:54px;height:54px;font-size:22px;border-width:4px;">📱</div>
           <div>
-            <div class="nomaya-step-label">seyahat günü</div>
-            <p class="nomaya-step-copy">
-              Uygulamayı açar, sana verilen <strong>takip kodunu girersin</strong>. Deneyimin kilidi açılır ve günün adım adım görünür hale gelir.
+            <div class="nomaya-step-label" style="font-size:11px;">4. BAŞLA</div>
+            <p class="nomaya-step-copy" style="font-size:16px;">
+              Uygulamaya giriş yapar, <strong>takip kodunu girer</strong> ve deneyimin açılır.
             </p>
           </div>
         </div>
 
-        <div class="nomaya-timeline-item">
-          <div class="nomaya-bubble">🚶</div>
+        <div class="nomaya-timeline-item" style="min-height:92px;padding-bottom:0;">
+          <div class="nomaya-bubble" style="width:54px;height:54px;font-size:22px;border-width:4px;">🌍</div>
           <div>
-            <div class="nomaya-step-label">yolda</div>
-            <p class="nomaya-step-copy">
-              <strong>Sadece yolculuğa odaklanırsın;</strong> uygulama seni doğru anda doğru durağa, doğru fikre ve etrafındaki özel detaylara götürür.
+            <div class="nomaya-step-label" style="font-size:11px;">5. KEŞFET</div>
+            <p class="nomaya-step-copy" style="font-size:16px;">
+              <strong>Telefonuna bakarak değil, etrafına bakarak</strong> şehri keşfedersin. ✨
             </p>
           </div>
         </div>
 
-        <div class="nomaya-timeline-item">
-          <div class="nomaya-bubble">💎</div>
-          <div>
-            <div class="nomaya-step-label">sonra</div>
-            <p class="nomaya-step-copy">
-              <strong>Mil kazanırsın.</strong> Yolculuk bittiğinde anıların yanında yeni Nomaya deneyimlerinde kullanabileceğin miller de hesabına eklenir.
-            </p>
-          </div>
-        </div>
       </div>
+
     </div>
   </section>
 
+
   <section class="nomaya-section nomaya-section-soft">
     <div class="container">
-      <h2 class="nomaya-section-title">Ben kimim, neden Nomaya'yı yaptım?</h2>
+
+      <h2 class="nomaya-section-title">
+        Ben kimim, neden Nomaya'yı yaptım?
+      </h2>
 
       <div class="nomaya-founder-card">
+
         <div class="text-center mb-4">
-          <img src="{% static 'assets/images/team/volkan.jpg' %}" alt="Volkan Güler" class="rounded-circle shadow-lg" style="width:140px;height:140px;object-fit:cover;border:5px solid rgba(255,255,255,.12);">
+          <img src="{% static 'assets/images/team/volkan.jpg' %}"
+               alt="Volkan Güler"
+               class="rounded-circle shadow-lg"
+               style="width:140px;height:140px;object-fit:cover;border:5px solid rgba(255,255,255,.12);">
         </div>
 
-        <div class="founder-pill">Volkan'dan kısa not</div>
+        <div class="founder-pill">
+          ❤️ Volkan'dan kısa not
+        </div>
 
         <div class="founder-text">
+
           <p>
-            Ben <strong>Volkan</strong>. Uzun yıllar Avrupa'da siber güvenlik alanında çalıştım. Güvenli, planlı ve kuralları belli bir kariyerim vardı; ama dünyayı gezerken başka bir şeyin eksik kaldığını fark ettim: İnsan yolda sadece bir yere varmak istemiyor, o yerin içinde kendine ait bir iz bulmak istiyor.
+            Ben <strong>Volkan</strong>. Uzun yıllar Avrupa'da siber güvenlik alanında çalıştım. 💻
+            Güçlü, güvenli ve planlı bir kariyerim vardı. Ancak dünyayı gezerken şunu fark ettim:
+            insanlar bir şehri görmekten çok, <strong>onu gerçekten yaşayabilmek</strong> istiyor.
           </p>
 
           <p>
-            <strong>Turla çıkınca çoğu zaman başkasının temposuna uyuyorsun.</strong> Kalabalığın ritmi, sabit saatler ve herkese aynı gelen duraklar yüzünden şehrin sana söyleyeceği küçük şeyleri kaçırabiliyorsun.
+            🚌 <strong>Klasik turlar</strong> çoğu zaman herkesi aynı yerlere götürüyor.
+            🗺️ Tek başına seyahat ettiğinde ise tüm planlama yükü senin üzerinde kalıyor.
           </p>
 
           <p>
-            <strong>Tek başına çıkınca ise bütün yük senin omzunda kalıyor.</strong> Nereden başlamalı, hangi sokak gerçekten değerli, ne zaman mola vermeli, nerede daha dikkatli yürümeli, hangi deneyim sana göre; bunları çözmeye çalışırken yolculuğun tadı bazen plan yapmanın içinde kayboluyor.
+            Saatlerce araştırma yapmak, yorum okumak, haritalar arasında kaybolmak...
+            Yolculuğun en güzel kısmı başlamadan yoruluyorsun.
           </p>
 
           <p>
-            Nomaya bu arada duran boşluktan doğdu. Sana sadece bir rota vermek için değil; tarzını anlayan, günün akışını senin ritmine göre kuran, gerektiğinde yanında cevap veren ve keşfi daha kişisel hale getiren dijital bir yol arkadaşı olmak için.
+            İşte bu yüzden <strong>Nomaya'yı kurdum.</strong> ✨
+            Sana sadece bir rota vermek için değil;
+            seni tanıyan, doğru zamanda doğru öneriyi yapan,
+            gerektiğinde WhatsApp üzerinden yanında olan
+            dijital bir yol arkadaşı oluşturmak istedim.
           </p>
 
           <p>
-            Benim için iyi seyahat, eve döndüğünde sadece fotoğraf değil, anlatacak bir hikaye bırakandır. Eğer yolculuğun sonunda <strong>"İyi ki Nomaya yanımdaydı."</strong> diyorsan, bizim için en büyük başarı budur.
+            🌍 Benim için güzel seyahat;
+            eve sadece fotoğrafla değil,
+            anlatacak hikâyelerle dönmektir.
           </p>
+
+          <p>
+            Eğer yolculuğun sonunda
+            <strong>"İyi ki Nomaya yanımdaydı."</strong>
+            diyorsan,
+            bizim için en büyük başarı budur. ❤️
+          </p>
+
         </div>
+
       </div>
+
     </div>
   </section>
 
@@ -869,4 +908,3 @@
 </script>
 
 {% endblock %}
-```
