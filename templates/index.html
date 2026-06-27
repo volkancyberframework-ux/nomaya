@@ -263,11 +263,11 @@
   }
 
   .nomaya-timeline {
-    --bubble-size: 72px;
-    --line-width: 6px;
-    --line-color: #3b82f6;
-    max-width: 980px;
-    margin: 42px auto 0;
+    --bubble-size: 76px;
+    --line-width: 4px;
+    --line-color: rgba(121, 174, 252, .38);
+    max-width: 920px;
+    margin: 46px auto 0;
   }
 
   .nomaya-timeline-item {
@@ -275,7 +275,7 @@
     grid-template-columns: var(--bubble-size) minmax(0, 1fr);
     gap: 34px;
     position: relative;
-    min-height: 132px;
+    min-height: 126px;
     padding-bottom: 34px;
   }
 
@@ -288,14 +288,14 @@
       content:"";
       position:absolute;
 
-      left:calc(var(--bubble-size)/2 - 2px);
+      left:calc(var(--bubble-size)/2 - var(--line-width)/2);
 
-      top:56px;
-      bottom:-18px;
+      top:62px;
+      bottom:-12px;
 
-      width:4px;
+      width:var(--line-width);
 
-      background:#79aefc;
+      background:var(--line-color);
       border-radius:999px;
   }
 
@@ -307,8 +307,8 @@
       position:relative;
       z-index:2;
 
-      width:60px;
-      height:60px;
+      width:68px;
+      height:68px;
 
       display:flex;
       align-items:center;
@@ -320,7 +320,7 @@
       border:5px solid #4f8cff;
 
       color:#2563eb;
-      font-size:26px;
+      font-size:27px;
 
       box-shadow:
           0 10px 30px rgba(37,99,235,.12),
@@ -329,19 +329,20 @@
 
   .nomaya-step-label {
     color: #60a5fa;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 900;
     letter-spacing: .18em;
     text-transform: uppercase;
-    margin: 7px 0 12px;
+    margin: 2px 0 12px;
   }
 
   .nomaya-step-copy {
     margin: 0;
     color: #5b6475;
-    font-size: clamp(18px, 2vw, 24px);
-    line-height: 1.55;
+    font-size: clamp(20px, 2.15vw, 29px);
+    line-height: 1.38;
     font-weight: 500;
+    letter-spacing: 0;
   }
 
   .nomaya-step-copy strong {
@@ -450,7 +451,11 @@
   [data-bs-theme="dark"] .nomaya-bubble {
     background: #1e293b !important;
     border-color: #3b82f6 !important;
-    box-shadow: none;
+    box-shadow: 0 0 0 6px rgba(59, 130, 246, .14);
+  }
+
+  [data-bs-theme="dark"] .nomaya-timeline {
+    --line-color: rgba(96, 165, 250, .28);
   }
 
   [data-bs-theme="dark"] .live-users-pill {
@@ -518,21 +523,23 @@
     }
 
     .nomaya-timeline {
-      --bubble-size: 54px;
+      --bubble-size: 58px;
       --line-width: 4px;
       max-width: 100%;
-      margin-top: 30px;
+      margin-top: 32px;
     }
 
     .nomaya-timeline-item {
-      gap: 16px;
-      min-height: 118px;
-      padding-bottom: 26px;
+      gap: 18px;
+      min-height: 112px;
+      padding-bottom: 24px;
     }
 
     .nomaya-bubble {
+      width: 56px;
+      height: 56px;
       border-width: 4px;
-      font-size: 23px;
+      font-size: 22px;
     }
 
     .nomaya-step-label {
@@ -542,8 +549,8 @@
     }
 
     .nomaya-step-copy {
-      font-size: 15px;
-      line-height: 1.5;
+      font-size: 17px;
+      line-height: 1.45;
     }
 
     .nomaya-founder-card,
@@ -712,61 +719,61 @@
     <div class="container">
 
       <h2 class="nomaya-section-title">
-        Satın aldıktan sonra seni neler bekliyor?
+        Nomaya'yı nasıl kullanırsın?
       </h2>
 
       <p class="nomaya-section-subtitle">
-        Yaklaşık 2 dakika içinde başvurunu tamamlar, gerisini Nomaya hazırlar.
+        Satın aldıktan sonra birkaç kısa bilgi verirsin; Nomaya seyahat öncesinden keşif anına kadar deneyimini hazırlar.
       </p>
 
-      <div class="nomaya-timeline" style="max-width:760px;margin-top:34px;">
+      <div class="nomaya-timeline">
 
-        <div class="nomaya-timeline-item" style="min-height:92px;padding-bottom:18px;">
-          <div class="nomaya-bubble" style="width:54px;height:54px;font-size:22px;border-width:4px;">📝</div>
+        <div class="nomaya-timeline-item">
+          <div class="nomaya-bubble">📝</div>
           <div>
-            <div class="nomaya-step-label" style="font-size:11px;">1. FORM</div>
-            <p class="nomaya-step-copy" style="font-size:16px;">
-              <strong>Gitmek istediğin yeri</strong> ve beklentilerini yazarsın.
+            <div class="nomaya-step-label">1. SEYAHATİNİ ANLAT</div>
+            <p class="nomaya-step-copy">
+              <strong>Nereye gideceğini</strong>, tarihlerini ve nasıl bir deneyim istediğini birkaç cümleyle paylaşırsın.
             </p>
           </div>
         </div>
 
-        <div class="nomaya-timeline-item" style="min-height:92px;padding-bottom:18px;">
-          <div class="nomaya-bubble" style="width:54px;height:54px;font-size:22px;border-width:4px;">🧠</div>
+        <div class="nomaya-timeline-item">
+          <div class="nomaya-bubble">🧠</div>
           <div>
-            <div class="nomaya-step-label" style="font-size:11px;">2. HAZIRLIK</div>
-            <p class="nomaya-step-copy" style="font-size:16px;">
-              <strong>Nomaya sana özel rotayı</strong>, önerileri ve deneyimi oluşturur.
+            <div class="nomaya-step-label">2. KİŞİSEL HAZIRLIK</div>
+            <p class="nomaya-step-copy">
+              <strong>Nomaya sana özel akışı</strong>, rota önerilerini ve şehirdeki en doğru durakları özenle hazırlar.
             </p>
           </div>
         </div>
 
-        <div class="nomaya-timeline-item" style="min-height:92px;padding-bottom:18px;">
-          <div class="nomaya-bubble" style="width:54px;height:54px;font-size:22px;border-width:4px;">💬</div>
+        <div class="nomaya-timeline-item">
+          <div class="nomaya-bubble">💬</div>
           <div>
-            <div class="nomaya-step-label" style="font-size:11px;">3. DESTEK</div>
-            <p class="nomaya-step-copy" style="font-size:16px;">
-              <strong>Sana özel WhatsApp asistanın</strong> atanır ve yolculuk boyunca yanında olur.
+            <div class="nomaya-step-label">3. WHATSAPP ASİSTANI</div>
+            <p class="nomaya-step-copy">
+              <strong>Seyahat öncesinde WhatsApp asistanın</strong> devreye girer; sorularını yanıtlar, detayları netleştirir ve yolculuk boyunca yanında kalır.
             </p>
           </div>
         </div>
 
-        <div class="nomaya-timeline-item" style="min-height:92px;padding-bottom:18px;">
-          <div class="nomaya-bubble" style="width:54px;height:54px;font-size:22px;border-width:4px;">📱</div>
+        <div class="nomaya-timeline-item">
+          <div class="nomaya-bubble">📱</div>
           <div>
-            <div class="nomaya-step-label" style="font-size:11px;">4. BAŞLA</div>
-            <p class="nomaya-step-copy" style="font-size:16px;">
-              Uygulamaya giriş yapar, <strong>takip kodunu girer</strong> ve deneyimin açılır.
+            <div class="nomaya-step-label">4. DENEYİMİNİ AÇ</div>
+            <p class="nomaya-step-copy">
+              Uygulamaya giriş yapar, <strong>takip kodunu girersin</strong> ve sana özel Nomaya deneyimi tek ekranda açılır.
             </p>
           </div>
         </div>
 
-        <div class="nomaya-timeline-item" style="min-height:92px;padding-bottom:0;">
-          <div class="nomaya-bubble" style="width:54px;height:54px;font-size:22px;border-width:4px;">🌍</div>
+        <div class="nomaya-timeline-item">
+          <div class="nomaya-bubble">🌍</div>
           <div>
-            <div class="nomaya-step-label" style="font-size:11px;">5. KEŞFET</div>
-            <p class="nomaya-step-copy" style="font-size:16px;">
-              <strong>Telefonuna bakarak değil, etrafına bakarak</strong> şehri keşfedersin. ✨
+            <div class="nomaya-step-label">5. ŞEHRİ YAŞA</div>
+            <p class="nomaya-step-copy">
+              <strong>Telefonuna gömülmeden</strong>, doğru anda doğru öneriyle şehri daha akıcı ve daha kişisel keşfedersin.
             </p>
           </div>
         </div>

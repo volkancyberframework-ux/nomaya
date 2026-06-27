@@ -391,7 +391,6 @@ def sign_up(request):
 
 def home(request):
     countries = Country.objects.only("id", "name").order_by("name")
-
     total_orders = Order.objects.filter(is_paid=True).count()
 
     live_orders = (
@@ -401,11 +400,87 @@ def home(request):
         .order_by("-created_at")[:12]
     )
 
+    price_per_day = Decimal("500")
+
+    if request.method == "POST":
+        location = (request.POST.get("location") or "").strip()
+        dates = (request.POST.get("dates") or "").strip()
+        travel_style = (request.POST.get("travel_style") or "").strip()
+        notes = (request.POST.get("notes") or "").strip()
+
+        if request.user.is_authenticated:
+            email = (request.user.email or "").strip()
+        else:
+            email = (request.POST.get("email") or "").strip()
+
+        phone = (request.POST.get("phone") or "").strip()
+
+        if not email or not phone:
+            messages.error(request, "Devam etmek için e-posta ve telefon zorunludur.")
+            return render(request, "index.html", {
+                "countries": countries,
+                "total_orders": total_orders,
+                "live_orders": live_orders,
+                "price_per_day": price_per_day,
+                "prefill": request.POST,
+            })
+
+        start, end, days = _custom_days_from_dates(dates)
+
+        total_price = (price_per_day * Decimal(days)).quantize(
+            Decimal("0.01"),
+            rounding=ROUND_HALF_UP
+        )
+
+        settings_obj = (
+            CustomizedTravelSettings.objects
+            .filter(is_active=True)
+            .order_by("-id")
+            .first()
+        )
+
+        stripe_link = settings_obj.stripe_payment_link if settings_obj else ""
+
+        obj = CustomizedTravelRequest.objects.create(
+            email=email,
+            phone=phone,
+            location=location,
+            dates=dates,
+            travel_style=travel_style,
+            notes=notes,
+            days=days,
+            price_per_day=price_per_day,
+            total_price=total_price,
+            stripe_payment_link=stripe_link,
+            ip_address=get_client_ip(request),
+            user_agent=request.META.get("HTTP_USER_AGENT", ""),
+        )
+
+        send_telegram_message(
+            f"<b>🧭 Yeni Kişiye Özel Nomaya Talebi</b>\n\n"
+            f"<b>ID:</b> {tg(obj.id)}\n"
+            f"<b>E-posta:</b> {tg(obj.email)}\n"
+            f"<b>Telefon:</b> {tg(obj.phone)}\n"
+            f"<b>Konum:</b> {tg(obj.location)}\n"
+            f"<b>Tarih:</b> {tg(obj.dates)}\n"
+            f"<b>Gün:</b> {tg(obj.days)}\n"
+            f"<b>Tarz:</b> {tg(obj.travel_style)}\n"
+            f"<b>Tutar:</b> ₺{tg(obj.total_price)}\n"
+            f"<b>Not:</b> {tg(obj.notes)}"
+        )
+
+        return redirect(
+            "order_customized_detail",
+            public_id=obj.public_id
+        )
+
     return render(request, "index.html", {
         "countries": countries,
         "total_orders": total_orders,
         "live_orders": live_orders,
+        "price_per_day": price_per_day,
     })
+
 
 def about(request):
     return render(request, "about.html")
@@ -1714,7 +1789,7 @@ def order_customized(request):
             f"<b>Tarih:</b> {tg(obj.dates)}\n"
             f"<b>Gün:</b> {tg(obj.days)}\n"
             f"<b>Tarz:</b> {tg(obj.travel_style)}\n"
-            f"<b>Tutar:</b> ${tg(obj.total_price)}\n"
+            f"<b>Tutar:</b> ₺{tg(obj.total_price)}\n"
             f"<b>Not:</b> {tg(obj.notes)}"
         )
 
@@ -1780,7 +1855,7 @@ def order_customized_pay(request, public_id):
         line_items=[
             {
                 "price_data": {
-                    "currency": "usd",
+                    "currency": "try",
                     "unit_amount": amount_cents,
                     "product_data": {
                         "name": "Kişiye Özel Nomaya Deneyimi",
@@ -1798,7 +1873,7 @@ def order_customized_pay(request, public_id):
         f"<b>💳 Stripe Checkout Oluşturuldu</b>\n\n"
         f"<b>ID:</b> {tg(obj.id)}\n"
         f"<b>Konum:</b> {tg(obj.location)}\n"
-        f"<b>Tutar:</b> ${tg(obj.total_price)}\n"
+        f"<b>Tutar:</b> ₺{tg(obj.total_price)}\n"
         f"<b>Checkout:</b> {tg(checkout_session.id)}"
     )
 
@@ -1824,7 +1899,7 @@ def stripe_checkout_order(request, public_id):
         line_items=[
             {
                 "price_data": {
-                    "currency": "usd",
+                    "currency": "try",
                     "unit_amount": amount_cents,
                     "product_data": {
                         "name": order.tour.title,
