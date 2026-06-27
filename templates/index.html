@@ -932,42 +932,33 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/tr.js"></script>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const RANGE_SEP = " - ";
-    const form = document.getElementById("customTravelForm");
-    const dateInput = document.querySelector('input[name="dates"]');
+document.addEventListener("DOMContentLoaded", function () {
 
-    if (form) {
-      form.addEventListener("submit", function (event) {
-        const emailInput = form.querySelector('input[name="email"], input[type="email"]');
-        const phoneInput = form.querySelector('input[name="phone"]');
+    const input = document.querySelector("input.flatpickr");
 
-        if (!emailInput || !emailInput.value.trim() || !phoneInput || !phoneInput.value.trim()) {
-          event.preventDefault();
-          alert("Devam etmek için e-posta ve telefon numarası zorunludur.");
-          return false;
-        }
-      });
+    if (!input) return;
+
+    // Daha önce initialize edildiyse kaldır
+    if (input._flatpickr) {
+        input._flatpickr.destroy();
     }
 
-    if (!dateInput) return;
+    // Bugün +2 gün
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    today.setDate(today.getDate() + 2);
 
-    const minDate = new Date();
-    minDate.setHours(0, 0, 0, 0);
-    minDate.setDate(minDate.getDate() + 2);
-
-    flatpickr(dateInput, {
-      mode: "range",
-      dateFormat: "Y-m-d",
-      altInput: true,
-      altFormat: "d F Y",
-      minDate: minDate,
-      disableMobile: true,
-      locale: Object.assign({}, flatpickr.l10ns.tr || {}, {
-        rangeSeparator: RANGE_SEP
-      })
+    flatpickr(input, {
+        mode: "range",
+        locale: "tr",
+        disableMobile: true,
+        minDate: today,
+        dateFormat: "Y-m-d",
+        altInput: true,
+        altFormat: "d F Y",
+        allowInput: false
     });
-  });
-</script>
 
+});
+</script>
 {% endblock %}
