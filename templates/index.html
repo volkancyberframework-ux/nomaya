@@ -949,7 +949,12 @@
         });
       }
 
-      if (!dateInput || !window.flatpickr) return;
+      if (!dateInput) return;
+
+      if (!window.flatpickr) {
+        console.error("Flatpickr yüklenmedi. CDN scriptlerini kontrol et.");
+        return;
+      }
 
       if (flatpickr.l10ns && flatpickr.l10ns.tr) {
         flatpickr.localize(flatpickr.l10ns.tr);
@@ -957,6 +962,10 @@
 
       const minDate = new Date();
       minDate.setDate(minDate.getDate() + 2);
+
+      if (dateInput._flatpickr) {
+        dateInput._flatpickr.destroy();
+      }
 
       flatpickr(dateInput, {
           mode: "range",
