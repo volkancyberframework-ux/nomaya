@@ -1,3 +1,4 @@
+```django
 {% extends "base.html" %}
 {% load static %}
 
@@ -113,15 +114,8 @@
   }
 
   @keyframes nomayaPulse {
-    0% {
-      transform: scale(.7);
-      opacity: 1;
-    }
-
-    100% {
-      transform: scale(2.2);
-      opacity: 0;
-    }
+    0% { transform: scale(.7); opacity: 1; }
+    100% { transform: scale(2.2); opacity: 0; }
   }
 
   .live-emoji {
@@ -156,7 +150,6 @@
     font-size: clamp(26px, 3vw, 42px);
     line-height: 1.12;
     font-weight: 900;
-    letter-spacing: 0;
     text-align: center;
   }
 
@@ -228,13 +221,8 @@
   }
 
   @keyframes nomayaMarquee {
-    from {
-      transform: translateX(0);
-    }
-
-    to {
-      transform: translateX(-50%);
-    }
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
   }
 
   .nomaya-live-card {
@@ -306,7 +294,6 @@
     width: var(--line-width);
     border-radius: 999px;
     background: linear-gradient(180deg, var(--line-color), #60a5fa);
-    box-shadow: 0 0 0 1px rgba(59, 130, 246, .08);
   }
 
   .nomaya-timeline-item:last-child::before {
@@ -527,15 +514,9 @@
     }
 
     .nomaya-timeline-item {
-      grid-template-columns: var(--bubble-size) minmax(0, 1fr);
       gap: 16px;
       min-height: 118px;
       padding-bottom: 26px;
-    }
-
-    .nomaya-timeline-item::before {
-      top: calc(var(--bubble-size) + 5px);
-      bottom: -2px;
     }
 
     .nomaya-bubble {
@@ -620,15 +601,15 @@
               </div>
 
               {% if not request.user.is_authenticated %}
-                <div class="col-md-6">
-                  <label class="nomaya-label">E-posta</label>
-                  <input type="email" name="email" class="form-control nomaya-input" required value="{{ prefill.email|default:'' }}" placeholder="ornek@email.com">
-                </div>
+              <div class="col-md-6">
+                <label class="nomaya-label">E-posta</label>
+                <input type="email" name="email" class="form-control nomaya-input" required value="{{ prefill.email|default:'' }}" placeholder="ornek@email.com">
+              </div>
               {% else %}
-                <div class="col-md-6">
-                  <label class="nomaya-label">E-posta</label>
-                  <input type="email" class="form-control nomaya-input" value="{{ request.user.email }}" readonly required>
-                </div>
+              <div class="col-md-6">
+                <label class="nomaya-label">E-posta</label>
+                <input type="email" class="form-control nomaya-input" value="{{ request.user.email }}" readonly required>
+              </div>
               {% endif %}
 
               <div class="col-md-6">
@@ -667,49 +648,49 @@
       <div class="nomaya-live-marquee">
         <div class="nomaya-live-track">
           {% for order in live_orders %}
-            <div class="nomaya-live-card">
-              <div class="card-emoji">🧭</div>
-              <h3>
-                {% if order.tour %}
-                  {{ order.tour.title }}
-                {% else %}
-                  Nomaya yolculuğu
-                {% endif %}
-              </h3>
-              <p>🇹🇷 Şu an senin gibi birisi keşifte</p>
-              <div class="live-card-bottom">
-                <span>👥 {{ order.pax }} kişi</span>
-                <span>yolda</span>
-              </div>
+          <div class="nomaya-live-card">
+            <div class="card-emoji">🧭</div>
+            <h3>
+              {% if order.tour %}
+                {{ order.tour.title }}
+              {% else %}
+                Nomaya yolculuğu
+              {% endif %}
+            </h3>
+            <p>🇹🇷 Şu an senin gibi birisi keşifte</p>
+            <div class="live-card-bottom">
+              <span>👥 {{ order.pax }} kişi</span>
+              <span>yolda</span>
             </div>
+          </div>
           {% empty %}
-            <div class="nomaya-live-card">
-              <div class="card-emoji">🌍</div>
-              <h3>İlk Nomaya yolculuğu hazırlanıyor</h3>
-              <p>Çok yakında gezginler burada akmaya başlayacak.</p>
-              <div class="live-card-bottom">
-                <span>hazır</span>
-                <span>başlıyor</span>
-              </div>
+          <div class="nomaya-live-card">
+            <div class="card-emoji">🌍</div>
+            <h3>İlk Nomaya yolculuğu hazırlanıyor</h3>
+            <p>Çok yakında gezginler burada akmaya başlayacak.</p>
+            <div class="live-card-bottom">
+              <span>hazır</span>
+              <span>başlıyor</span>
             </div>
+          </div>
           {% endfor %}
 
           {% for order in live_orders %}
-            <div class="nomaya-live-card">
-              <div class="card-emoji">✈️</div>
-              <h3>
-                {% if order.tour %}
-                  {{ order.tour.title }}
-                {% else %}
-                  Nomaya yolculuğu
-                {% endif %}
-              </h3>
-              <p>🌍 Bir gezgin Nomaya ile rotasını yaşıyor</p>
-              <div class="live-card-bottom">
-                <span>👥 {{ order.pax }} kişi</span>
-                <span>aktif</span>
-              </div>
+          <div class="nomaya-live-card">
+            <div class="card-emoji">✈️</div>
+            <h3>
+              {% if order.tour %}
+                {{ order.tour.title }}
+              {% else %}
+                Nomaya yolculuğu
+              {% endif %}
+            </h3>
+            <p>🌍 Bir gezgin Nomaya ile rotasını yaşıyor</p>
+            <div class="live-card-bottom">
+              <span>👥 {{ order.pax }} kişi</span>
+              <span>aktif</span>
             </div>
+          </div>
           {% endfor %}
         </div>
       </div>
@@ -888,3 +869,4 @@
 </script>
 
 {% endblock %}
+```
