@@ -8,7 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # --- Güvenlik / genel ---
 SECRET_KEY = os.environ.get("SECRET_KEY", "")
-DEBUG = True   # local: 1, prod: 0
+DEBUG =  config("DEBUG", default=False) # local: 1, prod: 0
 
 ALLOWED_HOSTS = ["nomaya.co", "www.nomaya.co", "nomaya.onrender.com"]
 
