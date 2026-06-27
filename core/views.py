@@ -391,7 +391,21 @@ def sign_up(request):
 
 def home(request):
     countries = Country.objects.only("id", "name").order_by("name")
-    return render(request, "index.html", {"countries": countries})
+
+    total_orders = Order.objects.filter(is_paid=True).count()
+
+    live_orders = (
+        Order.objects
+        .filter(is_paid=True)
+        .select_related("tour")
+        .order_by("-created_at")[:12]
+    )
+
+    return render(request, "index.html", {
+        "countries": countries,
+        "total_orders": total_orders,
+        "live_orders": live_orders,
+    })
 
 def about(request):
     return render(request, "about.html")

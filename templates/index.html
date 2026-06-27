@@ -4,194 +4,886 @@
 {% block content %}
 
 <style>
-  /* Hareketi sevmeyenler için erişilebilirlik */
-  @media (prefers-reduced-motion: reduce) {
-    .page-fade { transition: none !important; }
+  .nomaya-page {
+    background: #fffaf6;
+    color: #111827;
   }
 
-  :root { --fade-duration: 320ms; }
-
-  .page-fade {
-    opacity: 0;
-    transition: opacity var(--fade-duration) ease;
-  }
-  .page-fade.is-visible { opacity: 1; }
-  .page-fade.is-hidden  { opacity: 0; }
-</style>
-
-
-<!-- **************** MAIN CONTENT START **************** -->
-<main id="page-fader" class="page-fade" data-fader>
-
-	<!-- =======================
-	Main banner START -->
-	<section class="position-relative py-xl-9" style="background-image:url({% static 'assets/images/bg/10.jpg' %}); background-position: center left; background-size: cover;">
-		<div class="container z-index-9">
-			<div class="row">
-				<div class="col-lg-10 m-auto text-center position-relative z-index-9">
-          <form class="form-control-inline my-5" action="{% url 'tour_grid' %}" method="get">
-            <div class="d-flex flex-wrap justify-content-center align-items-center">
-
-              <!-- x civarında -->
-              <span class="d-inline-block">
-                <select class="form-select js-choice" data-search-enabled="true" name="country">
-                  <option value="">Seçiniz</option>
-                  {% for c in countries %}
-                    <option value="{{ c.id }}">{{ c.name }}</option>
-                  {% endfor %}
-                </select>
-              </span>
-              <label class="form-control-inline-text">civarında</label>
-
-              <!-- x–y tarihleri arasında -->
-              <span class="d-inline-block">
-                <input type="text" class="form-control flatpickr" name="dates" placeholder="Başlangıç - Bitiş">
-              </span>
-              <label class="form-control-inline-text">tarihleri arasında</label>
-
-              <!-- kapanış -->
-              <label class="form-control-inline-text">size özel bir seyahat deneyimi yaşayın.</label>
-            </div>
-
-            <!-- Button -->
-            <button class="icon-xxl bg-primary btn-dark-hover rounded-circle btn fs-6 text-white p-0 mt-4" type="submit">
-              Rotamı Bul
-            </button>
-          </form>
-
-				</div>
-			</div> <!-- Row END -->
-		</div>
-	</section>
-	<!-- =======================
-	Main banner END -->
-
-</main>
-<!-- **************** MAIN CONTENT END **************** -->
-
-
-<script>
-(function(){
-  const FADE_MS = 320;
-
-  function showFader() {
-    const fader = document.querySelector('[data-fader]');
-    if (!fader) return;
-    // önce gizli sınıfını temizle, sonra görünür yap
-    fader.classList.remove('is-hidden');
-    // raf ile transition tetikle
-    requestAnimationFrame(() => fader.classList.add('is-visible'));
+  .nomaya-hero {
+    min-height: 92vh;
+    background:
+      linear-gradient(135deg, rgba(10,20,45,.88), rgba(18,75,95,.72)),
+      url("{% static 'assets/images/bg/10.jpg' %}") center/cover no-repeat;
   }
 
-  function wireFormFadeOut() {
-    const fader = document.querySelector('[data-fader]');
-    const form  = document.querySelector('form.form-control-inline');
-    if (!fader || !form) return;
-
-    if (form.dataset.fadeBound === '1') return; // iki kez bağlama
-    form.dataset.fadeBound = '1';
-
-    form.addEventListener('submit', function(e){
-      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (reduce) return;
-
-      e.preventDefault();
-      fader.classList.remove('is-visible');
-      fader.classList.add('is-hidden');
-      setTimeout(() => form.submit(), FADE_MS + 50);
-    });
+  .nomaya-card {
+    background: rgba(255,255,255,.96);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,.35);
+    border-radius: 26px;
+    box-shadow: 0 30px 90px rgba(0,0,0,.25);
+    color: #111827;
   }
 
-  // İlk yükleme
-  document.addEventListener('DOMContentLoaded', () => {
-    showFader();
-    wireFormFadeOut();
-  });
+  .nomaya-card h2,
+  .nomaya-card .fw-bold {
+    color: #111827;
+  }
 
-  // Geri/ileri gezinmede (BFCache) de tetikle
-  window.addEventListener('pageshow', (ev) => {
-    // BFCache’den gelinmiş olsun olmasın görünürlüğü düzelt
-    showFader();
-    wireFormFadeOut();
-  });
-})();
-</script>
+  .nomaya-card .text-muted {
+    color: #6b7280 !important;
+  }
 
-<script>
-(function () {
-  const RANGE_SEP = ' - '; // URL’de canonical ayraç; görünüm altFormat ayrı
+  .nomaya-input {
+    height: 52px;
+    border-radius: 15px;
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    padding: 0 16px;
+    font-size: 14px;
+    color: #111827;
+  }
 
-  function initIndexRange() {
-    if (!window.flatpickr) return;
+  .nomaya-input::placeholder {
+    color: #9ca3af;
+  }
 
-    // inputu bul
-    const el = document.querySelector('input.flatpickr[name="dates"]');
-    if (!el) return;
+  .nomaya-input:focus {
+    background: #fff;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 .22rem rgba(37,99,235,.12);
+    color: #111827;
+  }
 
-    // Önce olası eski instance'ı yok et
-    if (el._flatpickr) el._flatpickr.destroy();
+  .nomaya-label {
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 7px;
+    font-size: 14px;
+  }
 
-    // Flatpickr yerelleştirme
-    if (flatpickr.l10ns && flatpickr.l10ns.tr) flatpickr.localize(flatpickr.l10ns.tr);
+  .nomaya-btn {
+    border: 0;
+    border-radius: 999px;
+    padding: 14px 28px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #2563eb, #06b6d4);
+    color: #fff;
+    box-shadow: 0 18px 40px rgba(37,99,235,.32);
+    transition: .2s ease;
+  }
 
-    // Bugün + 2 gün (flatpickr Date helper'ı: fp_incr)
-    const minDate = new Date().fp_incr(2); // bugün dahil değil → +2
+  .nomaya-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 22px 48px rgba(37,99,235,.42);
+    color: #fff;
+  }
 
-    // URL'den gelen dates varsa normalize et
-    const params = new URLSearchParams(window.location.search);
-    const raw = (params.get('dates') || '').trim();
-    const isoMatches = raw.match(/\d{4}-\d{2}-\d{2}/g) || [];
-    const initial = isoMatches.length >= 2 ? [isoMatches[0], isoMatches[1]] : [];
+  .hint-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,.16);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.25);
+    padding: 9px 15px;
+    border-radius: 999px;
+    font-size: 13px;
+  }
 
-    // Kurulum
-    const fp = flatpickr(el, {
-      locale: Object.assign({}, flatpickr.l10ns?.tr || {}, { rangeSeparator: RANGE_SEP }),
-      mode: 'range',
-      dateFormat: 'Y-m-d',   // URL’e gidecek ham
-      altInput: true,
-      altFormat: 'd F Y',    // Kullanıcıya görünen
-      allowInput: true,
-      minDate,               // 🔒 en erken 2 gün sonrası
-      // Ek güvenlik: minDate’ten küçük seçimi engelle/temizle
-      onClose: function (selectedDates, dateStr, instance) {
-        if (!selectedDates || selectedDates.length === 0) return;
-        const tooEarly = selectedDates.some(d => d < minDate);
-        if (tooEarly) {
-          // minDate'e ittir
-          const bumped = selectedDates.map((d,i) => {
-            const base = new Date(minDate);
-            if (i === 1 && selectedDates.length === 2 && selectedDates[1] < minDate) {
-              // bitiş de minDate’ten küçükse en az minDate yap
-              return base;
-            }
-            return d < minDate ? base : d;
-          });
-          instance.setDate(bumped, true, 'Y-m-d');
-        }
-      },
-    });
+  .nomaya-section {
+    padding: 46px 0;
+    background: #fffaf6;
+  }
 
-    // Başlangıç değerini sadece minDate şartına uyuyorsa ver
-    if (initial.length === 2) {
-      const s = new Date(initial[0]);
-      const e = new Date(initial[1]);
-      if (s >= minDate && e >= minDate && e >= s) {
-        fp.setDate(initial, true, 'Y-m-d');
-      } else {
-        // Geçersizse temizle
-        el.value = '';
-        fp.clear();
-      }
+  .nomaya-section-soft {
+    background: #fff7f1;
+  }
+
+  .nomaya-section-title {
+    max-width: 620px;
+    margin: 0 auto;
+    color: #2d2d3b;
+    font-size: clamp(26px, 3vw, 40px);
+    line-height: 1.12;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    text-align: center;
+  }
+
+  .nomaya-section-subtitle {
+    max-width: 620px;
+    margin: 12px auto 0;
+    color: #6b7280;
+    font-size: 15px;
+    line-height: 1.5;
+    text-align: center;
+  }
+
+  .nomaya-timeline {
+    max-width: 680px;
+    margin: 34px auto 0;
+  }
+
+  .nomaya-timeline-item {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 18px;
+    position: relative;
+  }
+
+  .nomaya-timeline-item + .nomaya-timeline-item {
+    margin-top: 18px;
+  }
+
+  .nomaya-timeline-item::before {
+    content: "";
+    position: absolute;
+    left: 23px;
+    top: 47px;
+    bottom: -24px;
+    width: 2px;
+    background: #ffd9e3;
+    border-radius: 999px;
+  }
+
+  .nomaya-timeline-item:last-child::before {
+    display: none;
+  }
+
+  .nomaya-bubble {
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    border: 2px solid #ffd1dc;
+    border-radius: 999px;
+    background: rgba(255,255,255,.82);
+    font-size: 20px;
+  }
+
+  .nomaya-step-label {
+    color: #ff5274;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .nomaya-step-copy {
+    margin: 0;
+    color: #5b5f6b;
+    font-size: 16px;
+    line-height: 1.45;
+    font-weight: 500;
+  }
+
+  .nomaya-step-copy strong {
+    color: #2d2d3b;
+    font-weight: 900;
+  }
+
+  .nomaya-founder-card {
+    max-width: 760px;
+    margin: 30px auto 0;
+    text-align: center;
+  }
+
+  .founder-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff0f4;
+    color: #ff5274;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 13px;
+    margin-bottom: 18px;
+  }
+
+  .founder-text {
+    color: #5b5f6b;
+    font-size: 16px;
+    line-height: 1.65;
+  }
+
+  .founder-text strong {
+    color: #2d2d3b;
+    font-weight: 900;
+  }
+
+  .nomaya-final-box {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 30px;
+    border-radius: 24px;
+    background: #ffffff;
+    border: 1px solid #f0ebe7;
+    box-shadow: 0 20px 55px rgba(45,45,59,.08);
+    text-align: center;
+  }
+
+  [data-bs-theme="dark"] .nomaya-page,
+  [data-bs-theme="dark"] .nomaya-section {
+    background: #0f172a !important;
+    color: #f9fafb !important;
+  }
+
+  [data-bs-theme="dark"] .nomaya-section-soft {
+    background: #111827 !important;
+  }
+
+  [data-bs-theme="dark"] .nomaya-section-title,
+  [data-bs-theme="dark"] .nomaya-step-copy strong,
+  [data-bs-theme="dark"] .founder-text strong {
+    color: #f9fafb !important;
+  }
+
+  [data-bs-theme="dark"] .nomaya-section-subtitle,
+  [data-bs-theme="dark"] .nomaya-step-copy,
+  [data-bs-theme="dark"] .founder-text {
+    color: #cbd5e1 !important;
+  }
+
+  [data-bs-theme="dark"] .nomaya-bubble {
+    background: #1f2937 !important;
+    border-color: #ff8aa1 !important;
+  }
+
+  [data-bs-theme="dark"] .nomaya-timeline-item::before {
+    background: #ff8aa1 !important;
+  }
+
+  [data-bs-theme="dark"] .nomaya-final-box,
+  [data-bs-theme="dark"] .nomaya-card {
+    background: #111827 !important;
+    border-color: #374151 !important;
+    color: #f9fafb !important;
+  }
+
+  [data-bs-theme="dark"] .nomaya-card h2,
+  [data-bs-theme="dark"] .nomaya-card .fw-bold,
+  [data-bs-theme="dark"] .nomaya-label {
+    color: #f9fafb !important;
+  }
+
+  [data-bs-theme="dark"] .nomaya-card .text-muted {
+    color: #9ca3af !important;
+  }
+
+  [data-bs-theme="dark"] .nomaya-input {
+    background: #1f2937 !important;
+    border-color: #374151 !important;
+    color: #ffffff !important;
+  }
+
+  [data-bs-theme="dark"] .nomaya-input::placeholder {
+    color: #9ca3af !important;
+  }
+
+  @media (max-width: 768px) {
+    .nomaya-hero {
+      min-height: auto;
+      padding: 46px 0;
+    }
+
+    .nomaya-hero h1 {
+      font-size: 32px;
+      line-height: 1.12;
+    }
+
+    .nomaya-hero .lead {
+      font-size: 16px;
+    }
+
+    .nomaya-section {
+      padding: 34px 0;
+    }
+
+    .nomaya-section-title {
+      max-width: 340px;
+      font-size: 25px;
+    }
+
+    .nomaya-section-subtitle {
+      max-width: 330px;
+      font-size: 14px;
+    }
+
+    .nomaya-timeline {
+      max-width: 100%;
+      margin-top: 26px;
+    }
+
+    .nomaya-timeline-item {
+      grid-template-columns: 42px 1fr;
+      gap: 13px;
+    }
+
+    .nomaya-timeline-item + .nomaya-timeline-item {
+      margin-top: 14px;
+    }
+
+    .nomaya-bubble {
+      width: 42px;
+      height: 42px;
+      font-size: 17px;
+    }
+
+    .nomaya-timeline-item::before {
+      left: 20px;
+      top: 42px;
+      bottom: -20px;
+    }
+
+    .nomaya-step-label {
+      font-size: 10.5px;
+    }
+
+    .nomaya-step-copy {
+      font-size: 14px;
+      line-height: 1.42;
+    }
+
+    .nomaya-final-box {
+      padding: 24px 18px;
+    }
+
+    .founder-text {
+      font-size: 14.5px;
     }
   }
 
-  // İlk yükleme + BFCache dönüşleri
-  document.addEventListener('DOMContentLoaded', initIndexRange);
-  window.addEventListener('pageshow', initIndexRange);
+  .live-users-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:12px;
+      padding:12px 22px;
+      border-radius:999px;
+      background:#fff;
+      border:1px solid #e8e8e8;
+      box-shadow:0 8px 25px rgba(0,0,0,.05);
+      font-size:16px;
+      font-weight:500;
+  }
+
+  .live-users-pill strong{
+      font-size:18px;
+      font-weight:800;
+      color:#222;
+  }
+
+  .live-dot{
+      width:16px;
+      height:16px;
+      border-radius:50%;
+      background:#22c55e;
+      position:relative;
+      flex-shrink:0;
+  }
+
+  .live-dot::before{
+      content:"";
+      position:absolute;
+      inset:-7px;
+      border-radius:50%;
+      background:rgba(34,197,94,.25);
+      animation:pulse 1.8s infinite;
+  }
+
+  @keyframes pulse{
+      0%{
+          transform:scale(.8);
+          opacity:1;
+      }
+      100%{
+          transform:scale(2);
+          opacity:0;
+      }
+  }
+
+  .nomaya-live-section{
+    padding:70px 0;
+    background:#fffaf4;
+    overflow:hidden;
+  }
+
+  .nomaya-live-head{
+    text-align:center;
+    max-width:760px;
+    margin:0 auto 38px;
+  }
+
+  .live-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 18px;
+    border-radius:999px;
+    background:#fff;
+    border:1px solid #eee;
+    box-shadow:0 10px 30px rgba(0,0,0,.05);
+    font-weight:700;
+    color:#30303d;
+    margin-bottom:18px;
+  }
+
+  .live-dot{
+    width:14px;
+    height:14px;
+    border-radius:50%;
+    background:#22c55e;
+    position:relative;
+  }
+
+  .live-dot:before{
+    content:"";
+    position:absolute;
+    inset:-7px;
+    border-radius:50%;
+    background:rgba(34,197,94,.25);
+    animation:livePulse 1.6s infinite;
+  }
+
+  @keyframes livePulse{
+    0%{transform:scale(.8);opacity:1;}
+    100%{transform:scale(2);opacity:0;}
+  }
+
+  .nomaya-live-head h2{
+    font-size:42px;
+    line-height:1.12;
+    font-weight:900;
+    color:#2f3040;
+    margin-bottom:14px;
+  }
+
+  .nomaya-live-head p{
+    font-size:20px;
+    color:#666;
+    margin:0;
+  }
+
+  .nomaya-live-marquee{
+    width:100%;
+    overflow:hidden;
+  }
+
+  .nomaya-live-track{
+    display:flex;
+    gap:24px;
+    width:max-content;
+    animation:nomayaMarquee 35s linear infinite;
+  }
+
+  .nomaya-live-track:hover{
+    animation-play-state:paused;
+  }
+
+  @keyframes nomayaMarquee{
+    from{transform:translateX(0);}
+    to{transform:translateX(-50%);}
+  }
+
+  .nomaya-live-card{
+    width:320px;
+    min-height:210px;
+    background:#fff;
+    border:1px solid #eee;
+    border-radius:26px;
+    padding:26px;
+    box-shadow:0 14px 35px rgba(0,0,0,.04);
+    flex-shrink:0;
+  }
+
+  .card-emoji{
+    font-size:38px;
+    margin-bottom:22px;
+  }
+
+  .nomaya-live-card h3{
+    font-size:22px;
+    line-height:1.25;
+    font-weight:900;
+    color:#30303d;
+    margin-bottom:12px;
+  }
+
+  .nomaya-live-card p{
+    font-size:16px;
+    color:#999;
+    margin-bottom:24px;
+  }
+
+  .live-card-bottom{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    color:#ff4f72;
+    font-weight:800;
+  }
+
+  @media(max-width:768px){
+    .nomaya-live-section{
+      padding:44px 0;
+    }
+
+    .nomaya-live-head h2{
+      font-size:28px;
+    }
+
+    .nomaya-live-head p{
+      font-size:16px;
+    }
+
+    .nomaya-live-card{
+      width:270px;
+      min-height:190px;
+      padding:22px;
+    }
+
+    .nomaya-live-card h3{
+      font-size:19px;
+    }
+  }
+
+</style>
+
+<main class="nomaya-page page-fade is-visible">
+
+  <section class="nomaya-hero d-flex align-items-center py-5 py-xl-8">
+    <div class="container">
+      <div class="row align-items-center g-4">
+
+        <div class="col-lg-5 text-white">
+          <div class="hint-pill mb-4 live-users-pill">
+              <span class="live-dot"></span>
+              <strong>{{ total_orders }}</strong> kişi şu ana kadar Nomaya ile keşfetmeye başladı 🌍
+          </div>
+
+          <h1 class="display-4 fw-bold mb-4">
+            Seyahatini yaz, Nomaya sana özel deneyimi hazırlasın.
+          </h1>
+
+          <p class="lead text-white-50 mb-4">
+            Konum, tarih ve seyahat tarzını seç. Nomaya sana özel rota, öneriler ve kişiselleştirilmiş içerikler oluştursun.
+          </p>
+
+          <div class="d-flex flex-column gap-2 text-white-50">
+            <div>✓ Sana özel rota planı</div>
+            <div>✓ Kişiselleştirilmiş deneyim</div>
+            <div>✓ WhatsApp asistan desteği</div>
+          </div>
+        </div>
+
+        <div class="col-lg-7">
+          <form method="post" id="customTravelForm" class="nomaya-card p-4 p-md-5">
+            {% csrf_token %}
+
+            <div class="mb-4">
+              <h2 class="fw-bold mb-1">Nomaya Deneyimini Başlat</h2>
+              <p class="text-muted mb-0">Bilgilerini doldur, sonraki aşamada ödeme ve rota hazırlığına geç.</p>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="nomaya-label">Nereye gidiyorsun?</label>
+                <input type="text" name="location" class="form-control nomaya-input"
+                       placeholder="Örn: Bangkok, Kapadokya, Roma" required>
+              </div>
+
+              <div class="col-md-6">
+                <label class="nomaya-label">Tarih aralığı</label>
+                <input type="text" name="dates" class="form-control nomaya-input flatpickr"
+                       placeholder="Başlangıç - Bitiş" required>
+              </div>
+
+              <div class="col-12">
+                <label class="nomaya-label">Seyahat tarzın</label>
+                <input type="text" name="travel_style" class="form-control nomaya-input"
+                       placeholder="Romantik, gurme, macera, aile, kültür..." required>
+              </div>
+
+              {% if not request.user.is_authenticated %}
+                <div class="col-md-6">
+                  <label class="nomaya-label">E-posta</label>
+                  <input type="email" name="email" class="form-control nomaya-input"
+                         required value="{{ prefill.email|default:'' }}"
+                         placeholder="ornek@email.com">
+                </div>
+              {% else %}
+                <div class="col-md-6">
+                  <label class="nomaya-label">E-posta</label>
+                  <input type="email" class="form-control nomaya-input"
+                         value="{{ request.user.email }}" readonly required>
+                </div>
+              {% endif %}
+
+              <div class="col-md-6">
+                <label class="nomaya-label">Telefon</label>
+                <input type="tel" name="phone" class="form-control nomaya-input"
+                       required value="{{ prefill.phone|default:'' }}"
+                       placeholder="+90 5xx xxx xx xx">
+              </div>
+            </div>
+
+            <div class="mt-4 d-grid">
+              <button class="btn nomaya-btn btn-lg" type="submit">
+                Nomaya Deneyimimi Hazırla →
+              </button>
+            </div>
+
+            <p class="text-muted small text-center mt-3 mb-0">
+              E-posta ve telefon bilgisi olmadan sonraki aşamaya geçilemez.
+            </p>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="nomaya-live-section">
+    <div class="container">
+
+      <div class="nomaya-live-head">
+        <div class="live-badge">
+          <span class="live-dot"></span>
+          Canlı Nomaya hareketi
+        </div>
+
+        <h2>Şu an dünyada bir yerlerde Nomaya ile gezen gezginler var 🌍</h2>
+        <p>Türkiye’den çıkmış gezginler, kendi rotalarında Nomaya deneyimini yaşıyor ✈️🔥</p>
+      </div>
+
+      <div class="nomaya-live-marquee">
+        <div class="nomaya-live-track">
+
+          {% for order in live_orders %}
+          <div class="nomaya-live-card">
+            <div class="card-emoji">🧭</div>
+
+            <h3>
+              {% if order.tour %}
+                {{ order.tour.title }}
+              {% else %}
+                Nomaya yolculuğu
+              {% endif %}
+            </h3>
+
+            <p>
+              🇹🇷 Türkiye’den çıkan bir gezgin şimdi keşifte
+            </p>
+
+            <div class="live-card-bottom">
+              <span>👥 {{ order.pax }} kişi</span>
+              <span>🔥 yolda</span>
+            </div>
+          </div>
+          {% empty %}
+          <div class="nomaya-live-card">
+            <div class="card-emoji">🌍</div>
+            <h3>İlk Nomaya yolculuğu hazırlanıyor</h3>
+            <p>Çok yakında gezginler burada akmaya başlayacak.</p>
+            <div class="live-card-bottom">
+              <span>✨ hazır</span>
+              <span>🚀 başlıyor</span>
+            </div>
+          </div>
+          {% endfor %}
+
+          {% for order in live_orders %}
+          <div class="nomaya-live-card">
+            <div class="card-emoji">✈️</div>
+
+            <h3>
+              {% if order.tour %}
+                {{ order.tour.title }}
+              {% else %}
+                Nomaya yolculuğu
+              {% endif %}
+            </h3>
+
+            <p>
+              🌍 Bir gezgin Nomaya ile rotasını yaşıyor
+            </p>
+
+            <div class="live-card-bottom">
+              <span>👥 {{ order.pax }} kişi</span>
+              <span>💚 aktif</span>
+            </div>
+          </div>
+          {% endfor %}
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="nomaya-section">
+    <div class="container">
+      <h2 class="nomaya-section-title">satın aldıktan sonra günün böyle ilerler</h2>
+      <p class="nomaya-section-subtitle">
+        Kısa formu doldurursun, biz deneyimi hazırlarız. Seyahat günü uygulama ve WhatsApp asistan yanında olur.
+      </p>
+
+      <div class="nomaya-timeline">
+        <div class="nomaya-timeline-item">
+          <div class="nomaya-bubble">🧭</div>
+          <div>
+            <div class="nomaya-step-label">önce</div>
+            <p class="nomaya-step-copy">
+              <strong>istediğin tarzda deneyimi seçersin</strong> ve kısa formda beklentini anlatırsın.
+            </p>
+          </div>
+        </div>
+
+        <div class="nomaya-timeline-item">
+          <div class="nomaya-bubble">✍️</div>
+          <div>
+            <div class="nomaya-step-label">hazırlık</div>
+            <p class="nomaya-step-copy">
+              <strong>biz senin için tasarlarız:</strong> rota, duraklar, zamanlama ve küçük sürprizler hazır olur.
+            </p>
+          </div>
+        </div>
+
+        <div class="nomaya-timeline-item">
+          <div class="nomaya-bubble">💬</div>
+          <div>
+            <div class="nomaya-step-label">seyahat öncesi</div>
+            <p class="nomaya-step-copy">
+              <strong>sana özel WhatsApp asistan atanır.</strong> Seyahat boyunca her şeyi sorabilir, acil anlarda bile destek alabilirsin.
+            </p>
+          </div>
+        </div>
+
+        <div class="nomaya-timeline-item">
+          <div class="nomaya-bubble">🔐</div>
+          <div>
+            <div class="nomaya-step-label">seyahat günü</div>
+            <p class="nomaya-step-copy">
+              uygulamayı açar, sana verilen <strong>takip kodunu girersin</strong> ve deneyim başlar.
+            </p>
+          </div>
+        </div>
+
+        <div class="nomaya-timeline-item">
+          <div class="nomaya-bubble">🚶</div>
+          <div>
+            <div class="nomaya-step-label">yolda</div>
+            <p class="nomaya-step-copy">
+              <strong>seyahat edersin;</strong> uygulama seni doğru anda doğru durağa ve fikre götürür.
+            </p>
+          </div>
+        </div>
+
+        <div class="nomaya-timeline-item">
+          <div class="nomaya-bubble">💎</div>
+          <div>
+            <div class="nomaya-step-label">sonra</div>
+            <p class="nomaya-step-copy">
+              <strong>mil kazanırsın</strong> ve bu millerle yeni Nomaya deneyimlerini alırsın.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="nomaya-section nomaya-section-soft">
+    <div class="container">
+      <h2 class="nomaya-section-title">ben kimim, neden Nomaya'yı yaptım?</h2>
+
+      <div class="nomaya-founder-card">
+        <div class="founder-pill">❤️ Volkan'dan kısa not</div>
+
+        <div class="founder-text">
+          <p>
+            Ben <strong>Volkan</strong>. Türkiye'den çıkan gençlerin dünyaya açılırken tereddüt ettiğini gördüm.
+            Çünkü yurtdışına çıkmak hâlâ birçok kişi için pahalı, belirsiz ve yalnız hissettiren bir şey.
+          </p>
+
+          <p>
+            Klasik turlar çoğu zaman <strong>pahalı ve genel</strong>. Herkese aynı liste, aynı duraklar,
+            aynı deneyim. Oysa bir genç ülkeden çıkarken yanında gerçekten biri varmış gibi hissetmeli.
+          </p>
+
+          <p>
+            Bu yüzden Nomaya'yı kurdum. İstedim ki o genç ülkeden çıksın, maliyet etkin şekilde keşfetsin,
+            uygulama onu doğru zamanda doğru yere yönlendirsin ve bir ihtiyacı olursa
+            <strong>anında gerçek bir insana ulaşabilsin.</strong>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="nomaya-section">
+    <div class="container">
+      <div class="nomaya-final-box">
+        <div class="founder-pill">🚀 rota değil, yanında biri var hissi</div>
+
+        <h2 class="nomaya-section-title">
+          Nomaya ile gez, mil kazan, tekrar yola çık
+        </h2>
+
+        <p class="nomaya-section-subtitle">
+          Şehrini, tarihini ve tarzını yaz. Biz sana kişisel seyahat akışını hazırlayalım.
+        </p>
+
+        <a href="#" onclick="document.getElementById('customTravelForm').scrollIntoView({behavior:'smooth'}); return false;"
+           class="btn nomaya-btn btn-lg mt-4">
+          Deneyimimi Hazırla →
+        </a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+(function () {
+  const RANGE_SEP = ' - ';
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('customTravelForm');
+    const el = document.querySelector('input.flatpickr[name="dates"]');
+
+    if (form) {
+      form.addEventListener('submit', function (e) {
+        const emailInput = form.querySelector('input[name="email"], input[type="email"]');
+        const phoneInput = form.querySelector('input[name="phone"]');
+
+        if (!emailInput || !emailInput.value.trim() || !phoneInput || !phoneInput.value.trim()) {
+          e.preventDefault();
+          alert('Devam etmek için e-posta ve telefon numarası zorunludur.');
+          return false;
+        }
+      });
+    }
+
+    if (!el || !window.flatpickr) return;
+
+    if (flatpickr.l10ns && flatpickr.l10ns.tr) {
+      flatpickr.localize(flatpickr.l10ns.tr);
+    }
+
+    flatpickr(el, {
+      mode: 'range',
+      dateFormat: 'Y-m-d',
+      altInput: true,
+      altFormat: 'd F Y',
+      locale: Object.assign({}, flatpickr.l10ns?.tr || {}, {
+        rangeSeparator: RANGE_SEP
+      }),
+      minDate: new Date().fp_incr(2)
+    });
+  });
 })();
 </script>
-
-
-
 
 {% endblock %}

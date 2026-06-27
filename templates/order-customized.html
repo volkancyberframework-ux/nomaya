@@ -355,6 +355,55 @@
       font-size: 14.5px;
     }
   }
+
+  .live-users-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:12px;
+      padding:12px 22px;
+      border-radius:999px;
+      background:#fff;
+      border:1px solid #e8e8e8;
+      box-shadow:0 8px 25px rgba(0,0,0,.05);
+      font-size:16px;
+      font-weight:500;
+  }
+
+  .live-users-pill strong{
+      font-size:18px;
+      font-weight:800;
+      color:#222;
+  }
+
+  .live-dot{
+      width:16px;
+      height:16px;
+      border-radius:50%;
+      background:#22c55e;
+      position:relative;
+      flex-shrink:0;
+  }
+
+  .live-dot::before{
+      content:"";
+      position:absolute;
+      inset:-7px;
+      border-radius:50%;
+      background:rgba(34,197,94,.25);
+      animation:pulse 1.8s infinite;
+  }
+
+  @keyframes pulse{
+      0%{
+          transform:scale(.8);
+          opacity:1;
+      }
+      100%{
+          transform:scale(2);
+          opacity:0;
+      }
+  }
+
 </style>
 
 <main class="nomaya-page page-fade is-visible">
@@ -364,7 +413,10 @@
       <div class="row align-items-center g-4">
 
         <div class="col-lg-5 text-white">
-          <div class="hint-pill mb-4">✨ Kişiye özel rota + sesli Nomaya deneyimi</div>
+          <div class="hint-pill mb-4 live-users-pill">
+              <span class="live-dot"></span>
+              <strong>{{ total_orders }}</strong> kişi şu ana kadar Nomaya ile keşfetmeye başladı 🌍
+          </div>
 
           <h1 class="display-4 fw-bold mb-4">
             Seyahatini yaz, Nomaya sana özel deneyimi hazırlasın.
