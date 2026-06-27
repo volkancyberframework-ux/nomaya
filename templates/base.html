@@ -441,30 +441,31 @@
 
 {% block content %}{% endblock %}
 <!-- =======================
-Footer START -->
+<!-- Footer START -->
 <footer class="nomaya-footer bg-dark pt-5">
   <div class="container">
 
-    <!-- Trust strip START -->
     <div class="row g-3 mb-5">
       <div class="col-6 col-lg-3">
         <div class="nomaya-trust-card h-100">
           <div class="nomaya-trust-icon">🔒</div>
           <div>
-            <div class="fw-bold text-white">SSL Güvenliği</div>
-            <div class="small text-body-secondary">Şifreli ve güvenli bağlantı</div>
+            <div class="fw-bold text-white">Güvenli Ödeme</div>
+            <div class="small text-body-secondary">Kart bilgileriniz korunur</div>
           </div>
         </div>
       </div>
+
       <div class="col-6 col-lg-3">
         <div class="nomaya-trust-card h-100">
           <div class="nomaya-trust-icon">💳</div>
           <div>
-            <div class="fw-bold text-white">Stripe Ödeme</div>
+            <div class="fw-bold text-white">Kartla Ödeme</div>
             <div class="small text-body-secondary">Visa, Mastercard, Amex</div>
           </div>
         </div>
       </div>
+
       <div class="col-6 col-lg-3">
         <div class="nomaya-trust-card h-100">
           <div class="nomaya-trust-icon">💬</div>
@@ -474,71 +475,40 @@ Footer START -->
           </div>
         </div>
       </div>
+
       <div class="col-6 col-lg-3">
         <div class="nomaya-trust-card h-100">
           <div class="nomaya-trust-icon">🎧</div>
           <div>
             <div class="fw-bold text-white">Sesli Rehber</div>
-            <div class="small text-body-secondary">Sana özel yol arkadaşın</div>
+            <div class="small text-body-secondary">Sana özel yol arkadaşı</div>
           </div>
         </div>
       </div>
     </div>
-    <!-- Trust strip END -->
 
     <div class="row g-4">
-      <!-- Brand -->
       <div class="col-lg-4">
         <a href="{% url 'home' %}" class="d-inline-flex align-items-center text-decoration-none">
-          <img src="{% static 'assets/images/logo-icon.svg' %}"
-               class="logo-icon me-2"
-               alt=""
-               aria-hidden="true"
-               width="70" />
-          <img src="{% static 'assets/images/logo-light.svg' %}"
-               class="logo-wordmark"
-               alt="Nomaya logo"
-               width="190" />
+          <img src="{% static 'assets/images/logo-icon.svg' %}" class="logo-icon me-2" alt="" aria-hidden="true" width="70">
+          <img src="{% static 'assets/images/logo-light.svg' %}" class="logo-wordmark" alt="Nomaya logo" width="190">
         </a>
 
         <p class="my-3 text-body-secondary">
-          Nomaya; kişiye özel rotalar, sesli yönlendirmeler, WhatsApp asistan ve güvenli ödeme altyapısıyla seyahati daha sade, daha erişilebilir ve daha insani hale getirir.
+          Nomaya; kişiye özel rotalar, sesli yönlendirmeler ve WhatsApp asistan desteğiyle seyahati daha sade, daha erişilebilir ve daha insani hale getirir.
         </p>
 
         <div class="d-flex flex-wrap gap-2 mb-4">
           <a href="{% url 'order_customized' %}" class="btn btn-primary rounded-pill px-4">
             ✨ Kendi Seyahatini Oluştur
           </a>
+
           <a href="https://wa.me/32476073171?text={{ 'Merhaba Nomaya! Bana özel seyahat planı oluşturmak istiyorum.'|urlencode }}"
              target="_blank" rel="noopener" class="btn btn-outline-light rounded-pill px-4">
             WhatsApp Destek
           </a>
         </div>
 
-        <!-- App badges START -->
-        <div class="mb-4">
-          <div class="small text-body-secondary mb-2">Nomaya uygulamasını indir</div>
-          <div class="d-flex flex-wrap gap-2 align-items-center">
-            <a href="#" class="d-inline-flex" aria-label="App Store'dan indir">
-              <img src="{% static 'assets/images/element/app-store.svg' %}"
-                   alt="App Store'dan indir"
-                   style="height:44px; width:auto; display:block;">
-            </a>
-            <a href="#" class="d-inline-flex" aria-label="Google Play'den indir">
-              <img src="{% static 'assets/images/element/google-play.svg' %}"
-                   alt="Google Play'den indir"
-                   style="height:44px; width:auto; display:block;">
-            </a>
-          </div>
-        </div>
-        <!-- App badges END -->
-
-        <p class="mb-2">
-          <a href="https://wa.me/32476073171?text={{ 'Merhaba Nomaya! Seyahat planım için destek almak istiyorum.'|urlencode }}"
-             target="_blank" rel="noopener" class="text-body-secondary text-primary-hover">
-            <i class="bi bi-whatsapp me-2"></i>WhatsApp Destek
-          </a>
-        </p>
         <p class="mb-0">
           <a href="mailto:destek@nomaya.co" class="text-body-secondary text-primary-hover">
             <i class="bi bi-envelope me-2"></i>destek@nomaya.co
@@ -546,7 +516,6 @@ Footer START -->
         </p>
       </div>
 
-      <!-- Links -->
       <div class="col-lg-8 ms-auto">
         <div class="row g-4">
           <div class="col-6 col-md-3">
@@ -576,7 +545,6 @@ Footer START -->
               <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'order_customized' %}">🍜 Yerel lezzetler</a></li>
               <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'order_customized' %}">📍 Gizli noktalar</a></li>
               <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'order_customized' %}">🌴 Hafta sonu kaçamağı</a></li>
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'order_customized' %}">🧭 İlk kez gidenler</a></li>
             </ul>
           </div>
 
@@ -594,63 +562,38 @@ Footer START -->
       </div>
     </div>
 
-    <hr class="my-5">
+    <hr class="my-4">
 
-    <!-- Payment, App & Social -->
-    <div class="row g-4 justify-content-between align-items-start">
-      <div class="col-md-7 col-lg-6">
-        <h5 class="text-white mb-2">🔒 Güvenli Ödeme</h5>
-        <p class="text-body-secondary mb-3">
-          Stripe altyapısı ile Visa, Mastercard ve American Express kartlarınızla güvenle ödeme yapabilirsiniz. Kart bilgileriniz Nomaya sunucularında tutulmaz.
-        </p>
-
-        <ul class="list-inline mb-3" aria-label="Desteklenen ödeme yöntemleri">
+    <div class="row g-4 align-items-center">
+      <div class="col-lg-4">
+        <div class="small text-body-secondary mb-2">Güvenli ödeme yöntemleri</div>
+        <ul class="list-inline mb-0">
           <li class="list-inline-item me-2">
             <img src="{% static 'assets/images/element/visa.svg' %}" class="h-30px" alt="Visa">
           </li>
           <li class="list-inline-item me-2">
             <img src="{% static 'assets/images/element/mastercard.svg' %}" class="h-30px" alt="Mastercard">
           </li>
-          <li class="list-inline-item me-2">
+          <li class="list-inline-item">
             <img src="{% static 'assets/images/element/expresscard.svg' %}" class="h-30px" alt="American Express">
           </li>
-          <li class="list-inline-item me-2">
-            <img src="{% static 'assets/images/element/paypal.svg' %}" class="h-30px opacity-50" alt="PayPal">
-          </li>
         </ul>
+      </div>
 
-        <div class="row g-2 small">
-          <div class="col-sm-6"><span class="nomaya-check">✓</span> Stripe Secure Checkout</div>
-          <div class="col-sm-6"><span class="nomaya-check">✓</span> SSL şifreli işlem</div>
-          <div class="col-sm-6"><span class="nomaya-check">✓</span> Kredi kartı aktif</div>
-          <div class="col-sm-6"><span class="nomaya-check">✓</span> Uluslararası kart desteği</div>
+      <div class="col-lg-4 text-lg-center">
+        <div class="small text-body-secondary mb-2">Nomaya uygulamasını indir</div>
+        <div class="d-flex flex-wrap gap-2 justify-content-lg-center">
+          <a href="#" class="d-inline-flex" aria-label="App Store'dan indir">
+            <img src="{% static 'assets/images/element/app-store.svg' %}" alt="App Store'dan indir" style="height:42px; width:auto; display:block;">
+          </a>
+          <a href="#" class="d-inline-flex" aria-label="Google Play'den indir">
+            <img src="{% static 'assets/images/element/google-play.svg' %}" alt="Google Play'den indir" style="height:42px; width:auto; display:block;">
+          </a>
         </div>
       </div>
 
-      <div class="col-md-5 col-lg-4 text-md-end">
-        <h5 class="text-white mb-2">Uygulamayı indir</h5>
-        <p class="text-body-secondary mb-3">
-          Seyahatin boyunca rota, sesli rehber ve WhatsApp asistan deneyimini cebinde taşı.
-        </p>
-
-        <div class="d-flex flex-wrap justify-content-md-end gap-2 mb-4">
-          <a href="#" class="d-inline-flex" aria-label="App Store'dan indir">
-            <img src="{% static 'assets/images/element/app-store.svg' %}"
-                 alt="App Store'dan indir"
-                 style="height:44px; width:auto; display:block;">
-          </a>
-          <a href="#" class="d-inline-flex" aria-label="Google Play'den indir">
-            <img src="{% static 'assets/images/element/google-play.svg' %}"
-                 alt="Google Play'den indir"
-                 style="height:44px; width:auto; display:block;">
-          </a>
-        </div>
-
-        <h5 class="text-white mb-2">Bizi takip edin</h5>
-        <p class="text-body-secondary mb-3">
-          Seyahat hikayeleri, yeni rotalar ve Nomaya güncellemeleri için bizi takip edin.
-        </p>
-
+      <div class="col-lg-4 text-lg-end">
+        <div class="small text-body-secondary mb-2">Bizi takip edin</div>
         <ul class="list-inline mb-0">
           <li class="list-inline-item">
             <a class="btn btn-sm shadow px-2 bg-youtube mb-0"
@@ -659,14 +602,12 @@ Footer START -->
             </a>
           </li>
           <li class="list-inline-item">
-            <a class="btn btn-sm shadow px-2 bg-instagram mb-0 opacity-75"
-               href="#" aria-label="Instagram">
+            <a class="btn btn-sm shadow px-2 bg-instagram mb-0 opacity-75" href="#" aria-label="Instagram">
               <i class="fab fa-fw fa-instagram"></i>
             </a>
           </li>
           <li class="list-inline-item">
-            <a class="btn btn-sm shadow px-2 bg-linkedin mb-0 opacity-75"
-               href="#" aria-label="LinkedIn">
+            <a class="btn btn-sm shadow px-2 bg-linkedin mb-0 opacity-75" href="#" aria-label="LinkedIn">
               <i class="fab fa-fw fa-linkedin-in"></i>
             </a>
           </li>
@@ -676,23 +617,24 @@ Footer START -->
 
     <hr class="mt-4 mb-0">
 
-    <!-- Bottom footer -->
-    <div class="row">
-      <div class="container">
-        <div class="d-lg-flex justify-content-between align-items-center py-3 text-center text-lg-start">
-          <div class="text-body-secondary text-primary-hover">
-            © {% now "Y" %} Nomaya. Tüm hakları saklıdır. <span class="d-none d-sm-inline">Travel like a local.</span>
-          </div>
-          <div class="nav mt-2 mt-lg-0">
-            <ul class="list-inline text-primary-hover mx-auto mb-0">
-              <li class="list-inline-item me-0"><a class="nav-link text-body-secondary py-1" href="#" data-bs-toggle="modal" data-bs-target="#privacyModal">Gizlilik Politikası</a></li>
-              <li class="list-inline-item me-0"><a class="nav-link text-body-secondary py-1" href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Şartlar ve Koşullar</a></li>
-              <li class="list-inline-item me-0"><a class="nav-link text-body-secondary py-1 pe-0" href="#" data-bs-toggle="modal" data-bs-target="#refundModal">İade Politikası</a></li>
-            </ul>
-          </div>
-        </div>
+    <div class="d-lg-flex justify-content-between align-items-center py-3 text-center text-lg-start">
+      <div class="text-body-secondary text-primary-hover">
+        © {% now "Y" %} Nomaya. Tüm hakları saklıdır.
       </div>
+
+      <ul class="list-inline text-primary-hover mx-auto mx-lg-0 mb-0 mt-2 mt-lg-0">
+        <li class="list-inline-item me-0">
+          <a class="nav-link text-body-secondary py-1" href="#" data-bs-toggle="modal" data-bs-target="#privacyModal">Gizlilik Politikası</a>
+        </li>
+        <li class="list-inline-item me-0">
+          <a class="nav-link text-body-secondary py-1" href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Şartlar ve Koşullar</a>
+        </li>
+        <li class="list-inline-item me-0">
+          <a class="nav-link text-body-secondary py-1 pe-0" href="#" data-bs-toggle="modal" data-bs-target="#refundModal">İade Politikası</a>
+        </li>
+      </ul>
     </div>
+
   </div>
 </footer>
 <!-- Footer END -->
