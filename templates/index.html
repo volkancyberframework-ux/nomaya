@@ -860,6 +860,47 @@ font-size:13px;
     }
 
 }
+
+.nomaya-timeline-item{
+    position:relative;
+    display:flex;
+    gap:24px;
+    align-items:flex-start;
+    padding-bottom:36px;
+}
+
+.nomaya-bubble{
+    position:relative;
+    z-index:2;
+    width:58px;
+    min-width:58px;
+    height:58px;
+    border-radius:50%;
+    border:4px solid #3b82f6;
+    background:#1e293b;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:28px;
+}
+
+/* Çizgi */
+.nomaya-timeline-item::after{
+    content:"";
+    position:absolute;
+    left:27px;              /* Balonun tam ortası */
+    top:58px;               /* Balonun hemen altından başla */
+    bottom:-8px;            /* Sonraki balona kadar uzat */
+    width:4px;
+    background:#3b82f6;
+    border-radius:4px;
+}
+
+/* Son elemanda çizgi olmasın */
+.nomaya-timeline-item:last-child::after{
+    display:none;
+}
+
 </style>
 
 <main class="nomaya-page page-fade is-visible">
