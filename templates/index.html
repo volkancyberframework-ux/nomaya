@@ -912,15 +912,18 @@
         flatpickr.localize(flatpickr.l10ns.tr);
       }
 
+      const minDate = new Date();
+      minDate.setDate(minDate.getDate() + 2);
+
       flatpickr(dateInput, {
-        mode: 'range',
-        dateFormat: 'Y-m-d',
-        altInput: true,
-        altFormat: 'd F Y',
-        locale: Object.assign({}, flatpickr.l10ns?.tr || {}, {
-          rangeSeparator: RANGE_SEP
-        }),
-        minDate: new Date().fp_incr(2)
+          mode: "range",
+          dateFormat: "Y-m-d",
+          altInput: true,
+          altFormat: "d F Y",
+          minDate: minDate,
+          locale: Object.assign({}, flatpickr.l10ns?.tr || {}, {
+              rangeSeparator: RANGE_SEP
+          })
       });
     });
   })();
