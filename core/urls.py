@@ -8,10 +8,10 @@ from . import views
 
 urlpatterns = [
     path("", views.home, name="home"),
-    path("tours/", views.tour_grid, name="tour_grid"),
+    #path("tours/", views.tour_grid, name="tour_grid"),
 
     # 1) Modal POST -> Order create (değişmedi)
-    path("tours/booking/", views.tour_booking, name="tour_booking"),
+    #path("tours/booking/", views.tour_booking, name="tour_booking"),
     path(
     "audio/<str:tracking_code>/<int:day_activity_id>/<str:audio_type>/",
     views.secure_audio_stream,
@@ -19,9 +19,9 @@ urlpatterns = [
     ),
 
     # 2) GÜVENLİ (UUID) detay/flow
-    path("tours/booking/p/<uuid:public_id>/", views.tour_booking_detail_public, name="tour_booking_detail_public"),
-    path("tours/booking/p/<uuid:public_id>/traveler/", views.save_travelers_public, name="save_travelers_public"),
-    path('tours/booking/p/<uuid:public_id>/success/', views.order_success_public, name='order_success_public'),
+    #path("tours/booking/p/<uuid:public_id>/", views.tour_booking_detail_public, name="tour_booking_detail_public"),
+    #path("tours/booking/p/<uuid:public_id>/traveler/", views.save_travelers_public, name="save_travelers_public"),
+    #path('tours/booking/p/<uuid:public_id>/success/', views.order_success_public, name='order_success_public'),
 
     # İstersen: eski int ID rotalarını kapat ya da 404/redirect yap
     # path("tours/booking/<int:order_id>/", views.legacy_booking_redirect, name="tour_booking_detail"),
@@ -29,9 +29,9 @@ urlpatterns = [
     # path('tours/booking/<int:order_id>/success/', views.legacy_booking_redirect, name='order_success'),
     path("api/today-plan/<str:code>/", views.today_plan, name="today_plan"),
     path("api/activity-progress/", views.update_activity_progress, name="update_activity_progress"),
-    path("tours/<slug:slug>/", views.tour_detail, name="tour_detail"),
+    #path("tours/<slug:slug>/", views.tour_detail, name="tour_detail"),
     path("about/", views.about, name="about"),
-    path("nomayaasistan/", views.nomaya_asistan, name="nomaya_asistan"),
+    #path("nomayaasistan/", views.nomaya_asistan, name="nomaya_asistan"),
     path("services/", views.services, name="services"),
     path("faqs/", views.faqs, name="faqs"),
     path("booking-confirmation/", views.booking_confirmation, name="booking_confirmation"),

@@ -440,7 +440,6 @@
 <!-- Header END -->
 
 {% block content %}{% endblock %}
-
 <!-- =======================
 Footer START -->
 <footer class="nomaya-footer bg-dark pt-5">
@@ -477,10 +476,10 @@ Footer START -->
       </div>
       <div class="col-6 col-lg-3">
         <div class="nomaya-trust-card h-100">
-          <div class="nomaya-trust-icon">🌍</div>
+          <div class="nomaya-trust-icon">🎧</div>
           <div>
-            <div class="fw-bold text-white">Global Rotalar</div>
-            <div class="small text-body-secondary">Asya’dan Avrupa’ya</div>
+            <div class="fw-bold text-white">Sesli Rehber</div>
+            <div class="small text-body-secondary">Sana özel yol arkadaşın</div>
           </div>
         </div>
       </div>
@@ -507,13 +506,32 @@ Footer START -->
         </p>
 
         <div class="d-flex flex-wrap gap-2 mb-4">
-          <a href="{% url 'tour_grid' %}" class="btn btn-primary rounded-pill px-4">
-            ✨ Rotaları Keşfet
+          <a href="{% url 'order_customized' %}" class="btn btn-primary rounded-pill px-4">
+            ✨ Kendi Seyahatini Oluştur
           </a>
-          <a href="{% url 'order_customized' %}" class="btn btn-outline-light rounded-pill px-4">
-            Bana Özel Rota
+          <a href="https://wa.me/32476073171?text={{ 'Merhaba Nomaya! Bana özel seyahat planı oluşturmak istiyorum.'|urlencode }}"
+             target="_blank" rel="noopener" class="btn btn-outline-light rounded-pill px-4">
+            WhatsApp Destek
           </a>
         </div>
+
+        <!-- App badges START -->
+        <div class="mb-4">
+          <div class="small text-body-secondary mb-2">Nomaya uygulamasını indir</div>
+          <div class="d-flex flex-wrap gap-2 align-items-center">
+            <a href="#" class="d-inline-flex" aria-label="App Store'dan indir">
+              <img src="{% static 'assets/images/element/app-store.svg' %}"
+                   alt="App Store'dan indir"
+                   style="height:44px; width:auto; display:block;">
+            </a>
+            <a href="#" class="d-inline-flex" aria-label="Google Play'den indir">
+              <img src="{% static 'assets/images/element/google-play.svg' %}"
+                   alt="Google Play'den indir"
+                   style="height:44px; width:auto; display:block;">
+            </a>
+          </div>
+        </div>
+        <!-- App badges END -->
 
         <p class="mb-2">
           <a href="https://wa.me/32476073171?text={{ 'Merhaba Nomaya! Seyahat planım için destek almak istiyorum.'|urlencode }}"
@@ -542,23 +560,23 @@ Footer START -->
           </div>
 
           <div class="col-6 col-md-3">
-            <h5 class="text-white mb-2 mb-md-4">Seyahat</h5>
+            <h5 class="text-white mb-2 mb-md-4">Seyahatini Kur</h5>
             <ul class="nav flex-column text-primary-hover">
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}"><i class="fa-solid fa-globe-americas me-2"></i>Turlar</a></li>
               <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'order_customized' %}"><i class="bi bi-stars me-2"></i>Bana Özel Rota</a></li>
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}"><i class="fa-solid fa-car me-2"></i>Transfer</a></li>
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}"><i class="fa-solid fa-hotel me-2"></i>Konaklama</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'order_customized' %}"><i class="bi bi-map me-2"></i>Kişisel Plan</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'order_customized' %}"><i class="bi bi-headphones me-2"></i>Sesli Rehber</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'order_customized' %}"><i class="bi bi-whatsapp me-2"></i>WhatsApp Asistan</a></li>
             </ul>
           </div>
 
           <div class="col-6 col-md-3">
-            <h5 class="text-white mb-2 mb-md-4">Destinasyonlar</h5>
+            <h5 class="text-white mb-2 mb-md-4">Popüler İstekler</h5>
             <ul class="nav flex-column text-primary-hover">
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}">🇻🇳 Vietnam</a></li>
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}">🇯🇵 Japonya</a></li>
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}">🇰🇷 Güney Kore</a></li>
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}">🇹🇭 Tayland</a></li>
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}">🇮🇩 Endonezya</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'order_customized' %}">🇻🇳 Vietnam rotası</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'order_customized' %}">🍜 Yerel lezzetler</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'order_customized' %}">📍 Gizli noktalar</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'order_customized' %}">🌴 Hafta sonu kaçamağı</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'order_customized' %}">🧭 İlk kez gidenler</a></li>
             </ul>
           </div>
 
@@ -578,7 +596,7 @@ Footer START -->
 
     <hr class="my-5">
 
-    <!-- Payment & Social -->
+    <!-- Payment, App & Social -->
     <div class="row g-4 justify-content-between align-items-start">
       <div class="col-md-7 col-lg-6">
         <h5 class="text-white mb-2">🔒 Güvenli Ödeme</h5>
@@ -610,6 +628,24 @@ Footer START -->
       </div>
 
       <div class="col-md-5 col-lg-4 text-md-end">
+        <h5 class="text-white mb-2">Uygulamayı indir</h5>
+        <p class="text-body-secondary mb-3">
+          Seyahatin boyunca rota, sesli rehber ve WhatsApp asistan deneyimini cebinde taşı.
+        </p>
+
+        <div class="d-flex flex-wrap justify-content-md-end gap-2 mb-4">
+          <a href="#" class="d-inline-flex" aria-label="App Store'dan indir">
+            <img src="{% static 'assets/images/element/app-store.svg' %}"
+                 alt="App Store'dan indir"
+                 style="height:44px; width:auto; display:block;">
+          </a>
+          <a href="#" class="d-inline-flex" aria-label="Google Play'den indir">
+            <img src="{% static 'assets/images/element/google-play.svg' %}"
+                 alt="Google Play'den indir"
+                 style="height:44px; width:auto; display:block;">
+          </a>
+        </div>
+
         <h5 class="text-white mb-2">Bizi takip edin</h5>
         <p class="text-body-secondary mb-3">
           Seyahat hikayeleri, yeni rotalar ve Nomaya güncellemeleri için bizi takip edin.
@@ -645,7 +681,7 @@ Footer START -->
       <div class="container">
         <div class="d-lg-flex justify-content-between align-items-center py-3 text-center text-lg-start">
           <div class="text-body-secondary text-primary-hover">
-            © {% now "Y" %} Nomaya. Tüm hakları saklıdır. <span class="d-none d-sm-inline">Explore differently.</span>
+            © {% now "Y" %} Nomaya. Tüm hakları saklıdır. <span class="d-none d-sm-inline">Travel like a local.</span>
           </div>
           <div class="nav mt-2 mt-lg-0">
             <ul class="list-inline text-primary-hover mx-auto mb-0">
@@ -660,7 +696,6 @@ Footer START -->
   </div>
 </footer>
 <!-- Footer END -->
-
 <style>
   .nomaya-footer{
     position: relative;
