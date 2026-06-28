@@ -24,9 +24,9 @@ urlpatterns = [
     path('tours/booking/p/<uuid:public_id>/success/', views.order_success_public, name='order_success_public'),
 
     # İstersen: eski int ID rotalarını kapat ya da 404/redirect yap
-    path("tours/booking/<int:order_id>/", views.legacy_booking_redirect, name="tour_booking_detail"),
-    path("tours/booking/<int:order_id>/traveler/", views.legacy_booking_redirect, name="save_travelers"),
-    path('tours/booking/<int:order_id>/success/', views.legacy_booking_redirect, name='order_success'),
+    #path("tours/booking/<int:order_id>/", views.legacy_booking_redirect, name="tour_booking_detail"),
+    #path("tours/booking/<int:order_id>/traveler/", views.legacy_booking_redirect, name="save_travelers"),
+    #path('tours/booking/<int:order_id>/success/', views.legacy_booking_redirect, name='order_success'),
     path("api/today-plan/<str:code>/", views.today_plan, name="today_plan"),
     path("api/activity-progress/", views.update_activity_progress, name="update_activity_progress"),
     #path("tours/<slug:slug>/", views.tour_detail, name="tour_detail"),
