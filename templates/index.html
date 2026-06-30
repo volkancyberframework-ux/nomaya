@@ -657,8 +657,13 @@
               </div>
 
               <div class="col-12">
-                <label class="nomaya-label">Seyahat tarzın</label>
-                <input type="text" name="travel_style" class="form-control nomaya-input" placeholder="Romantik, gurme, macera, aile, kültür..." required>
+                  <label class="nomaya-label">Seyahat tarzın</label>
+                  <input
+                      type="text"
+                      name="travel_style"
+                      class="form-control nomaya-input"
+                      placeholder="🎥 Volkan Güler gibi • 🏛️ Kültür • 🍜 Gurme • 🌿 Doğa • 💑 Romantik • 📸 Instagram • 🎒 Macera • ☕ Local gibi yaşa • 💎 Lüks"
+                      required>
               </div>
 
               {% if not request.user.is_authenticated %}
