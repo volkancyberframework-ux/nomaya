@@ -641,58 +641,119 @@
             {% csrf_token %}
 
             <div class="mb-4">
-              <h2 class="fw-bold mb-1">Nomaya Deneyimini Başlat</h2>
-              <p class="text-muted mb-0">Bilgilerini doldur, sonraki aşamada ödeme ve rota hazırlığına geç.</p>
+              <h2 class="fw-bold mb-1">🌍 Nomaya Deneyimini Başlat</h2>
+              <p class="text-muted mb-0">
+                Birkaç bilgiyi paylaş, sana tamamen kişiselleştirilmiş seyahat deneyimini hazırlayalım.
+              </p>
             </div>
 
             <div class="row g-3">
+
               <div class="col-md-6">
-                <label class="nomaya-label">Nereye gidiyorsun?</label>
-                <input type="text" name="location" class="form-control nomaya-input" placeholder="Örn: Bangkok, Kapadokya, Roma" required>
+                <label class="nomaya-label">📍 Nereye gidiyorsun?</label>
+                <input
+                  type="text"
+                  name="location"
+                  class="form-control nomaya-input"
+                  placeholder="Örn: Hanoi, Seul, Buenos Aires..."
+                  required>
               </div>
 
               <div class="col-md-6">
-                <label class="nomaya-label">Tarih aralığı</label>
-                <input type="text" id="nomayaDates" name="dates" class="form-control nomaya-input" placeholder="Başlangıç - Bitiş" required>
+                <label class="nomaya-label">📅 Tarih aralığı</label>
+                <input
+                  type="text"
+                  id="nomayaDates"
+                  name="dates"
+                  class="form-control nomaya-input"
+                  placeholder="Başlangıç - Bitiş"
+                  required>
               </div>
 
               <div class="col-12">
-                  <label class="nomaya-label">Seyahat tarzın</label>
-                  <input
-                      type="text"
-                      name="travel_style"
-                      class="form-control nomaya-input"
-                      placeholder="🎥 Volkan Güler gibi • 🏛️ Kültür • 🍜 Gurme • 🌿 Doğa • 💑 Romantik • 📸 Instagram • 🎒 Macera • ☕ Local gibi yaşa • 💎 Lüks"
-                      required>
+                <label class="nomaya-label">✨ Seyahat tarzın</label>
+                <input
+                  type="text"
+                  name="travel_style"
+                  class="form-control nomaya-input"
+                  placeholder="🎥 Volkan Güler gibi • 🏙️ Şehrin yerlisi gibi yaşa • 🏛️ Kültür • 🍜 Gurme • 🌿 Doğa • 💑 Romantik • 📸 Instagram • 🎒 Macera • 💎 Lüks"
+                  required>
+              </div>
+
+              <div class="col-12">
+                <label class="nomaya-label">✈️ Seyahat hazırlığın</label>
+
+                <div class="d-flex flex-wrap gap-4 mt-2">
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="flightBooked"
+                      name="flight_booked">
+                    <label class="form-check-label" for="flightBooked">
+                      ✈️ Uçak biletimi aldım
+                    </label>
+                  </div>
+
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="hotelBooked"
+                      name="hotel_booked">
+                    <label class="form-check-label" for="hotelBooked">
+                      🏨 Otelimi ayarladım
+                    </label>
+                  </div>
+                </div>
               </div>
 
               {% if not request.user.is_authenticated %}
               <div class="col-md-6">
-                <label class="nomaya-label">E-posta</label>
-                <input type="email" name="email" class="form-control nomaya-input" required value="{{ prefill.email|default:'' }}" placeholder="ornek@email.com">
+                <label class="nomaya-label">📧 E-posta</label>
+                <input
+                  type="email"
+                  name="email"
+                  class="form-control nomaya-input"
+                  required
+                  value="{{ prefill.email|default:'' }}"
+                  placeholder="ornek@email.com">
               </div>
               {% else %}
               <div class="col-md-6">
-                <label class="nomaya-label">E-posta</label>
-                <input type="email" class="form-control nomaya-input" value="{{ request.user.email }}" readonly required>
+                <label class="nomaya-label">📧 E-posta</label>
+                <input
+                  type="email"
+                  class="form-control nomaya-input"
+                  value="{{ request.user.email }}"
+                  readonly
+                  required>
               </div>
               {% endif %}
 
               <div class="col-md-6">
-                <label class="nomaya-label">Telefon</label>
-                <input type="tel" name="phone" class="form-control nomaya-input" required value="{{ prefill.phone|default:'' }}" placeholder="+90 5xx xxx xx xx">
+                <label class="nomaya-label">📱 Telefon</label>
+                <input
+                  type="tel"
+                  name="phone"
+                  class="form-control nomaya-input"
+                  required
+                  value="{{ prefill.phone|default:'' }}"
+                  placeholder="+90 5xx xxx xx xx">
               </div>
+
             </div>
 
             <div class="mt-4 d-grid">
               <button class="btn nomaya-btn btn-lg" type="submit">
-                Nomaya Deneyimimi Hazırla →
+                🚀 Bana Özel Deneyimimi Hazırla
               </button>
             </div>
 
             <p class="text-muted small text-center mt-3 mb-0">
-              E-posta ve telefon bilgisi olmadan sonraki aşamaya geçilemez.
+              🔒 Bilgilerin yalnızca sana özel seyahat planını hazırlamak için kullanılır.
             </p>
+
           </form>
         </div>
       </div>
