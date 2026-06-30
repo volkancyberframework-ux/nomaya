@@ -400,7 +400,7 @@ def home(request):
         .order_by("-created_at")[:12]
     )
 
-    price_per_day = Decimal("500")
+    price_per_day = Decimal("100")
 
     if request.method == "POST":
         location = (request.POST.get("location") or "").strip()
