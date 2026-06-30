@@ -4,6 +4,12 @@
 {% block content %}
 
 <style>
+  .nomaya-saving-inline {
+    display: inline-block;
+    color: #ffffff;
+    font-weight: 900;
+    text-shadow: 0 0 24px rgba(34, 197, 94, .45);
+  }
   .nomaya-page {
     background: #fffaf6;
     color: #111827;
@@ -622,7 +628,9 @@
           </div>
 
           <h1 class="display-4 fw-bold mb-4">
-            Seyahatini yaz, Nomaya sana özel deneyimi hazırlasın.
+            Ortalama bir gezgine gün başı
+            <span class="nomaya-saving-inline">₺<span id="nomayaSavingAmount">5.243</span></span>
+            tasarruf ettiriyoruz.
           </h1>
 
           <p class="lead text-white-50 mb-4">
@@ -987,6 +995,25 @@
     </div>
   </section>
 </main>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const savingEl = document.getElementById("nomayaSavingAmount");
+
+  function updateSavingAmount() {
+    if (!savingEl) return;
+
+    const baseAmount = 5243;
+    const variation = Math.floor(Math.random() * 381) - 190;
+    const liveAmount = baseAmount + variation;
+
+    savingEl.textContent = liveAmount.toLocaleString("tr-TR");
+  }
+
+  updateSavingAmount();
+  setInterval(updateSavingAmount, 2600);
+});
+</script>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
