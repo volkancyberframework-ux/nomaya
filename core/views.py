@@ -1411,6 +1411,19 @@ def today_plan(request, code):
             "activity_id": activity.id,
             "title": activity.title,
             "location": activity.location_text,
+
+            # Apple Maps / mobil harita için
+            "latitude": float(activity.latitude) if activity.latitude is not None else None,
+            "longitude": float(activity.longitude) if activity.longitude is not None else None,
+            "apple_maps_url": (
+                activity.apple_maps_url
+                or (
+                    f"https://maps.apple.com/?ll={activity.latitude},{activity.longitude}&q={activity.title}"
+                    if activity.latitude is not None and activity.longitude is not None
+                    else None
+                )
+            ),
+
             "points": activity.points or [],
             "duration_hours": str(activity.duration_hours) if activity.duration_hours else None,
             "status": progress.status,

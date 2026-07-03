@@ -698,6 +698,30 @@ class Activity(models.Model):
         help_text="Aktivite yerine varınca dinlenecek ses kaydı"
     )
 
+    # Activity model içine ekle
+    latitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True,
+        help_text="Apple Maps için enlem"
+    )
+
+    longitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True,
+        help_text="Apple Maps için boylam"
+    )
+
+    apple_maps_url = models.URLField(
+        blank=True,
+        default="",
+        help_text="Opsiyonel: manuel Apple Maps linki"
+    )
+
+
     class Meta:
         ordering = ["title"]
 
