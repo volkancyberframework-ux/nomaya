@@ -1127,6 +1127,17 @@ def verify_tracking_code(request):
     if timezone.now() > order.tracking_code_expires_at:
         return JsonResponse({"valid": False, "message": "expired"}, status=403)
 
+    # Seyahat durumu
+    today = timezone.localdate()
+    trip_status = "ready"
+
+    if not order.start_date:
+        trip_status = "missing_start_date"
+    elif today < order.start_date:
+        trip_status = "not_started"
+    elif order.end_date and today > order.end_date:
+        trip_status = "finished"
+
     first_start = not bool(order.tracking_started_at)
 
     if first_start:
@@ -1142,6 +1153,9 @@ def verify_tracking_code(request):
             f"<b>Tur:</b> {tg(order.tour.title if order.tour else '-')}\n"
             f"<b>E-posta:</b> {tg(order.email)}\n"
             f"<b>Tracking Code:</b> {tg(order.tracking_code)}\n"
+            f"<b>Trip Status:</b> {tg(trip_status)}\n"
+            f"<b>Start Date:</b> {tg(order.start_date)}\n"
+            f"<b>End Date:</b> {tg(order.end_date)}\n"
             f"<b>IP:</b> {tg(get_client_ip(request))}"
         )
 
@@ -1151,8 +1165,13 @@ def verify_tracking_code(request):
         "order_id": order.id,
         "tour": order.tour.title,
         "expires_at": order.tracking_code_expires_at.isoformat(),
+        "order": {
+            "tracking_code": order.tracking_code,
+            "start_date": str(order.start_date) if order.start_date else None,
+            "end_date": str(order.end_date) if order.end_date else None,
+            "trip_status": trip_status,
+        }
     })
-
 @csrf_exempt
 def update_location(request):
     if request.method != "POST":
