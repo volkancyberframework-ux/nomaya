@@ -389,6 +389,7 @@ def sign_up(request):
 
     return render(request, "sign-up.html")
 
+from django.http import JsonResponse
 def home(request):
     countries = Country.objects.only("id", "name").order_by("name")
     total_orders = Order.objects.filter(is_paid=True).count()
@@ -407,6 +408,8 @@ def home(request):
         dates = (request.POST.get("dates") or "").strip()
         travel_style = (request.POST.get("travel_style") or "").strip()
         notes = (request.POST.get("notes") or "").strip()
+        flight_booked = request.POST.get("flight_booked") == "on"
+        hotel_booked = request.POST.get("hotel_booked") == "on"
 
         if request.user.is_authenticated:
             email = (request.user.email or "").strip()
@@ -461,6 +464,8 @@ def home(request):
             f"<b>ID:</b> {tg(obj.id)}\n"
             f"<b>E-posta:</b> {tg(obj.email)}\n"
             f"<b>Telefon:</b> {tg(obj.phone)}\n"
+            f"<b>Uçak bileti:</b> {'✅ Aldı' if flight_booked else '❌ Almadı / Belirtmedi'}\n"
+            f"<b>Otel:</b> {'✅ Ayarladı' if hotel_booked else '❌ Ayarlamadı / Belirtmedi'}\n"
             f"<b>Konum:</b> {tg(obj.location)}\n"
             f"<b>Tarih:</b> {tg(obj.dates)}\n"
             f"<b>Gün:</b> {tg(obj.days)}\n"
@@ -469,10 +474,10 @@ def home(request):
             f"<b>Not:</b> {tg(obj.notes)}"
         )
 
-        return redirect(
-            "order_customized_detail",
-            public_id=obj.public_id
-        )
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse({"success": True})
+
+        return redirect("home")
 
     return render(request, "index.html", {
         "countries": countries,

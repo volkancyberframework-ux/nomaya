@@ -684,7 +684,7 @@
                   type="text"
                   name="travel_style"
                   class="form-control nomaya-input"
-                  placeholder="🎥 X youtuber gibi • 🏙️ Lokal gibi yaşa • 🏛️ Kültür • 🍜 Gurme • 🌿 Doğa • 💑 Romantik • 📸 Instagram • 🎒 Macera • 💎 Lüks"
+                  placeholder="Lokal gibi yaşa • YouTuber gibi gez • Dil öğren • Aile"
                   required>
               </div>
 
@@ -763,6 +763,12 @@
             </p>
 
           </form>
+          <div id="successBox" class="alert alert-success mt-4 d-none text-center">
+            <h4 class="mb-2">🎉 Talebiniz alındı!</h4>
+            <p class="mb-0">
+                Ekibimiz en kısa sürede sizinle <strong>WhatsApp üzerinden iletişime geçecektir.</strong>
+            </p>
+        </div>
         </div>
       </div>
     </div>
@@ -1040,4 +1046,36 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 </script>
+
+
+<script>
+document.getElementById("customTravelForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const form = this;
+    const button = form.querySelector("button[type='submit']");
+    const successBox = document.getElementById("successBox");
+
+    button.disabled = true;
+    button.innerText = "Gönderiliyor...";
+
+    const response = await fetch(form.action || window.location.href, {
+        method: "POST",
+        body: new FormData(form),
+        headers: {
+            "X-Requested-With": "XMLHttpRequest"
+        }
+    });
+
+    if (response.ok) {
+        form.style.display = "none";
+        successBox.classList.remove("d-none");
+    } else {
+        button.disabled = false;
+        button.innerText = "🚀 Bana Özel Deneyimimi Hazırla";
+        alert("Bir hata oluştu. Lütfen tekrar deneyin.");
+    }
+});
+</script>
+
 {% endblock %}
