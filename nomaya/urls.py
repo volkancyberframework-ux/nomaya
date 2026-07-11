@@ -8,7 +8,7 @@ from django.urls import path
 from django.views.static import serve
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('bulamazsinki/', admin.site.urls),
     path('', include('core.urls')),  # TÜM app rotaları core.urls'te
 ]
 if settings.DEBUG:
