@@ -67,6 +67,85 @@ from django.conf import settings
 
 User = get_user_model()
 
+import hashlib
+import os
+import random
+import subprocess
+import tempfile
+
+from django.conf import settings
+
+from .models import IntroAudioLibrary
+
+
+def normalize_intro_name(name):
+    """
+    'Alican' -> 'alican'
+    'Alican Yalçın' -> 'alican'
+    '  ALICAN  ' -> 'alican'
+    """
+    normalized = (name or "").strip().lower()
+
+    if not normalized:
+        return ""
+
+    return normalized.split()[0]
+
+
+def get_current_traveler_intro(order):
+    """
+    Her ses isteğinde order'ın güncel ilk traveler kaydını okur.
+
+    Admin panelinden traveler adı değiştirildiğinde,
+    herhangi bir manuel güncelleme olmadan yeni isim kullanılır.
+    """
+    traveler = (
+        order.travelers
+        .exclude(first_name="")
+        .order_by("id")
+        .first()
+    )
+
+    if not traveler:
+        return None
+
+    name = normalize_intro_name(traveler.first_name)
+
+    if not name:
+        return None
+
+    intro_items = list(
+        IntroAudioLibrary.objects.filter(
+            name__iexact=name,
+            is_active=True,
+        )
+        .exclude(audio="")
+        .order_by("id")
+    )
+
+    if not intro_items:
+        return None
+
+    return random.choice(intro_items)
+
+
+def get_local_audio_path(audio_field):
+    """
+    Local FileSystemStorage kullanılan projelerde FileField yolunu döndürür.
+    """
+    if not audio_field:
+        return None
+
+    try:
+        path = audio_field.path
+    except (AttributeError, NotImplementedError, ValueError):
+        return None
+
+    if not path or not os.path.isfile(path):
+        return None
+
+    return path
+
 def send_telegram_message(message: str) -> bool:
     token = getattr(settings, "TELEGRAM_BOT_TOKEN", "") or ""
     chat_id = getattr(settings, "TELEGRAM_CHAT_ID", "") or ""
@@ -245,9 +324,6 @@ def save_travelers_public(request, public_id):
             dob=dob,
         )
 
-        if i == 1:
-            from .services import create_order_intro_audios_for_name
-            create_order_intro_audios_for_name(order, first_name)
         created.append(i)
 
     messages.success(request, f"{len(created)} traveler saved.")
@@ -1684,57 +1760,81 @@ def request_bank_transfer(request, order_id):
 
 from django.http import FileResponse, HttpResponseForbidden, Http404
 
+from django.http import FileResponse, Http404, HttpResponseForbidden
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+
+from django.http import FileResponse, Http404, HttpResponseForbidden
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+
+
 def secure_audio_stream(request, tracking_code, day_activity_id, audio_type):
     order = get_object_or_404(
-        Order,
+        Order.objects.select_related("tour"),
         tracking_code=tracking_code.upper(),
         is_paid=True,
         tracking_enabled=True,
     )
 
     if timezone.now() > order.tracking_code_expires_at:
-        return HttpResponseForbidden("Bu ses kaydının süresi dolmuş.")
+        return HttpResponseForbidden(
+            "Bu ses kaydının süresi dolmuş."
+        )
 
     day_activity = get_object_or_404(
-        DayActivity.objects.select_related("activity", "day"),
+        DayActivity.objects.select_related(
+            "activity",
+            "day",
+        ),
         id=day_activity_id,
     )
 
     belongs_to_tour = TourDay.objects.filter(
         tour=order.tour,
-        day=day_activity.day
+        day=day_activity.day,
     ).exists()
 
     if not belongs_to_tour:
-        return HttpResponseForbidden("Bu aktivite bu tura ait değil.")
+        return HttpResponseForbidden(
+            "Bu aktivite bu tura ait değil."
+        )
 
     activity = day_activity.activity
 
     if audio_type == "on-the-way":
         audio_file = activity.audio_on_the_way
+
     elif audio_type == "at-location":
         audio_file = activity.audio_at_location
+
     else:
-        raise Http404("Ses tipi bulunamadı.")
+        raise Http404("Geçersiz ses tipi.")
 
     if not audio_file:
-        raise Http404("Ses kaydı bulunamadı.")
+        raise Http404("Aktivite ses kaydı bulunamadı.")
 
-    try:
-        final_audio = build_combined_audio(
-            order=order,
-            day_activity=day_activity,
-            audio_type=audio_type,
-            main_audio_file=audio_file,
-        )
-    except Exception:
-        final_audio = audio_file.open("rb")
-
-    return FileResponse(
-        final_audio,
-        content_type="audio/mpeg"
+    final_audio = build_combined_audio(
+        order=order,
+        day_activity=day_activity,
+        audio_type=audio_type,
+        main_audio_file=audio_file,
     )
 
+    response = FileResponse(
+        final_audio,
+        content_type="audio/mpeg",
+    )
+
+    response["Content-Disposition"] = (
+        f'inline; filename="nomaya-{audio_type}.mp3"'
+    )
+
+    # Tarayıcı aynı URL'nin eski sesini göstermesin.
+    response["Cache-Control"] = "private, no-store, max-age=0"
+    response["Pragma"] = "no-cache"
+
+    return response
 from decimal import Decimal, ROUND_HALF_UP
 from django.views.decorators.http import require_http_methods
 from django.shortcuts import render, redirect, get_object_or_404
@@ -1963,56 +2063,185 @@ def stripe_checkout_order(request, public_id):
 
     return redirect(session.url)
 
+import hashlib
+import os
 import random
+import subprocess
+import tempfile
+
+from django.conf import settings
+from django.core.files import File
+
 
 def build_combined_audio(order, day_activity, audio_type, main_audio_file):
     """
-    Order intro + activity audio birleşik MP3 üretir.
-    Cache mantığı: aynı dosya varsa yeniden üretmez.
+    Her çağrıda:
+
+    1. Order'ın güncel ilk traveler adını okur.
+    2. IntroAudioLibrary içinden bu isme ait aktif intro kayıtlarını bulur.
+    3. Intro kayıtlarından birini rastgele seçer.
+    4. Seçilen intro ile ilgili activity sesini birleştirir.
+    5. Tek MP3 olarak döndürür.
+
+    Traveler adı admin panelinden değiştirildiğinde bir sonraki istekte
+    yeni isim otomatik olarak kullanılır.
     """
 
-    intro_obj = order.intro_audios.order_by("?").first()
+    intro_item = get_current_traveler_intro(order)
 
-    if intro_obj and intro_obj.audio:
-        intro_audio = intro_obj.audio
+    # İsim için kütüphanede intro bulunamazsa eski custom intro desteğini koru.
+    if intro_item and intro_item.audio:
+        intro_audio_file = intro_item.audio
+        intro_identity = f"library-{intro_item.id}"
+
     elif order.custom_intro_audio:
-        intro_audio = order.custom_intro_audio
-    else:
-        return main_audio_file
+        intro_audio_file = order.custom_intro_audio
+        intro_identity = "custom"
 
-    combined_dir = os.path.join(settings.MEDIA_ROOT, "orders", "combined_audio")
+    else:
+        # Hiç intro yoksa activity sesini tek başına çal.
+        return main_audio_file.open("rb")
+
+    intro_path = get_local_audio_path(intro_audio_file)
+    main_path = get_local_audio_path(main_audio_file)
+
+    if not intro_path or not main_path:
+        return main_audio_file.open("rb")
+
+    combined_dir = os.path.join(
+        settings.MEDIA_ROOT,
+        "orders",
+        "combined_audio",
+    )
     os.makedirs(combined_dir, exist_ok=True)
 
-    intro_id = intro_obj.id if intro_obj else "legacy"
-    output_name = f"order_{order.id}_intro_{intro_id}_activity_{day_activity.id}_{audio_type}.mp3"
-    output_path = os.path.join(combined_dir, output_name)
+    # Intro veya activity dosyası değiştiğinde eski cache kullanılmasın.
+    intro_mtime = int(os.path.getmtime(intro_path))
+    main_mtime = int(os.path.getmtime(main_path))
 
-    if os.path.exists(output_path):
-        return open(output_path, "rb")
-
-    intro_path = intro_audio.path
-    main_path = main_audio_file.path
-
-    list_path = os.path.join(combined_dir, f"concat_{order.id}_{day_activity.id}_{audio_type}.txt")
-
-    with open(list_path, "w") as f:
-        f.write(f"file '{intro_path}'\n")
-        f.write(f"file '{main_path}'\n")
-
-    subprocess.run(
-        [
-            "ffmpeg",
-            "-y",
-            "-f", "concat",
-            "-safe", "0",
-            "-i", list_path,
-            "-c", "copy",
-            output_path,
-        ],
-        check=True,
+    cache_source = (
+        f"order={order.id}|"
+        f"intro={intro_identity}|"
+        f"intro_mtime={intro_mtime}|"
+        f"day_activity={day_activity.id}|"
+        f"audio_type={audio_type}|"
+        f"main_mtime={main_mtime}"
     )
 
-    return open(output_path, "rb")
+    cache_hash = hashlib.sha256(
+        cache_source.encode("utf-8")
+    ).hexdigest()[:24]
+
+    safe_audio_type = audio_type.replace("/", "-")
+
+    output_filename = (
+        f"order_{order.id}_"
+        f"activity_{day_activity.id}_"
+        f"{safe_audio_type}_"
+        f"{cache_hash}.mp3"
+    )
+
+    output_path = os.path.join(
+        combined_dir,
+        output_filename,
+    )
+
+    # Aynı intro daha önce aynı activity ile birleştirildiyse hazır dosyayı kullan.
+    if os.path.isfile(output_path) and os.path.getsize(output_path) > 0:
+        return open(output_path, "rb")
+
+    file_descriptor, temporary_output_path = tempfile.mkstemp(
+        prefix="nomaya_combined_",
+        suffix=".mp3",
+        dir=combined_dir,
+    )
+    os.close(file_descriptor)
+
+    try:
+        command = [
+            "ffmpeg",
+            "-hide_banner",
+            "-loglevel", "error",
+            "-y",
+
+            "-i", intro_path,
+            "-i", main_path,
+
+            "-filter_complex",
+            (
+                "[0:a]"
+                "aresample=44100,"
+                "aformat=sample_fmts=fltp:channel_layouts=stereo,"
+                "asetpts=N/SR/TB"
+                "[intro];"
+
+                "[1:a]"
+                "aresample=44100,"
+                "aformat=sample_fmts=fltp:channel_layouts=stereo,"
+                "asetpts=N/SR/TB"
+                "[activity];"
+
+                "[intro][activity]"
+                "concat=n=2:v=0:a=1"
+                "[combined]"
+            ),
+
+            "-map", "[combined]",
+            "-vn",
+            "-c:a", "libmp3lame",
+            "-b:a", "192k",
+            "-ar", "44100",
+            "-ac", "2",
+
+            temporary_output_path,
+        ]
+
+        result = subprocess.run(
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=180,
+            check=False,
+        )
+
+        if result.returncode != 0:
+            raise RuntimeError(
+                result.stderr or "FFmpeg audio birleştirme hatası."
+            )
+
+        if (
+            not os.path.isfile(temporary_output_path)
+            or os.path.getsize(temporary_output_path) == 0
+        ):
+            raise RuntimeError(
+                "Birleştirilmiş ses dosyası oluşturulamadı."
+            )
+
+        os.replace(
+            temporary_output_path,
+            output_path,
+        )
+
+        return open(output_path, "rb")
+
+    except Exception as exc:
+        # Sunucu logunda gerçek nedeni görebilmek için logla.
+        print(
+            f"Nomaya audio merge error "
+            f"order={order.id}, "
+            f"activity={day_activity.id}, "
+            f"type={audio_type}: {exc}"
+        )
+
+        try:
+            if os.path.exists(temporary_output_path):
+                os.remove(temporary_output_path)
+        except OSError:
+            pass
+
+        # Birleştirme bozulursa ana sistem çalışmaya devam etsin.
+        return main_audio_file.open("rb")
 from django.contrib.auth import update_session_auth_hash
 
 @login_required
