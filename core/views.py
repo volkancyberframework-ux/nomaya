@@ -147,35 +147,50 @@ def get_local_audio_path(audio_field):
     return path
 
 def send_telegram_message(message: str) -> bool:
-    token = getattr(settings, "TELEGRAM_BOT_TOKEN", "") or ""
-    chat_id = getattr(settings, "TELEGRAM_CHAT_ID", "") or ""
+    recipients = [
+        (
+            getattr(settings, "TELEGRAM_BOT_TOKEN", "") or "",
+            getattr(settings, "TELEGRAM_CHAT_ID", "") or "",
+        ),
+        (
+            getattr(settings, "TELEGRAM_BOT_TOKEN_2", "") or "",
+            getattr(settings, "TELEGRAM_CHAT_ID_2", "") or "",
+        ),
+    ]
 
-    if not token or not chat_id:
-        return False
+    at_least_one_sent = False
 
-    try:
-        url = f"https://api.telegram.org/bot{token}/sendMessage"
+    for token, chat_id in recipients:
+        if not token or not chat_id:
+            continue
 
-        payload = {
-            "chat_id": chat_id,
-            "text": message,
-            "parse_mode": "HTML",
-            "disable_web_page_preview": True,
-        }
+        try:
+            url = f"https://api.telegram.org/bot{token}/sendMessage"
 
-        req = urllib.request.Request(
-            url,
-            data=json.dumps(payload).encode("utf-8"),
-            headers={"Content-Type": "application/json"},
-            method="POST",
-        )
+            payload = {
+                "chat_id": chat_id,
+                "text": message,
+                "parse_mode": "HTML",
+                "disable_web_page_preview": True,
+            }
 
-        urllib.request.urlopen(req, timeout=3)
-        return True
+            req = urllib.request.Request(
+                url,
+                data=json.dumps(payload).encode("utf-8"),
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
 
-    except Exception:
-        return False
+            urllib.request.urlopen(req, timeout=5)
+            at_least_one_sent = True
 
+        except Exception as exc:
+            print(
+                f"Telegram mesajı gönderilemedi. "
+                f"Chat ID: {chat_id}, Hata: {exc}"
+            )
+
+    return at_least_one_sent
 
 def tg(v):
     return html.escape(str(v or "-"))

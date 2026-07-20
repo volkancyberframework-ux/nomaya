@@ -28,6 +28,10 @@ TELEGRAM_BOT_TOKEN = config("TELEGRAM_BOT_TOKEN", default="")
 TELEGRAM_CHAT_ID = config("TELEGRAM_CHAT_ID", default="")
 STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY", default="")
 
+TELEGRAM_BOT_TOKEN_2 = config("TELEGRAM_BOT_TOKEN_2", default="")
+TELEGRAM_CHAT_ID_2 = config("TELEGRAM_CHAT_ID_2", default="")
+
+
 # --- Auth yönlendirmeleri ---
 LOGIN_URL = "sign_in"
 LOGIN_REDIRECT_URL = "home"
