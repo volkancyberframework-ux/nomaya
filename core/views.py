@@ -483,7 +483,7 @@ def sign_up(request):
 from django.http import JsonResponse
 def home(request):
     countries = Country.objects.only("id", "name").order_by("name")
-    total_orders = Order.objects.filter(is_paid=True).count()
+    total_orders = CustomizedTravelRequest.objects.count()
 
     live_orders = (
         Order.objects
@@ -1965,6 +1965,8 @@ def order_customized_detail(request, public_id):
         "order-customized-detail.html",
         {"obj": obj}
     )
+
+
 @require_http_methods(["POST"])
 def order_customized_pay(request, public_id):
     obj = get_object_or_404(
@@ -1977,18 +1979,31 @@ def order_customized_pay(request, public_id):
 
     stripe.api_key = settings.STRIPE_SECRET_KEY
 
-    amount_cents = int(obj.total_price * 100)
+    # Stripe unit_amount en küçük para biriminde gönderilir.
+    # 60.90 USD => 6090 cent
+    amount_cents = int(
+        (obj.total_price * Decimal("100")).quantize(
+            Decimal("1"),
+            rounding=ROUND_HALF_UP,
+        )
+    )
 
     success_url = (
         request.build_absolute_uri(
-            reverse("order_customized_detail", kwargs={"public_id": obj.public_id})
+            reverse(
+                "order_customized_detail",
+                kwargs={"public_id": obj.public_id},
+            )
         )
         + "?payment=success&session_id={CHECKOUT_SESSION_ID}"
     )
 
     cancel_url = (
         request.build_absolute_uri(
-            reverse("order_customized_detail", kwargs={"public_id": obj.public_id})
+            reverse(
+                "order_customized_detail",
+                kwargs={"public_id": obj.public_id},
+            )
         )
         + "?payment=cancel"
     )
@@ -1997,26 +2012,34 @@ def order_customized_pay(request, public_id):
         mode="payment",
         customer_email=obj.email,
         client_reference_id=str(obj.public_id),
+
         metadata={
             "customized_request_id": str(obj.id),
             "public_id": str(obj.public_id),
             "location": obj.location,
             "dates": obj.dates,
             "travel_style": obj.travel_style,
+            "currency": "USD",
         },
+
         line_items=[
             {
                 "price_data": {
-                    "currency": "try",
+                    "currency": "usd",
                     "unit_amount": amount_cents,
                     "product_data": {
                         "name": "Kişiye Özel Nomaya Deneyimi",
-                        "description": f"{obj.location} • {obj.dates} • {obj.travel_style}",
+                        "description": (
+                            f"{obj.location} • "
+                            f"{obj.dates} • "
+                            f"{obj.travel_style}"
+                        ),
                     },
                 },
                 "quantity": 1,
             }
         ],
+
         success_url=success_url,
         cancel_url=cancel_url,
     )
@@ -2025,7 +2048,7 @@ def order_customized_pay(request, public_id):
         f"<b>💳 Stripe Checkout Oluşturuldu</b>\n\n"
         f"<b>ID:</b> {tg(obj.id)}\n"
         f"<b>Konum:</b> {tg(obj.location)}\n"
-        f"<b>Tutar:</b> ₺{tg(obj.total_price)}\n"
+        f"<b>Tutar:</b> ${tg(obj.total_price)} USD\n"
         f"<b>Checkout:</b> {tg(checkout_session.id)}"
     )
 
@@ -2051,7 +2074,7 @@ def stripe_checkout_order(request, public_id):
         line_items=[
             {
                 "price_data": {
-                    "currency": "try",
+                    "currency": "usd",
                     "unit_amount": amount_cents,
                     "product_data": {
                         "name": order.tour.title,
