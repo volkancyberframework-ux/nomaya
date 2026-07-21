@@ -639,6 +639,10 @@ from django.core.paginator import Paginator
 from django.utils import translation
 
 def tour_grid(request):
+
+    if not request.user.is_authenticated or not request.user.is_superuser:
+        raise Http404()
+
     country = request.GET.get("country")
     pax = request.GET.get("pax")
     dates = request.GET.get("dates")
