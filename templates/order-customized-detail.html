@@ -241,6 +241,24 @@
                 <div class="soft-note">{{ obj.travel_style }}</div>
               </div>
             </div>
+
+            <div class="summary-row">
+              <div class="summary-icon">📱</div>
+              <div>
+                <div class="fw-bold">İletişim</div>
+                <div class="soft-note">{{ obj.email }} • {{ obj.phone }}</div>
+              </div>
+            </div>
+
+            {% if obj.notes %}
+              <div class="summary-row">
+                <div class="summary-icon">📝</div>
+                <div>
+                  <div class="fw-bold">Notların</div>
+                  <div class="soft-note">{{ obj.notes }}</div>
+                </div>
+              </div>
+            {% endif %}
           </div>
 
           <div class="feature-box mb-4">

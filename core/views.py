@@ -495,7 +495,7 @@ def home(request):
         .order_by("-created_at")[:12]
     )
 
-    price_per_day = Decimal("100")
+    price_per_day = Decimal("9.99")
 
     if request.method == "POST":
         location = (request.POST.get("location") or "").strip()
@@ -514,6 +514,14 @@ def home(request):
 
         if not email or not phone:
             messages.error(request, "Devam etmek için e-posta ve telefon zorunludur.")
+            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "error": "Devam etmek için e-posta ve telefon zorunludur.",
+                    },
+                    status=400,
+                )
             return render(request, "index.html", {
                 "countries": countries,
                 "total_orders": total_orders,
@@ -569,9 +577,18 @@ def home(request):
         )
 
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-            return JsonResponse({"success": True})
+            return JsonResponse({
+                "success": True,
+                "redirect_url": reverse(
+                    "order_customized_detail",
+                    kwargs={"public_id": obj.public_id},
+                ),
+            })
 
-        return redirect("home")
+        return redirect(
+            "order_customized_detail",
+            public_id=obj.public_id,
+        )
 
     return render(request, "index.html", {
         "countries": countries,

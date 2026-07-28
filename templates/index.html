@@ -759,16 +759,10 @@
             </div>
 
             <p class="text-muted small text-center mt-3 mb-0">
-              🔒 Bilgilerin yalnızca sana özel seyahat planını hazırlamak için kullanılır.
+              Günlük <strong>${{ price_per_day }} USD</strong> • 🔒 Bilgilerin yalnızca sana özel seyahat planını hazırlamak için kullanılır.
             </p>
 
           </form>
-          <div id="successBox" class="alert alert-success mt-4 d-none text-center">
-            <h4 class="mb-2">🎉 Talebiniz alındı!</h4>
-            <p class="mb-0">
-                Ekibimiz en kısa sürede sizinle <strong>WhatsApp üzerinden iletişime geçecektir.</strong>
-            </p>
-        </div>
         </div>
       </div>
     </div>
@@ -1054,26 +1048,29 @@ document.getElementById("customTravelForm").addEventListener("submit", async fun
 
     const form = this;
     const button = form.querySelector("button[type='submit']");
-    const successBox = document.getElementById("successBox");
-
     button.disabled = true;
-    button.innerText = "Gönderiliyor...";
+    button.innerText = "Detaylar hazırlanıyor...";
 
-    const response = await fetch(form.action || window.location.href, {
-        method: "POST",
-        body: new FormData(form),
-        headers: {
-            "X-Requested-With": "XMLHttpRequest"
-        }
-    });
+    try {
+      const response = await fetch(form.action || window.location.href, {
+          method: "POST",
+          body: new FormData(form),
+          headers: {
+              "X-Requested-With": "XMLHttpRequest"
+          }
+      });
+      const data = await response.json();
 
-    if (response.ok) {
-        form.style.display = "none";
-        successBox.classList.remove("d-none");
-    } else {
+      if (response.ok && data.redirect_url) {
+          window.location.assign(data.redirect_url);
+          return;
+      }
+
+      throw new Error(data.error || "Bir hata oluştu. Lütfen tekrar deneyin.");
+    } catch (error) {
         button.disabled = false;
         button.innerText = "🚀 Bana Özel Deneyimimi Hazırla";
-        alert("Bir hata oluştu. Lütfen tekrar deneyin.");
+        alert(error.message || "Bir hata oluştu. Lütfen tekrar deneyin.");
     }
 });
 </script>
