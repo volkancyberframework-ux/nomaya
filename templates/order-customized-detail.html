@@ -121,6 +121,106 @@
     color: #6b7280;
   }
 
+  .experience-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .experience-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 12px 34px rgba(15,23,42,.07);
+  }
+
+  .experience-card .experience-icon { font-size: 28px; }
+  .experience-card h3 { font-size: 16px; margin: 10px 0 7px; }
+  .experience-card p { color: #64748b; font-size: 14px; margin: 0; line-height: 1.55; }
+
+  .miles-box {
+    background: linear-gradient(135deg, #312e81, #2563eb 55%, #0891b2);
+    color: #fff;
+    border-radius: 26px;
+    padding: 26px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .miles-number { font-size: clamp(38px, 7vw, 64px); font-weight: 900; line-height: 1; }
+  .miles-formula { color: rgba(255,255,255,.78); }
+
+  .example-tour {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 18px 20px;
+    border: 1px solid #dbeafe;
+    border-radius: 18px;
+    color: inherit;
+    text-decoration: none;
+    background: linear-gradient(135deg, #f8fafc, #eff6ff);
+    transition: .2s ease;
+  }
+
+  .example-tour:hover { transform: translateY(-2px); border-color: #60a5fa; color: inherit; }
+
+  .coming-soon {
+    border: 1px dashed #93c5fd;
+    background: #eff6ff;
+    border-radius: 18px;
+    padding: 18px;
+    color: #1e3a8a;
+  }
+
+  .payment-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    background: rgba(2,6,23,.82);
+    backdrop-filter: blur(10px);
+  }
+
+  .payment-overlay.is-open { display: flex; }
+  .payment-modal {
+    width: min(720px, 100%);
+    max-height: 94vh;
+    overflow: auto;
+    background: #fff;
+    border-radius: 26px;
+    box-shadow: 0 35px 100px rgba(0,0,0,.45);
+  }
+  .payment-modal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 22px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .payment-close {
+    border: 0;
+    background: #f1f5f9;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    font-size: 24px;
+    line-height: 1;
+  }
+  #embedded-checkout { min-height: 560px; }
+
+  @media (max-width: 767px) {
+    .experience-grid { grid-template-columns: 1fr; }
+    .nomaya-pay-page { padding: 28px 0; }
+    .nomaya-pay-card { border-radius: 22px; }
+    .example-tour { align-items: flex-start; }
+  }
+
   [data-bs-theme="dark"] .nomaya-pay-card,
   html.dark .nomaya-pay-card,
   body.dark .nomaya-pay-card,
@@ -192,11 +292,11 @@
           </div>
 
           <h1 class="display-6 fw-bold mb-3">
-            Sana en uygun özelleştirilmiş paketi hazırlıyoruz
+            Seyahatinin her adımı sana göre planlansın
           </h1>
 
           <p class="lead soft-note mb-0">
-            Sadece ödemeni tamamla. Nomaya, verdiğin bilgilere göre sana özel rota, öneriler ve sesli seyahat deneyimini hazırlamaya başlasın.
+            Maliyet etkin, kaliteli aktiviteleri senin ilgi alanlarına ve seyahat ritmine göre adım adım planlayacağız.
           </p>
         </div>
 
@@ -204,8 +304,8 @@
 
           {% if obj.is_paid %}
             <div class="alert alert-success mb-4" role="alert">
-              <strong>Ödemeniz alındı.</strong><br>
-              Ödeme sonrası size verdiğiniz WhatsApp numarası üzerinden iletişime geçilecektir.
+              <strong>Ödemenizi aldık.</strong><br>
+              WhatsApp'tan size ulaşacağız.
             </div>
           {% elif payment_result == "success" %}
             <div class="alert alert-info mb-4" role="alert">
@@ -230,7 +330,7 @@
               <div class="summary-icon">📅</div>
               <div>
                 <div class="fw-bold">Tarih</div>
-                <div class="soft-note">{{ obj.dates }}</div>
+                <div class="soft-note">{{ formatted_dates }} • {{ obj.days }} gün</div>
               </div>
             </div>
 
@@ -261,6 +361,24 @@
             {% endif %}
           </div>
 
+          <div class="experience-grid mb-4">
+            <div class="experience-card">
+              <div class="experience-icon">🧭</div>
+              <h3>Sana özel günlük plan</h3>
+              <p>Her gün için kaliteli, maliyet etkin ve gerçekten yapmak isteyeceğin aktiviteler seçilir.</p>
+            </div>
+            <div class="experience-card">
+              <div class="experience-icon">🎧</div>
+              <h3>Canlı sesli hikâyeler</h3>
+              <p>Nomaya uygulamasıyla gezerken bulunduğun yerlerin hikâyelerini tam zamanında dinlersin.</p>
+            </div>
+            <div class="experience-card">
+              <div class="experience-icon">💬</div>
+              <h3>WhatsApp asistanı</h3>
+              <p>Seyahat öncesinde ve yolculuk boyunca ihtiyacın olduğunda gerçek destek yanında olur.</p>
+            </div>
+          </div>
+
           <div class="feature-box mb-4">
             <h5 class="fw-bold mb-3">Ödeme sonrasında seni neler bekliyor?</h5>
 
@@ -269,6 +387,34 @@
             <div class="feature-item">✅ <span>Sesli Nomaya rehberliği ile kulaklığından yönlendirme</span></div>
             <div class="feature-item">✅ <span>Yerel ipuçları, sürpriz noktalar ve kişisel öneriler</span></div>
             <div class="feature-item">✅ <span>Mobil uygulama üzerinden tam Nomaya deneyimi</span></div>
+          </div>
+
+          <div class="miles-box mb-4 text-center">
+            <div class="small text-uppercase fw-bold mb-2">Bu seyahatte tahmini kazanacağın</div>
+            <div class="miles-number">{{ estimated_miles }} mil</div>
+            <div class="miles-formula mt-3">
+              Yaklaşık {{ estimated_activities }} aktivite: {{ obj.days }} gün × günde ortalama 4 aktivite × 200 mil
+              <br>Aktiviteleri tamamladıkça kazandığın milleri ileride Nomaya'da kullanabilirsin.
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <h5 class="fw-bold mb-2">Nomaya ile hazırlanmış örnek bir seyahati incele</h5>
+            <p class="soft-note">Uygulama deneyiminin rota, aktivite ve hikâye akışını bu iki bölümlük Vietnam seyahatinde görebilirsin.</p>
+            <div class="d-grid gap-2">
+              <a class="example-tour" href="/tours/erdi-bey-aile-turu-vietnam-1/" target="_blank" rel="noopener">
+                <span><strong>🇻🇳 Erdi Bey Aile Turu — Vietnam</strong><br><small class="soft-note">Seyahatin birinci bölümünü incele</small></span>
+                <span>↗</span>
+              </a>
+              <a class="example-tour" href="/tours/erdi-bey-aile-turu-vietnam-2/" target="_blank" rel="noopener">
+                <span><strong>🇻🇳 Erdi Bey Aile Turu — Devamı</strong><br><small class="soft-note">Seyahatin ikinci bölümünü incele</small></span>
+                <span>↗</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="coming-soon mb-4">
+            <strong>✈️ Çok yakında:</strong> Uçak bileti ve otel satın alma özelliği de Nomaya deneyimine ekleniyor.
           </div>
 
           <div class="total-box text-center mb-4">
@@ -280,16 +426,17 @@
           </div>
 
           {% if not obj.is_paid %}
-            <form method="post" action="{% url 'order_customized_pay' obj.public_id %}" class="d-grid">
+            <form method="post" action="{% url 'order_customized_pay' obj.public_id %}" class="d-grid" id="embeddedPaymentForm">
               {% csrf_token %}
               <button type="submit" class="btn pay-btn btn-lg">
-                Güvenli Ödemeye Geç →
+                Güvenli Ödeme Penceresini Aç →
               </button>
             </form>
           {% endif %}
 
           <p class="small soft-note text-center mt-4 mb-0">
-            Ödeme Stripe güvenli ödeme sayfasında tamamlanır. Ödeme sonrası size verdiğiniz WhatsApp numarası üzerinden iletişime geçilecektir.
+            Ödeme bu sayfadan ayrılmadan Stripe'ın güvenli ödeme penceresinde tamamlanır.
+            Ödeme sonrası verdiğiniz WhatsApp numarasından size ulaşacağız.
           </p>
 
         </div>
@@ -298,5 +445,86 @@
     </div>
   </div>
 </main>
+
+{% if not obj.is_paid %}
+  <div class="payment-overlay" id="paymentOverlay" aria-hidden="true">
+    <div class="payment-modal" role="dialog" aria-modal="true" aria-labelledby="paymentTitle">
+      <div class="payment-modal-head">
+        <div>
+          <strong id="paymentTitle">Güvenli Ödeme</strong>
+          <div class="small soft-note">Stripe tarafından korunur • ${{ obj.total_price }} USD</div>
+        </div>
+        <button class="payment-close" type="button" id="closePayment" aria-label="Ödeme penceresini kapat">×</button>
+      </div>
+      <div id="embedded-checkout"></div>
+    </div>
+  </div>
+  {{ stripe_publishable_key|json_script:"stripePublishableKey" }}
+  <script src="https://js.stripe.com/v3/"></script>
+  <script>
+    (() => {
+      const form = document.getElementById("embeddedPaymentForm");
+      const overlay = document.getElementById("paymentOverlay");
+      const closeButton = document.getElementById("closePayment");
+      const payButton = form && form.querySelector("button[type='submit']");
+      const publishableKey = JSON.parse(document.getElementById("stripePublishableKey").textContent);
+      let embeddedCheckout = null;
+
+      if (!form) return;
+
+      const closeModal = () => {
+        overlay.classList.remove("is-open");
+        overlay.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+      };
+
+      closeButton.addEventListener("click", closeModal);
+      overlay.addEventListener("click", (event) => {
+        if (event.target === overlay) closeModal();
+      });
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        if (!publishableKey) {
+          alert("Stripe yayınlanabilir anahtarı henüz tanımlanmamış.");
+          return;
+        }
+
+        payButton.disabled = true;
+        payButton.textContent = "Güvenli ödeme hazırlanıyor...";
+        overlay.classList.add("is-open");
+        overlay.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+
+        try {
+          if (!embeddedCheckout) {
+            const stripe = Stripe(publishableKey);
+            embeddedCheckout = await stripe.initEmbeddedCheckout({
+              fetchClientSecret: async () => {
+                const response = await fetch(form.action, {
+                  method: "POST",
+                  body: new FormData(form),
+                  headers: { "X-Requested-With": "XMLHttpRequest" }
+                });
+                const data = await response.json();
+                if (!response.ok || !data.client_secret) {
+                  throw new Error(data.error || "Ödeme penceresi hazırlanamadı.");
+                }
+                return data.client_secret;
+              }
+            });
+            embeddedCheckout.mount("#embedded-checkout");
+          }
+        } catch (error) {
+          closeModal();
+          alert(error.message || "Ödeme penceresi hazırlanamadı.");
+        } finally {
+          payButton.disabled = false;
+          payButton.textContent = "Güvenli Ödeme Penceresini Aç →";
+        }
+      });
+    })();
+  </script>
+{% endif %}
 
 {% endblock %}

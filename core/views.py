@@ -1965,7 +1965,7 @@ def order_customized(request):
             f"<b>Tarih:</b> {tg(obj.dates)}\n"
             f"<b>Gün:</b> {tg(obj.days)}\n"
             f"<b>Tarz:</b> {tg(obj.travel_style)}\n"
-            f"<b>Tutar:</b> ₺{tg(obj.total_price)}\n"
+            f"<b>Tutar:</b> ${tg(obj.total_price)} USD\n"
             f"<b>Not:</b> {tg(obj.notes)}"
         )
 
@@ -2003,7 +2003,35 @@ def order_customized_detail(request, public_id):
         {
             "obj": obj,
             "payment_result": payment_result,
+            "formatted_dates": _format_customized_dates(obj.dates),
+            "estimated_activities": obj.days * 4,
+            "estimated_miles": obj.days * 4 * 200,
+            "stripe_publishable_key": settings.STRIPE_PUBLISHABLE_KEY,
         }
+    )
+
+
+def _format_customized_dates(dates_str):
+    start, end, _ = _custom_days_from_dates(dates_str)
+    if not start or not end:
+        return dates_str
+
+    months = (
+        "", "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
+        "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık",
+    )
+    if start == end:
+        return f"{start.day} {months[start.month]} {start.year}"
+    if start.year == end.year and start.month == end.month:
+        return f"{start.day}–{end.day} {months[start.month]} {start.year}"
+    if start.year == end.year:
+        return (
+            f"{start.day} {months[start.month]} – "
+            f"{end.day} {months[end.month]} {end.year}"
+        )
+    return (
+        f"{start.day} {months[start.month]} {start.year} – "
+        f"{end.day} {months[end.month]} {end.year}"
     )
 
 
@@ -2013,6 +2041,18 @@ def order_customized_pay(request, public_id):
         CustomizedTravelRequest,
         public_id=public_id,
     )
+
+    if obj.is_paid:
+        return JsonResponse(
+            {"error": "Bu seyahat için ödeme zaten tamamlanmış."},
+            status=400,
+        )
+
+    if not settings.STRIPE_SECRET_KEY or not settings.STRIPE_PUBLISHABLE_KEY:
+        return JsonResponse(
+            {"error": "Ödeme sistemi henüz yapılandırılmamış."},
+            status=503,
+        )
 
     obj.payment_clicked = True
     obj.save(update_fields=["payment_clicked"])
@@ -2028,7 +2068,7 @@ def order_customized_pay(request, public_id):
         )
     )
 
-    success_url = (
+    return_url = (
         request.build_absolute_uri(
             reverse(
                 "order_customized_detail",
@@ -2038,51 +2078,47 @@ def order_customized_pay(request, public_id):
         + "?payment=success&session_id={CHECKOUT_SESSION_ID}"
     )
 
-    cancel_url = (
-        request.build_absolute_uri(
-            reverse(
-                "order_customized_detail",
-                kwargs={"public_id": obj.public_id},
-            )
-        )
-        + "?payment=cancel"
-    )
+    try:
+        checkout_session = stripe.checkout.Session.create(
+            mode="payment",
+            ui_mode="embedded",
+            customer_email=obj.email,
+            client_reference_id=str(obj.public_id),
 
-    checkout_session = stripe.checkout.Session.create(
-        mode="payment",
-        customer_email=obj.email,
-        client_reference_id=str(obj.public_id),
+            metadata={
+                "customized_request_id": str(obj.id),
+                "public_id": str(obj.public_id),
+                "location": obj.location,
+                "dates": obj.dates,
+                "travel_style": obj.travel_style,
+                "currency": "USD",
+            },
 
-        metadata={
-            "customized_request_id": str(obj.id),
-            "public_id": str(obj.public_id),
-            "location": obj.location,
-            "dates": obj.dates,
-            "travel_style": obj.travel_style,
-            "currency": "USD",
-        },
-
-        line_items=[
-            {
-                "price_data": {
-                    "currency": "usd",
-                    "unit_amount": amount_cents,
-                    "product_data": {
-                        "name": "Kişiye Özel Nomaya Deneyimi",
-                        "description": (
-                            f"{obj.location} • "
-                            f"{obj.dates} • "
-                            f"{obj.travel_style}"
-                        ),
+            line_items=[
+                {
+                    "price_data": {
+                        "currency": "usd",
+                        "unit_amount": amount_cents,
+                        "product_data": {
+                            "name": "Kişiye Özel Nomaya Deneyimi",
+                            "description": (
+                                f"{obj.location} • "
+                                f"{obj.dates} • "
+                                f"{obj.travel_style}"
+                            ),
+                        },
                     },
-                },
-                "quantity": 1,
-            }
-        ],
+                    "quantity": 1,
+                }
+            ],
 
-        success_url=success_url,
-        cancel_url=cancel_url,
-    )
+            return_url=return_url,
+        )
+    except stripe.error.StripeError:
+        return JsonResponse(
+            {"error": "Stripe ödeme penceresi şu anda hazırlanamadı."},
+            status=502,
+        )
 
     send_telegram_message(
         f"<b>💳 Stripe Checkout Oluşturuldu</b>\n\n"
@@ -2092,7 +2128,7 @@ def order_customized_pay(request, public_id):
         f"<b>Checkout:</b> {tg(checkout_session.id)}"
     )
 
-    return redirect(checkout_session.url)
+    return JsonResponse({"client_secret": checkout_session.client_secret})
 
 
 def _confirm_customized_payment(checkout_session):
