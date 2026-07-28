@@ -247,7 +247,9 @@
     font-size: 24px;
     line-height: 1;
   }
-  #embedded-checkout { min-height: 560px; }
+  #payment-element { min-height: 220px; padding: 22px; }
+  .payment-submit-wrap { padding: 0 22px 22px; }
+  .payment-error { color: #b91c1c; font-size: 14px; margin: 0 22px 16px; }
 
   @media (max-width: 767px) {
     .experience-grid { grid-template-columns: 1fr; }
@@ -569,19 +571,28 @@
         </div>
         <button class="payment-close" type="button" id="closePayment" aria-label="Ödeme penceresini kapat">×</button>
       </div>
-      <div id="embedded-checkout"></div>
+      <div id="payment-element"></div>
+      <div class="payment-error d-none" id="paymentError" role="alert"></div>
+      <div class="payment-submit-wrap d-grid">
+        <button class="btn pay-btn" type="button" id="confirmPayment">
+          ${{ obj.total_price }} USD Öde
+        </button>
+      </div>
     </div>
   </div>
   {{ stripe_publishable_key|json_script:"stripePublishableKey" }}
-  <script src="https://js.stripe.com/clover/stripe.js"></script>
+  <script src="https://js.stripe.com/v3/"></script>
   <script>
     (() => {
       const form = document.getElementById("embeddedPaymentForm");
       const overlay = document.getElementById("paymentOverlay");
       const closeButton = document.getElementById("closePayment");
+      const confirmButton = document.getElementById("confirmPayment");
+      const paymentError = document.getElementById("paymentError");
       const payButton = form && form.querySelector("button[type='submit']");
       const publishableKey = JSON.parse(document.getElementById("stripePublishableKey").textContent);
-      let embeddedCheckout = null;
+      let stripe = null;
+      let elements = null;
 
       if (!form) return;
 
@@ -589,6 +600,11 @@
         overlay.classList.remove("is-open");
         overlay.setAttribute("aria-hidden", "true");
         document.body.style.overflow = "";
+      };
+
+      const showPaymentError = (message) => {
+        paymentError.textContent = message;
+        paymentError.classList.remove("d-none");
       };
 
       closeButton.addEventListener("click", closeModal);
@@ -610,23 +626,34 @@
         document.body.style.overflow = "hidden";
 
         try {
-          if (!embeddedCheckout) {
-            const stripe = Stripe(publishableKey);
-            embeddedCheckout = await stripe.initEmbeddedCheckout({
-              fetchClientSecret: async () => {
-                const response = await fetch(form.action, {
-                  method: "POST",
-                  body: new FormData(form),
-                  headers: { "X-Requested-With": "XMLHttpRequest" }
-                });
-                const data = await response.json();
-                if (!response.ok || !data.client_secret) {
-                  throw new Error(data.error || "Ödeme penceresi hazırlanamadı.");
+          if (!elements) {
+            const response = await fetch(form.action, {
+              method: "POST",
+              body: new FormData(form),
+              headers: { "X-Requested-With": "XMLHttpRequest" }
+            });
+            const data = await response.json();
+            if (!response.ok || !data.client_secret) {
+              throw new Error(data.error || "Ödeme penceresi hazırlanamadı.");
+            }
+
+            stripe = Stripe(publishableKey, { locale: "tr" });
+            const isDark = document.documentElement.getAttribute("data-bs-theme") === "dark"
+              || document.documentElement.classList.contains("dark")
+              || document.body.classList.contains("dark");
+            elements = stripe.elements({
+              clientSecret: data.client_secret,
+              appearance: {
+                theme: isDark ? "night" : "stripe",
+                variables: {
+                  colorPrimary: "#2563eb",
+                  borderRadius: "12px",
+                  fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
                 }
-                return data.client_secret;
               }
             });
-            embeddedCheckout.mount("#embedded-checkout");
+            const paymentElement = elements.create("payment", { layout: "tabs" });
+            paymentElement.mount("#payment-element");
           }
         } catch (error) {
           closeModal();
@@ -634,6 +661,35 @@
         } finally {
           payButton.disabled = false;
           payButton.textContent = "Güvenli Ödeme Penceresini Aç →";
+        }
+      });
+
+      confirmButton.addEventListener("click", async () => {
+        if (!stripe || !elements) return;
+        confirmButton.disabled = true;
+        confirmButton.textContent = "Ödeme işleniyor...";
+        paymentError.classList.add("d-none");
+
+        const returnUrl = new URL(window.location.href);
+        returnUrl.search = "";
+        returnUrl.searchParams.set("payment", "success");
+
+        const result = await stripe.confirmPayment({
+          elements,
+          confirmParams: { return_url: returnUrl.toString() },
+          redirect: "if_required"
+        });
+
+        if (result.error) {
+          showPaymentError(result.error.message || "Ödeme tamamlanamadı.");
+          confirmButton.disabled = false;
+          confirmButton.textContent = "${{ obj.total_price }} USD Öde";
+          return;
+        }
+
+        if (result.paymentIntent && result.paymentIntent.status === "succeeded") {
+          returnUrl.searchParams.set("payment_intent", result.paymentIntent.id);
+          window.location.assign(returnUrl.toString());
         }
       });
     })();
