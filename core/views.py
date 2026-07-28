@@ -2054,6 +2054,20 @@ def order_customized_pay(request, public_id):
             status=503,
         )
 
+    secret_mode = "live" if settings.STRIPE_SECRET_KEY.startswith("sk_live_") else "test"
+    publishable_mode = "live" if settings.STRIPE_PUBLISHABLE_KEY.startswith("pk_live_") else "test"
+    if secret_mode != publishable_mode:
+        return JsonResponse(
+            {
+                "error": (
+                    "Stripe anahtarları aynı modda değil. "
+                    "STRIPE_SECRET_KEY ve STRIPE_PUBLISHABLE_KEY birlikte "
+                    "test veya birlikte live olmalı."
+                )
+            },
+            status=503,
+        )
+
     obj.payment_clicked = True
     obj.save(update_fields=["payment_clicked"])
 
@@ -2114,6 +2128,11 @@ def order_customized_pay(request, public_id):
 
             return_url=return_url,
         )
+        if bool(checkout_session.livemode) != (publishable_mode == "live"):
+            return JsonResponse(
+                {"error": "Stripe oturumu ile yayınlanabilir anahtar aynı modda değil."},
+                status=503,
+            )
     except stripe.error.StripeError:
         return JsonResponse(
             {"error": "Stripe ödeme penceresi şu anda hazırlanamadı."},
