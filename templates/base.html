@@ -444,50 +444,8 @@
 <footer class="nomaya-footer bg-dark pt-5">
   <div class="container">
 
-    <div class="row g-3 mb-5">
-      <div class="col-6 col-lg-3">
-        <div class="nomaya-trust-card h-100">
-          <div class="nomaya-trust-icon">🏅</div>
-          <div>
-            <div class="fw-bold text-white">Nomaya Milleri</div>
-            <div class="small text-body-secondary">Aktivite tamamla, mil kazan</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-6 col-lg-3">
-        <div class="nomaya-trust-card h-100">
-          <div class="nomaya-trust-icon">🧭</div>
-          <div>
-            <div class="fw-bold text-white">Kişisel Rota</div>
-            <div class="small text-body-secondary">Tarzına göre hazırlanır</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-6 col-lg-3">
-        <div class="nomaya-trust-card h-100">
-          <div class="nomaya-trust-icon">💬</div>
-          <div>
-            <div class="fw-bold text-white">WhatsApp Asistan</div>
-            <div class="small text-body-secondary">Yolda gerçek destek</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-6 col-lg-3">
-        <div class="nomaya-trust-card h-100">
-          <div class="nomaya-trust-icon">🎧</div>
-          <div>
-            <div class="fw-bold text-white">Sesli Yol Arkadaşı</div>
-            <div class="small text-body-secondary">Keşfi daha canlı yapar</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <div class="row g-4">
-      <div class="col-lg-5">
+      <div class="col-lg-6">
         <a href="{% url 'home' %}" class="d-inline-flex align-items-center text-decoration-none">
           <img src="{% static 'assets/images/logo-icon.svg' %}" class="logo-icon me-2" alt="" aria-hidden="true" width="64">
           <img src="{% static 'assets/images/logo-light.svg' %}" class="logo-wordmark" alt="Nomaya logo" width="180">
@@ -499,10 +457,6 @@
         </p>
 
         <div class="d-flex flex-wrap gap-2 mb-4">
-          <a href="{% url 'home' %}" class="btn btn-primary rounded-pill px-4">
-            Nomaya.co’ya Git
-          </a>
-
           <a href="https://wa.me/32476073171?text={{ 'Merhaba Nomaya! Seyahatim için bilgi almak istiyorum.'|urlencode }}"
              target="_blank" rel="noopener" class="btn btn-outline-light rounded-pill px-4">
             WhatsApp Destek
@@ -516,9 +470,9 @@
         </p>
       </div>
 
-      <div class="col-lg-7 ms-auto">
+      <div class="col-lg-5 ms-auto">
         <div class="row g-4">
-          <div class="col-6 col-md-4">
+          <div class="col-6">
             <h5 class="text-white mb-2 mb-md-4">Nomaya</h5>
             <ul class="nav flex-column text-primary-hover">
               <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'home' %}">Ana Sayfa</a></li>
@@ -528,17 +482,7 @@
             </ul>
           </div>
 
-          <div class="col-6 col-md-4">
-            <h5 class="text-white mb-2 mb-md-4">Deneyim</h5>
-            <ul class="nav flex-column text-primary-hover">
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'home' %}"><i class="bi bi-map me-2"></i>Kişisel Rota</a></li>
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'home' %}"><i class="bi bi-headphones me-2"></i>Sesli Rehber</a></li>
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'home' %}"><i class="bi bi-whatsapp me-2"></i>WhatsApp Asistan</a></li>
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'home' %}"><i class="bi bi-stars me-2"></i>Özel Seyahat Akışı</a></li>
-            </ul>
-          </div>
-
-          <div class="col-12 col-md-4">
+          <div class="col-6">
             <h5 class="text-white mb-2 mb-md-4">Yasal</h5>
             <ul class="nav flex-column text-primary-hover">
               <li class="nav-item"><a class="nav-link text-body-secondary" href="#" data-bs-toggle="modal" data-bs-target="#supportModal">Destek</a></li>
@@ -554,7 +498,7 @@
     <hr class="my-4">
 
     <div class="row g-4 align-items-center">
-      <div class="col-lg-4">
+      <div class="col-lg-6">
         <div class="small text-body-secondary mb-2">Nomaya uygulamasını indir</div>
         <div class="d-flex flex-wrap gap-2">
           <a href="https://apps.apple.com/tr/app/nomaya-asistan/id6782041383" target="_blank" rel="noopener" class="d-inline-flex" aria-label="Nomaya Asistan'ı App Store'dan indir">
@@ -567,14 +511,7 @@
         </div>
       </div>
 
-      <div class="col-lg-4 text-lg-center">
-        <div class="small text-body-secondary mb-2">İletişim</div>
-        <a href="mailto:destek@nomaya.co" class="text-body-secondary text-primary-hover">
-          destek@nomaya.co
-        </a>
-      </div>
-
-      <div class="col-lg-4 text-lg-end">
+      <div class="col-lg-6 text-lg-end">
         <div class="small text-body-secondary mb-2">Bizi takip edin</div>
         <ul class="list-inline mb-0">
           <li class="list-inline-item">
@@ -635,27 +572,6 @@
     pointer-events:none;
   }
   .nomaya-footer > .container{ position:relative; z-index:1; }
-  .nomaya-trust-card{
-    display:flex;
-    align-items:center;
-    gap: .85rem;
-    padding: 1rem;
-    border: 1px solid rgba(255,255,255,.10);
-    border-radius: 1rem;
-    background: rgba(255,255,255,.045);
-    backdrop-filter: blur(8px);
-  }
-  .nomaya-trust-icon{
-    width: 42px;
-    height: 42px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    border-radius: 999px;
-    background: rgba(255,255,255,.10);
-    font-size: 1.25rem;
-    flex: 0 0 auto;
-  }
   .nomaya-check{
     display:inline-flex;
     align-items:center;
@@ -676,15 +592,6 @@
     transform: translateX(3px);
   }
   @media (max-width: 576px){
-    .nomaya-trust-card{
-      align-items:flex-start;
-      padding:.85rem;
-    }
-    .nomaya-trust-icon{
-      width:36px;
-      height:36px;
-      font-size:1rem;
-    }
   }
 </style>
 
