@@ -80,6 +80,11 @@ urlpatterns = [
         name="order_customized_pay"
     ),
     path(
+        "stripe/webhook/",
+        views.stripe_webhook,
+        name="stripe_webhook",
+    ),
+    path(
     "update-forced-password/",
     views.update_forced_password,
     name="update_forced_password"

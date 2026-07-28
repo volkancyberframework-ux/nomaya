@@ -7,6 +7,8 @@ services:
         value: yourproject.settings  # kendi path'in
       - key: PYTHON_VERSION
         value: 3.13.0
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
       # SECRET_KEY, ALLOWED_HOSTS vb. ortam değişkenlerini Render panelinden ekleyebilirsin
     buildCommand: |
       pip install -r requirements.txt

@@ -202,6 +202,21 @@
 
         <div class="p-4 p-md-5">
 
+          {% if obj.is_paid %}
+            <div class="alert alert-success mb-4" role="alert">
+              <strong>Ödemeniz alındı.</strong><br>
+              Ödeme sonrası size verdiğiniz WhatsApp numarası üzerinden iletişime geçilecektir.
+            </div>
+          {% elif payment_result == "success" %}
+            <div class="alert alert-info mb-4" role="alert">
+              Ödemeniz doğrulanıyor. Onaylandığında verdiğiniz WhatsApp numarası üzerinden iletişime geçilecektir.
+            </div>
+          {% elif payment_result == "cancel" %}
+            <div class="alert alert-warning mb-4" role="alert">
+              Ödeme tamamlanmadı. Bilgilerinizi kaybetmeden yeniden deneyebilirsiniz.
+            </div>
+          {% endif %}
+
           <div class="summary-box mb-4">
             <div class="summary-row">
               <div class="summary-icon">📍</div>
@@ -243,18 +258,20 @@
             <div class="display-4 fw-bold mb-2">
               ${{ obj.total_price }} USD
             </div>
-            <div class="text-white-50">Sen ve kulaklığın yeter. 🎧</div>
+            <div class="text-white-50">${{ obj.price_per_day }} × {{ obj.days }} gün</div>
           </div>
 
-          <form method="post" action="{% url 'order_customized_pay' obj.public_id %}" class="d-grid">
-            {% csrf_token %}
-            <button type="submit" class="btn pay-btn btn-lg">
-              Güvenli Ödemeye Geç →
-            </button>
-          </form>
+          {% if not obj.is_paid %}
+            <form method="post" action="{% url 'order_customized_pay' obj.public_id %}" class="d-grid">
+              {% csrf_token %}
+              <button type="submit" class="btn pay-btn btn-lg">
+                Güvenli Ödemeye Geç →
+              </button>
+            </form>
+          {% endif %}
 
           <p class="small soft-note text-center mt-4 mb-0">
-            Ödeme Stripe güvenli ödeme sayfasında tamamlanır. Ödeme sonrası tüm detaylara erişebileceksin.
+            Ödeme Stripe güvenli ödeme sayfasında tamamlanır. Ödeme sonrası size verdiğiniz WhatsApp numarası üzerinden iletişime geçilecektir.
           </p>
 
         </div>

@@ -25,6 +25,9 @@ from django.shortcuts import render
 import stripe
 from django.conf import settings
 from django.urls import reverse
+from django.db import transaction
+from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 # core/views.py
 from urllib.parse import urlencode
 from django.core.paginator import Paginator
@@ -561,7 +564,7 @@ def home(request):
             f"<b>Tarih:</b> {tg(obj.dates)}\n"
             f"<b>Gün:</b> {tg(obj.days)}\n"
             f"<b>Tarz:</b> {tg(obj.travel_style)}\n"
-            f"<b>Tutar:</b> ₺{tg(obj.total_price)}\n"
+            f"<b>Tutar:</b> ${tg(obj.total_price)} USD\n"
             f"<b>Not:</b> {tg(obj.notes)}"
         )
 
@@ -1964,10 +1967,26 @@ def order_customized_detail(request, public_id):
         public_id=public_id
     )
 
+    payment_result = request.GET.get("payment", "")
+    session_id = request.GET.get("session_id", "")
+    if payment_result == "success" and session_id and settings.STRIPE_SECRET_KEY:
+        try:
+            stripe.api_key = settings.STRIPE_SECRET_KEY
+            checkout_session = stripe.checkout.Session.retrieve(session_id)
+            if checkout_session.get("client_reference_id") == str(obj.public_id):
+                _confirm_customized_payment(checkout_session)
+                obj.refresh_from_db()
+        except stripe.error.StripeError:
+            # The signed webhook remains the authoritative fallback.
+            pass
+
     return render(
         request,
         "order-customized-detail.html",
-        {"obj": obj}
+        {
+            "obj": obj,
+            "payment_result": payment_result,
+        }
     )
 
 
@@ -2057,6 +2076,77 @@ def order_customized_pay(request, public_id):
     )
 
     return redirect(checkout_session.url)
+
+
+def _confirm_customized_payment(checkout_session):
+    """Mark a customized request paid once and send its Telegram notification."""
+    metadata = checkout_session.get("metadata") or {}
+    request_id = metadata.get("customized_request_id")
+    if not request_id or checkout_session.get("payment_status") != "paid":
+        return False
+
+    with transaction.atomic():
+        obj = CustomizedTravelRequest.objects.select_for_update().filter(
+            id=request_id
+        ).first()
+        if not obj or obj.is_paid:
+            return bool(obj)
+
+        expected_amount = int(
+            (obj.total_price * Decimal("100")).quantize(
+                Decimal("1"),
+                rounding=ROUND_HALF_UP,
+            )
+        )
+        if (
+            checkout_session.get("currency") != "usd"
+            or checkout_session.get("amount_total") != expected_amount
+        ):
+            return False
+
+        obj.is_paid = True
+        obj.paid_at = timezone.now()
+        obj.save(update_fields=["is_paid", "paid_at"])
+
+        transaction.on_commit(lambda: send_telegram_message(
+            f"<b>✅ Kişiye Özel Nomaya Ödemesi Alındı</b>\n\n"
+            f"<b>ID:</b> {tg(obj.id)}\n"
+            f"<b>E-posta:</b> {tg(obj.email)}\n"
+            f"<b>Telefon:</b> {tg(obj.phone)}\n"
+            f"<b>Konum:</b> {tg(obj.location)}\n"
+            f"<b>Tarih:</b> {tg(obj.dates)}\n"
+            f"<b>Gün:</b> {tg(obj.days)}\n"
+            f"<b>Tutar:</b> ${tg(obj.total_price)} USD\n"
+            f"<b>Stripe Checkout:</b> {tg(checkout_session.get('id'))}"
+        ))
+    return True
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def stripe_webhook(request):
+    """Receive signed Stripe Checkout events."""
+    webhook_secret = settings.STRIPE_WEBHOOK_SECRET
+    if not webhook_secret:
+        return HttpResponse("Stripe webhook is not configured.", status=503)
+
+    try:
+        event = stripe.Webhook.construct_event(
+            request.body,
+            request.META.get("HTTP_STRIPE_SIGNATURE", ""),
+            webhook_secret,
+        )
+    except (ValueError, stripe.error.SignatureVerificationError):
+        return HttpResponse("Invalid Stripe signature.", status=400)
+
+    if event["type"] == "checkout.session.completed":
+        session = event["data"]["object"]
+        # Other Checkout flows in the project do not carry this metadata key.
+        if (session.get("metadata") or {}).get("customized_request_id"):
+            if not _confirm_customized_payment(session):
+                return HttpResponse("Payment details did not match.", status=400)
+
+    return HttpResponse(status=200)
 
 import stripe
 
