@@ -288,9 +288,9 @@
                 <ul class="list-group list-group-flush list-unstyled p-2">
                   <li>
                     <div class="list-group-item rounded notif-unread border-0 mb-1 p-3 no-link">
-                      <h6 class="mb-2">Mil kazanma özelliği yolda! ✈️</h6>
-                      <p class="mb-0 small">Uçuş, otel ve aktivitelerden mil toplayabileceksiniz.</p>
-                      <span class="notif-time">Güncel</span>
+                      <h6 class="mb-2">Nomaya Milleri aktif! 🏅</h6>
+                      <p class="mb-0 small">Aktiviteleri tamamladıkça mil kazanabilir, millerini sonraki Nomaya seyahatlerinde kullanabilirsin.</p>
+                      <span class="notif-time">Yeni</span>
                     </div>
                   </li>
                   <li>
@@ -447,10 +447,10 @@
     <div class="row g-3 mb-5">
       <div class="col-6 col-lg-3">
         <div class="nomaya-trust-card h-100">
-          <div class="nomaya-trust-icon">🔒</div>
+          <div class="nomaya-trust-icon">🏅</div>
           <div>
-            <div class="fw-bold text-white">Güvenli Deneyim</div>
-            <div class="small text-body-secondary">Seyahatin boyunca yanında</div>
+            <div class="fw-bold text-white">Nomaya Milleri</div>
+            <div class="small text-body-secondary">Aktivite tamamla, mil kazan</div>
           </div>
         </div>
       </div>
@@ -494,8 +494,8 @@
         </a>
 
         <p class="my-3 text-body-secondary">
-          Nomaya; kişiye özel seyahat akışları, sesli yönlendirmeler ve WhatsApp asistan desteğiyle
-          yolculuğunu daha sade, daha güvenli ve daha kişisel hale getirir.
+          Nomaya; kişiye özel seyahat akışları, canlı sesli hikâyeler ve 7/24 WhatsApp asistanıyla
+          gittiğin yeri sadece görmeni değil, anlayarak ve gerçekten yaşamanı sağlar.
         </p>
 
         <div class="d-flex flex-wrap gap-2 mb-4">
@@ -557,12 +557,13 @@
       <div class="col-lg-4">
         <div class="small text-body-secondary mb-2">Nomaya uygulamasını indir</div>
         <div class="d-flex flex-wrap gap-2">
-          <a href="{% url 'home' %}" class="d-inline-flex" aria-label="App Store'dan indir">
+          <a href="https://apps.apple.com/tr/app/nomaya-asistan/id6782041383" target="_blank" rel="noopener" class="d-inline-flex" aria-label="Nomaya Asistan'ı App Store'dan indir">
             <img src="{% static 'assets/images/element/app-store.svg' %}" alt="App Store'dan indir" style="height:42px; width:auto; display:block;">
           </a>
-          <a href="{% url 'home' %}" class="d-inline-flex" aria-label="Google Play'den indir">
+          <span class="d-inline-flex position-relative opacity-50" title="Android uygulaması çok yakında" aria-label="Google Play sürümü çok yakında">
             <img src="{% static 'assets/images/element/google-play.svg' %}" alt="Google Play'den indir" style="height:42px; width:auto; display:block;">
-          </a>
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">Yakında</span>
+          </span>
         </div>
       </div>
 

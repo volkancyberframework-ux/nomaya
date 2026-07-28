@@ -148,6 +148,51 @@
     background: #fff7f1;
   }
 
+  .nomaya-value-section {
+    padding: 28px 0 68px;
+    background: linear-gradient(180deg, #fffaf6, #fff7f1);
+  }
+
+  .nomaya-value-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .nomaya-value-card {
+    position: relative;
+    overflow: hidden;
+    padding: 26px;
+    border: 1px solid rgba(37,99,235,.12);
+    border-radius: 24px;
+    background: rgba(255,255,255,.88);
+    box-shadow: 0 18px 50px rgba(15,23,42,.08);
+  }
+
+  .nomaya-value-card::after {
+    content: "";
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    right: -50px;
+    top: -55px;
+    border-radius: 50%;
+    background: rgba(6,182,212,.10);
+  }
+
+  .nomaya-value-icon { font-size: 30px; }
+  .nomaya-value-card h3 { margin: 13px 0 8px; font-size: 19px; color: #172033; }
+  .nomaya-value-card p { margin: 0; color: #64748b; line-height: 1.65; }
+
+  .nomaya-reveal.reveal-ready {
+    opacity: 0;
+    transform: translateY(34px);
+    transition: opacity .7s ease, transform .7s cubic-bezier(.2,.75,.25,1);
+  }
+  .nomaya-reveal.reveal-ready.is-revealed { opacity: 1; transform: translateY(0); }
+  .nomaya-value-card:nth-child(2) { transition-delay: .10s; }
+  .nomaya-value-card:nth-child(3) { transition-delay: .20s; }
+
   .nomaya-section-title {
     max-width: 720px;
     margin: 0 auto;
@@ -448,7 +493,8 @@
   }
 
   [data-bs-theme="dark"] .nomaya-section-soft,
-  [data-bs-theme="dark"] .nomaya-live-section {
+  [data-bs-theme="dark"] .nomaya-live-section,
+  [data-bs-theme="dark"] .nomaya-value-section {
     background: #111827 !important;
   }
 
@@ -459,7 +505,8 @@
   [data-bs-theme="dark"] .nomaya-card .fw-bold,
   [data-bs-theme="dark"] .nomaya-label,
   [data-bs-theme="dark"] .nomaya-live-head h2,
-  [data-bs-theme="dark"] .nomaya-live-card h3 {
+  [data-bs-theme="dark"] .nomaya-live-card h3,
+  [data-bs-theme="dark"] .nomaya-value-card h3 {
     color: #f9fafb !important;
   }
 
@@ -468,7 +515,8 @@
   [data-bs-theme="dark"] .founder-text,
   [data-bs-theme="dark"] .nomaya-live-head p,
   [data-bs-theme="dark"] .nomaya-live-card p,
-  [data-bs-theme="dark"] .live-card-bottom {
+  [data-bs-theme="dark"] .live-card-bottom,
+  [data-bs-theme="dark"] .nomaya-value-card p {
     color: #cbd5e1 !important;
   }
 
@@ -481,6 +529,20 @@
     background: #111827 !important;
     border-color: #374151 !important;
     color: #f9fafb !important;
+  }
+
+  [data-bs-theme="dark"] .nomaya-value-card {
+    background: #172033 !important;
+    border-color: #334155 !important;
+    box-shadow: none !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nomaya-reveal.reveal-ready {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
   }
 
   [data-bs-theme="dark"] .nomaya-card .text-muted {
@@ -513,6 +575,8 @@
   }
 
   @media (max-width: 768px) {
+
+    .nomaya-value-grid { grid-template-columns: 1fr; }
     .nomaya-hero {
       min-height: auto;
       padding: 46px 0;
@@ -629,18 +693,18 @@
 
           <h1 class="display-4 fw-bold mb-4">
             Ortalama bir gezgine gün başı
-            <span class="nomaya-saving-inline">₺<span id="nomayaSavingAmount">5.243</span></span>
-            tasarruf ettiriyoruz.
+            <span class="nomaya-saving-inline">₺<span id="nomayaSavingAmount">5.357</span></span>
+            tasarruf ettirirken, gittiği yeri gerçekten anlamasını sağlıyoruz.
           </h1>
 
           <p class="lead text-white-50 mb-4">
-            Konum, tarih ve seyahat tarzını seç. Nomaya sana özel rota, öneriler ve kişiselleştirilmiş içerikler oluştursun.
+            Daha az araştır, gereksiz harcamalardan kaçın; doğru yerde doğru hikâyeyi dinleyerek daha kaliteli ve bilinçli gez.
           </p>
 
           <div class="d-flex flex-column gap-2 text-white-50">
-            <div>✓ Sana özel rota planı</div>
-            <div>✓ Kişiselleştirilmiş deneyim</div>
-            <div>✓ WhatsApp asistan desteği</div>
+            <div>✓ Sana özel, maliyet etkin rota planı</div>
+            <div>✓ Konuma göre canlı sesli hikâyeler</div>
+            <div>✓ 7/24 gerçek WhatsApp asistanı</div>
           </div>
         </div>
 
@@ -768,7 +832,29 @@
     </div>
   </section>
 
-  <section class="nomaya-live-section">
+  <section class="nomaya-value-section">
+    <div class="container">
+      <div class="nomaya-value-grid">
+        <article class="nomaya-value-card nomaya-reveal">
+          <div class="nomaya-value-icon">💸</div>
+          <h3>Daha akıllı harca</h3>
+          <p>Turist tuzakları yerine bütçene ve tarzına uyan kaliteli aktiviteleri seçer, zamanını ve paranı verimli kullanırsın.</p>
+        </article>
+        <article class="nomaya-value-card nomaya-reveal">
+          <div class="nomaya-value-icon">🎧</div>
+          <h3>Sadece görme, anla</h3>
+          <p>Bulunduğun yere özel sesli hikâyelerle sokakların, yapıların ve insanların ardındaki anlamı keŝfedersin.</p>
+        </article>
+        <article class="nomaya-value-card nomaya-reveal">
+          <div class="nomaya-value-icon">🏅</div>
+          <h3>Gezdikçe mil kazan</h3>
+          <p>Doğrulanmış aktivitelerini tamamladıkça Nomaya Mili kazanır, millerini sonraki seyahatlerinde kullanırsın.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="nomaya-live-section nomaya-reveal">
     <div class="container">
       <div class="nomaya-live-head">
         <div class="live-badge">
@@ -832,7 +918,7 @@
     </div>
   </section>
 
-  <section class="nomaya-section">
+  <section class="nomaya-section nomaya-reveal">
     <div class="container">
 
       <h2 class="nomaya-section-title">
@@ -900,7 +986,7 @@
     </div>
   </section>
 
-  <section class="nomaya-section nomaya-section-soft">
+  <section class="nomaya-section nomaya-section-soft nomaya-reveal">
     <div class="container">
 
       <h2 class="nomaya-section-title">
@@ -975,7 +1061,7 @@
   </section>
 
 
-  <section class="nomaya-section">
+  <section class="nomaya-section nomaya-reveal">
     <div class="container">
       <div class="nomaya-final-box">
         <div class="founder-pill">Rota değil, yanında biri var hissi</div>
@@ -1003,7 +1089,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function updateSavingAmount() {
     if (!savingEl) return;
 
-    const baseAmount = 5243;
+    const baseAmount = 5357;
     const variation = Math.floor(Math.random() * 381) - 190;
     const liveAmount = baseAmount + variation;
 
@@ -1012,6 +1098,24 @@ document.addEventListener("DOMContentLoaded", function () {
 
   updateSavingAmount();
   setInterval(updateSavingAmount, 2600);
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const revealItems = document.querySelectorAll(".nomaya-reveal");
+  if (!revealItems.length || !("IntersectionObserver" in window)) return;
+
+  revealItems.forEach((item) => item.classList.add("reveal-ready"));
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add("is-revealed");
+      observer.unobserve(entry.target);
+    });
+  }, { threshold: .12, rootMargin: "0px 0px -45px 0px" });
+
+  revealItems.forEach((item) => observer.observe(item));
 });
 </script>
 

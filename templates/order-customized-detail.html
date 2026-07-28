@@ -228,6 +228,7 @@
     max-height: 94vh;
     overflow: auto;
     background: #fff;
+    color: #111827;
     border-radius: 26px;
     box-shadow: 0 35px 100px rgba(0,0,0,.45);
   }
@@ -237,7 +238,10 @@
     align-items: center;
     padding: 18px 22px;
     border-bottom: 1px solid #e5e7eb;
+    background: #fff;
+    color: #111827;
   }
+  .payment-modal-head .soft-note { color: #6b7280 !important; }
   .payment-close {
     border: 0;
     background: #f1f5f9;
@@ -638,15 +642,15 @@
             }
 
             stripe = Stripe(publishableKey, { locale: "tr" });
-            const isDark = document.documentElement.getAttribute("data-bs-theme") === "dark"
-              || document.documentElement.classList.contains("dark")
-              || document.body.classList.contains("dark");
             elements = stripe.elements({
               clientSecret: data.client_secret,
               appearance: {
-                theme: isDark ? "night" : "stripe",
+                theme: "stripe",
                 variables: {
                   colorPrimary: "#2563eb",
+                  colorBackground: "#ffffff",
+                  colorText: "#30313d",
+                  colorDanger: "#df1b41",
                   borderRadius: "12px",
                   fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
                 }
