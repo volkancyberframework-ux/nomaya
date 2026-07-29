@@ -26,8 +26,10 @@ import stripe
 from django.conf import settings
 from django.urls import reverse
 from django.db import transaction
-from django.http import HttpResponse
+from django.db import connection
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET
 # core/views.py
 from urllib.parse import urlencode
 from django.core.paginator import Paginator
@@ -69,6 +71,19 @@ from django.core.files.base import ContentFile
 from django.conf import settings
 
 User = get_user_model()
+
+
+@require_GET
+def health_check(request):
+    """Render deploy gating: process and database must both be ready."""
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+            cursor.fetchone()
+    except Exception:
+        return JsonResponse({"status": "unhealthy"}, status=503)
+
+    return JsonResponse({"status": "ok"})
 
 import hashlib
 import os

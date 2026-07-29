@@ -4,7 +4,7 @@ services:
     runtime: python
     envVars:
       - key: DJANGO_SETTINGS_MODULE
-        value: yourproject.settings  # kendi path'in
+        value: nomaya.settings
       - key: PYTHON_VERSION
         value: 3.13.0
       - key: STRIPE_WEBHOOK_SECRET
@@ -14,10 +14,6 @@ services:
       # SECRET_KEY, ALLOWED_HOSTS vb. ortam değişkenlerini Render panelinden ekleyebilirsin
     buildCommand: |
       pip install -r requirements.txt
-      # splide js içindeki source map satırını kaldır
-      sed -i '/sourceMappingURL=splide\.min\.js\.map/d' assets/vendor/splide-master/dist/js/splide.min.js
-      # static topla
       python manage.py collectstatic --noinput
-    startCommand: |
-      # örnek: gunicorn ile çalıştır
-      gunicorn yourproject.wsgi:application --bind 0.0.0.0:10000
+    startCommand: gunicorn nomaya.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120 --graceful-timeout 30
+    healthCheckPath: /healthz/
