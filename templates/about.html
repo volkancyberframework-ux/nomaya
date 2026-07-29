@@ -3,6 +3,57 @@
 
 {% block content %}
 
+<style>
+	.nomaya-team-card {
+		height: 100%;
+		border: 1px solid rgba(148, 163, 184, .22);
+		border-radius: 24px;
+		background: var(--bs-body-bg);
+		overflow: hidden;
+		box-shadow: 0 18px 50px rgba(15, 23, 42, .08);
+		transition: transform .25s ease, box-shadow .25s ease;
+	}
+	.nomaya-team-card:hover {
+		transform: translateY(-5px);
+		box-shadow: 0 24px 65px rgba(15, 23, 42, .13);
+	}
+	.nomaya-team-photo,
+	.nomaya-team-avatar {
+		width: 100%;
+		aspect-ratio: 1 / 1;
+		object-fit: cover;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.nomaya-team-avatar {
+		font-size: clamp(54px, 7vw, 88px);
+		font-weight: 900;
+		letter-spacing: -.06em;
+		color: #fff;
+		background: linear-gradient(135deg, #2563eb, #06b6d4);
+	}
+	.nomaya-team-avatar.avatar-warm {
+		background: linear-gradient(135deg, #7c3aed, #ec4899);
+	}
+	.nomaya-team-body { padding: 22px; }
+	.nomaya-team-role {
+		display: inline-flex;
+		padding: 6px 11px;
+		border-radius: 999px;
+		background: rgba(37, 99, 235, .10);
+		color: #2563eb;
+		font-size: 12px;
+		font-weight: 800;
+		letter-spacing: .04em;
+	}
+	.nomaya-team-copy {
+		color: var(--bs-secondary-color);
+		font-size: 14px;
+		line-height: 1.65;
+	}
+</style>
+
 <!-- **************** MAIN CONTENT START **************** -->
 <main>
 
@@ -13,8 +64,8 @@ Main banner START -->
 		<div class="row mb-5">
 			<div class="col-xl-10 mx-auto text-center">
 				<!-- Title -->
-				<h1>Nomaya — Ülke ülke gezerken başlayan bir aşkın ürünü; şimdi sizin yol arkadaşınız.</h1>
-				<p class="lead">Dünyayı kendi hızınızda, bütçenize uygun ve güvenle keşfedin. Biz yolun her anında yanınızdayız: planlamadan ilk uçuşunuza, her günkü önerilerden dönüşünüze kadar.</p>
+				<h1>Yolda başlayan bir hikâye, bugün herkes için kişisel bir yol arkadaşı.</h1>
+				<p class="lead">Nomaya, dünyayı kendi hızınızda, bütçenize uygun ve gerçekten anlayarak keşfetmeniz için kuruldu. Planlamadan yolculuğun son anına kadar yanınızdayız.</p>
 
 				<!-- Meta -->
 				<div class="hstack gap-3 flex-wrap justify-content-center">
@@ -89,7 +140,7 @@ About content START -->
 					Tam rotalarımı yavaşlatacakken, Vietnam’da Thi ile tanıştım. Yol arkadaşlığımız kısa sürede bir aşka, aşkımız da Nomaya’ya dönüştü.
 				</p>
 				<p>
-					Amacımız çok netti: Türkiye ve Vietnam başta olmak üzere farklı kültürleri birbirine yaklaştırmak; insanlara
+					Amacımız en başından beri netti: Türkiye ve Vietnam başta olmak üzere farklı kültürleri birbirine yaklaştırmak; insanlara
 					<b>uygun fiyatlı, güvenli ve gerçekten kişisel</b> bir deneyim sunmak. Nomaya’da her paket kişiye özeldir:
 					takviminize uyar, hızınıza saygı duyar, zevklerinize göre şekillenir. Siz kendi maceranızı yaşarken,
 					WhatsApp asistanımız her gün rota önerileri, gizli lezzet durakları ve pratik ipuçlarıyla yanınızdadır.
@@ -144,58 +195,58 @@ Team START -->
 <section class="pt-0">
 	<div class="container">
 		<!-- Title -->
-		<div class="row mb-4">
-			<div class="col-12">
-				<h2 class="mb-0">Ekibimiz</h2>
+		<div class="row mb-4 align-items-end">
+			<div class="col-lg-8">
+				<h2 class="mb-2">Nomaya Ekibi</h2>
+				<p class="mb-0 text-body-secondary">Seyahat deneyimini insan dokunuşu, teknoloji ve yerel bilgiyle yeniden tasarlayan küçük ama tutkulu bir ekibiz.</p>
 			</div>
 		</div>
 
 		<!-- Team START -->
 		<div class="row g-4">
-			<!-- Thi -->
 			<div class="col-sm-6 col-lg-3">
-			  <div class="card card-element-hover bg-transparent">
-			    <div class="position-relative ratio ratio-1x1">
-			      <img src="{% static 'assets/images/team/thi.png' %}"
-			           class="w-100 h-100 object-fit-cover rounded-4" alt="Thi Nguyen">
-			      <div class="card-img-overlay hover-element d-flex p-3">
-			        <div class="btn-group mt-auto">
-			          <a href="#" class="btn btn-white mb-0"><i class="fa-brands fa-instagram text-instagram"></i></a>
-			          <a href="#" class="btn btn-white mb-0"><i class="fa-brands fa-facebook-f text-facebook"></i></a>
-			          <a href="#" class="btn btn-white mb-0"><i class="fa-brands fa-twitter text-twitter"></i></a>
-			        </div>
-			      </div>
-			    </div>
-			    <div class="card-body px-2 pb-0 text-center">
-			      <h5 class="card-title"><a href="#">Thi Nguyen</a></h5>
-			      <span>💚 Nomaya’nın Kalbi (Kurucu)</span>
-			    </div>
-			  </div>
+				<article class="nomaya-team-card">
+					<img src="{% static 'assets/images/team/thi.png' %}" class="nomaya-team-photo" alt="Thi Nguyen">
+					<div class="nomaya-team-body">
+						<span class="nomaya-team-role">CO-FOUNDER • CEO</span>
+						<h3 class="h5 mt-3 mb-2">Thi Nguyen</h3>
+						<p class="nomaya-team-copy mb-0">Nomaya'nın vizyonuna, misafir deneyimine ve uluslararası büyüme yolculuğuna liderlik ediyor.</p>
+					</div>
+				</article>
 			</div>
 
-			<!-- Volkan -->
 			<div class="col-sm-6 col-lg-3">
-			  <div class="card card-element-hover bg-transparent">
-			    <div class="position-relative ratio ratio-1x1">
-			      <img src="{% static 'assets/images/team/volkan.png' %}"
-			           class="w-100 h-100 object-fit-cover rounded-4" alt="Volkan Güler">
-			      <div class="card-img-overlay hover-element d-flex p-3">
-			        <div class="btn-group mt-auto">
-			          <a href="#" class="btn btn-white mb-0"><i class="fa-brands fa-instagram text-instagram"></i></a>
-			          <a href="#" class="btn btn-white mb-0"><i class="fa-brands fa-facebook-f text-facebook"></i></a>
-			          <a href="#" class="btn btn-white mb-0"><i class="fa-brands fa-twitter text-twitter"></i></a>
-			        </div>
-			      </div>
-			    </div>
-			    <div class="card-body px-2 pb-0 text-center">
-			      <h5 class="card-title"><a href="#">Volkan Güler</a></h5>
-			      <span>🌍 Kurucu</span>
-			    </div>
-			  </div>
+				<article class="nomaya-team-card">
+					<img src="{% static 'assets/images/team/volkan.png' %}" class="nomaya-team-photo" alt="Volkan Güler">
+					<div class="nomaya-team-body">
+						<span class="nomaya-team-role">CO-FOUNDER • CTO</span>
+						<h3 class="h5 mt-3 mb-2">Volkan Güler</h3>
+						<p class="nomaya-team-copy mb-0">103 ülkelik seyahat deneyimini Nomaya'nın teknoloji, ürün ve kişiselleştirme altyapısına dönüştürüyor.</p>
+					</div>
+				</article>
 			</div>
 
+			<div class="col-sm-6 col-lg-3">
+				<article class="nomaya-team-card">
+					<div class="nomaya-team-avatar avatar-warm" role="img" aria-label="Alican için AL baş harfli avatar">AL</div>
+					<div class="nomaya-team-body">
+						<span class="nomaya-team-role">CMO</span>
+						<h3 class="h5 mt-3 mb-2">Alican</h3>
+						<p class="nomaya-team-copy mb-0">Nomaya'nın hikâyesini doğru gezginlerle buluşturuyor; marka, iletişim ve büyüme stratejilerini yönetiyor.</p>
+					</div>
+				</article>
+			</div>
 
-			<!-- (İstersen ileride iki kart daha ekleyebilirsin) -->
+			<div class="col-sm-6 col-lg-3">
+				<article class="nomaya-team-card">
+					<div class="nomaya-team-avatar" role="img" aria-label="Yücel için Y baş harfli avatar">Y</div>
+					<div class="nomaya-team-body">
+						<span class="nomaya-team-role">SOFTWARE DEVELOPER</span>
+						<h3 class="h5 mt-3 mb-2">Yücel</h3>
+						<p class="nomaya-team-copy mb-0">Gezginlerin yolculuk boyunca kullandığı uygulama deneyimini ve Nomaya'nın yazılım altyapısını geliştiriyor.</p>
+					</div>
+				</article>
+			</div>
 		</div>
 		<!-- Team END -->
 	</div>
