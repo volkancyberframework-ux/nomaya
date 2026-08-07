@@ -218,26 +218,11 @@
         <ul class="navbar-nav navbar-nav-scroll mx-auto">
           {# Aktif sekmeyi vurgulamak için mevcut url_name'i alalım #}
           {% with url_name=request.resolver_match.url_name %}
-            <li class="nav-item">
-              <a class="nav-link {% if url_name == 'about' %}active fw-semibold{% endif %}"
-                 href="{% url 'about' %}" aria-current="{% if url_name == 'about' %}page{% endif %}">
-                🧭 <span class="ms-1">Hikayemiz</span>
-              </a>
-            </li>
-
-            <li class="nav-item">
-              <a class="nav-link {% if url_name == 'services' %}active fw-semibold{% endif %}"
-                 href="{% url 'services' %}" aria-current="{% if url_name == 'services' %}page{% endif %}">
-                🚀 <span class="ms-1">Neden Nomaya?</span>
-              </a>
-            </li>
-
-            <li class="nav-item">
-              <a class="nav-link {% if url_name == 'faqs' %}active fw-semibold{% endif %}"
-                 href="{% url 'faqs' %}" aria-current="{% if url_name == 'faqs' %}page{% endif %}">
-                ❓ <span class="ms-1">SSS</span>
-              </a>
-            </li>
+            <li class="nav-item"><a class="nav-link {% if url_name == 'tour_grid' or url_name == 'tour_detail' %}active fw-semibold{% endif %}" href="{% url 'tour_grid' %}">Turlar</a></li>
+            <li class="nav-item"><a class="nav-link {% if url_name == 'order_customized' %}active fw-semibold{% endif %}" href="{% url 'order_customized' %}">Kişiye Özel Plan</a></li>
+            <li class="nav-item"><a class="nav-link {% if url_name == 'services' %}active fw-semibold{% endif %}" href="{% url 'services' %}">Nasıl Çalışır?</a></li>
+            <li class="nav-item"><a class="nav-link {% if url_name == 'about' %}active fw-semibold{% endif %}" href="{% url 'about' %}">Kurumsal</a></li>
+            <li class="nav-item"><a class="nav-link {% if url_name == 'faqs' %}active fw-semibold{% endif %}" href="{% url 'faqs' %}">Destek</a></li>
           {% endwith %}
         </ul>
       </div>
@@ -476,9 +461,11 @@
             <h5 class="text-white mb-2 mb-md-4">Nomaya</h5>
             <ul class="nav flex-column text-primary-hover">
               <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'home' %}">Ana Sayfa</a></li>
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'about' %}">Hikayemiz</a></li>
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'services' %}">Neden Nomaya?</a></li>
-              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'faqs' %}">SSS</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'tour_grid' %}">Turlar</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'order_customized' %}">Kişiye Özel Plan</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'services' %}">Nasıl Çalışır?</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'about' %}">Kurumsal</a></li>
+              <li class="nav-item"><a class="nav-link text-body-secondary" href="{% url 'faqs' %}">Destek</a></li>
             </ul>
           </div>
 

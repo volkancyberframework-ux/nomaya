@@ -686,25 +686,20 @@
         <div class="col-lg-5 text-white">
           <div class="live-users-pill mb-4">
             <span class="live-dot"></span>
-            <span class="live-emoji">🧭</span>
             <span class="live-number">{{ total_orders }}</span>
-            <span class="live-text">aktif Nomaya gezgini</span>
+            <span class="live-text">kişiselleştirilmiş seyahat deneyimi</span>
           </div>
 
-          <h1 class="display-4 fw-bold mb-4">
-            Ortalama bir gezgine gün başı
-            <span class="nomaya-saving-inline">₺<span id="nomayaSavingAmount">5.357</span></span>
-            tasarruf ettiriyoruz.
-          </h1>
+          <h1 class="display-4 fw-bold mb-4">Planlamadan yolculuk anına, kişiye özel seyahat yönetimi.</h1>
 
           <p class="lead text-white-50 mb-4">
-            Daha az araştır, gereksiz harcamalardan kaçın; doğru yerde doğru hikâyeyi dinleyerek daha kaliteli ve bilinçli gez.
+            Nomaya; rota planlama, konum bazlı içerik ve gerçek insan desteğini tek bir dijital deneyimde birleştirir.
           </p>
 
           <div class="d-flex flex-column gap-2 text-white-50">
-            <div>✓ Sana özel, maliyet etkin rota planı</div>
-            <div>✓ Konuma göre canlı sesli hikâyeler</div>
-            <div>✓ 7/24 gerçek WhatsApp asistanı</div>
+            <div>✓ İhtiyaçlara göre yapılandırılmış günlük rota</div>
+            <div>✓ Konum bazlı sesli rehberlik ve içerik</div>
+            <div>✓ Seyahat öncesi ve sırasında operasyonel destek</div>
           </div>
         </div>
 
@@ -713,7 +708,7 @@
             {% csrf_token %}
 
             <div class="mb-4">
-              <h2 class="fw-bold mb-1">🌍 Nomaya Deneyimini Başlat</h2>
+              <h2 class="fw-bold mb-1">Kişiye Özel Seyahat Talebi</h2>
               <p class="text-muted mb-0">
                 Birkaç bilgiyi paylaş, sana tamamen kişiselleştirilmiş seyahat deneyimini hazırlayalım.
               </p>
@@ -722,7 +717,7 @@
             <div class="row g-3">
 
               <div class="col-md-6">
-                <label class="nomaya-label">📍 Nereye gidiyorsun?</label>
+                <label class="nomaya-label">Destinasyon</label>
                 <input
                   type="text"
                   name="location"
@@ -732,7 +727,7 @@
               </div>
 
               <div class="col-md-6">
-                <label class="nomaya-label">📅 Tarih aralığı</label>
+                <label class="nomaya-label">Tarih aralığı</label>
                 <input
                   type="text"
                   id="nomayaDates"
@@ -743,7 +738,7 @@
               </div>
 
               <div class="col-12">
-                <label class="nomaya-label">✨ Seyahat tarzın</label>
+                <label class="nomaya-label">Seyahat beklentisi</label>
                 <input
                   type="text"
                   name="travel_style"
@@ -753,7 +748,7 @@
               </div>
 
               <div class="col-12">
-                <label class="nomaya-label">✈️ Seyahat hazırlığın</label>
+                <label class="nomaya-label">Mevcut rezervasyonlar</label>
 
                 <div class="d-flex flex-wrap gap-4 mt-2">
                   <div class="form-check">
@@ -818,7 +813,7 @@
 
             <div class="mt-4 d-grid">
               <button class="btn nomaya-btn btn-lg" type="submit">
-                🚀 Bana Özel Deneyimimi Hazırla
+                Plan talebi oluştur
               </button>
             </div>
 
@@ -988,75 +983,43 @@
 
   <section class="nomaya-section nomaya-section-soft nomaya-reveal">
     <div class="container">
+      <div class="text-center mx-auto mb-5" style="max-width:760px;">
+        <div class="founder-pill">Nomaya seyahat standardı</div>
+        <h2 class="nomaya-section-title mb-3">Her yolculukta aynı kalite, her gezgin için farklı deneyim.</h2>
+        <p class="nomaya-section-subtitle mb-0">
+          Teknoloji, destinasyon bilgisi ve gerçek insan desteğini tek hizmet modelinde birleştiriyoruz.
+          Planlama öncesinden seyahat sonrasına kadar ölçülebilir, erişilebilir ve kişiselleştirilmiş bir deneyim sunuyoruz.
+        </p>
+      </div>
 
-      <h2 class="nomaya-section-title">
-        Ben kimim, neden Nomaya'yı yaptım?
-      </h2>
-
-      <div class="nomaya-founder-card">
-
-        <div class="text-center mb-4">
-          <img src="{% static 'assets/images/team/volkan.jpg' %}"
-               alt="Volkan Güler"
-               class="rounded-circle shadow-lg"
-               style="width:140px;height:140px;object-fit:cover;border:5px solid rgba(255,255,255,.12);">
+      <div class="row g-4">
+        <div class="col-md-4">
+          <article class="nomaya-value-card h-100">
+            <div class="nomaya-value-icon">🧭</div>
+            <h3 class="h5 fw-bold mt-3">Kişiselleştirilmiş planlama</h3>
+            <p class="mb-0 text-muted">Süre, bütçe, ilgi alanı ve seyahat koşullarına göre gün gün uygulanabilir rotalar oluşturulur.</p>
+          </article>
         </div>
-
-        <div class="founder-pill">
-          ❤️ Volkan'dan kısa not
+        <div class="col-md-4">
+          <article class="nomaya-value-card h-100">
+            <div class="nomaya-value-icon">🛡️</div>
+            <h3 class="h5 fw-bold mt-3">Operasyonel destek</h3>
+            <p class="mb-0 text-muted">Mobil uygulama ve WhatsApp desteğiyle seyahat boyunca bilgiye ve gerçek bir asistana erişim sağlanır.</p>
+          </article>
         </div>
-
-        <div class="founder-text" style="text-align:center;max-width:760px;margin:auto;">
-
-          <p>
-            Ben <strong>Volkan</strong>. Türkiye'de doğup büyüdüm, bugüne kadar <strong>103 ülke</strong> gezdim. 🌍
-          </p>
-
-          <p>
-            Yıllarca seyahat ederken şunu fark ettim:
-            Bir şehre gitmek artık kolay. Uçak biletini birkaç dakikada alabiliyor, otelini ayarlayabiliyorsun.
-            Ama o şehri <strong>gerçekten yaşayabilmek</strong> hâlâ zor.
-          </p>
-
-          <p>
-            Çoğumuz seyahatten önce saatlerce YouTube videoları izliyor, blog yazıları okuyor ve haritalar arasında kayboluyoruz.
-            Gittiğimizde ise bu kez "Şimdi nereye gitsem?", "Buna değer mi?", "Buraya girmeli miyim?" gibi onlarca karar vermek zorunda kalıyoruz.
-          </p>
-
-          <p>
-            İşte en büyük sorun da bu:
-            <strong>Karar yorgunluğu.</strong>
-            Tatilde dinlenmek yerine sürekli araştırıyor, rota değiştiriyor; hem zaman hem de para kaybediyoruz.
-          </p>
-
-          <p>
-            Ben de tam bu yüzden işimden istifa edip <strong>Nomaya'yı kurdum.</strong> ✨
-            Amacım; insanların yalnız seyahat ederken yalnız hissetmediği, gereksiz kararlarla uğraşmadığı ve gittikleri şehri gerçekten deneyimlediği dijital bir yol arkadaşı oluşturmaktı.
-          </p>
-
-          <p>
-            Sen sadece gitmek istediğin şehri ve nasıl bir deneyim yaşamak istediğini söylüyorsun.
-            Biz sana tamamen kişiselleştirilmiş bir gezi planı hazırlıyor, en verimli rotayı oluşturuyor ve gereksiz zaman ile para kaybını en aza indiriyoruz.
-          </p>
-
-          <p>
-            Yolculuk başladığında mobil uygulama seni adım adım yönlendiriyor.
-            Kulaklığını takıp yürürken bulunduğun konuma özel sesli anlatımları dinliyor; sadece nereye gideceğini değil, <strong>neden orada olduğunu</strong> da öğreniyorsun. 🎧
-          </p>
-
-          <p>
-            Gerektiğinde gerçek insan olan WhatsApp desteği alabiliyor, tamamladığın aktivitelerle <strong>Nomaya Milleri</strong> kazanarak sonraki seyahatlerinde kullanabiliyorsun. ✈️
-          </p>
-
-          <p>
-            Benim hayalim yeni bir seyahat uygulaması yapmak değildi.
-            Hayalim, yolculuğun sonunda herkesin şu cümleyi kurması:
-            <strong>"Ben bu şehri sadece görmedim, gerçekten yaşadım."</strong> ❤️
-          </p>
-
+        <div class="col-md-4">
+          <article class="nomaya-value-card h-100">
+            <div class="nomaya-value-icon">📍</div>
+            <h3 class="h5 fw-bold mt-3">Şeffaf ve izlenebilir deneyim</h3>
+            <p class="mb-0 text-muted">Aktiviteler, konumlar, süreler ve kapsam yolculuk öncesinde açıkça sunulur; ilerleme uygulama üzerinden takip edilir.</p>
+          </article>
         </div>
       </div>
 
+      <div class="d-flex flex-wrap justify-content-center gap-3 mt-5">
+        <a href="{% url 'about' %}" class="btn btn-dark rounded-pill px-4">Nomaya hakkında</a>
+        <a href="{% url 'services' %}" class="btn btn-outline-dark rounded-pill px-4">Hizmet modelini incele</a>
+      </div>
     </div>
   </section>
 
